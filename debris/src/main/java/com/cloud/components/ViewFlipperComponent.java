@@ -1,4 +1,4 @@
-package com.cloud.components.components;
+package com.cloud.components;
 
 import android.content.Context;
 import android.view.GestureDetector;
