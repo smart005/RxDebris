@@ -30,3 +30,5 @@ dependencies {
     api project(':dialogs')
     api project(':views')
 }
+
+apply from: 'nexus-push.gradle'

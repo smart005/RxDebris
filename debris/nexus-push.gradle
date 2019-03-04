@@ -1,0 +1,70 @@
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+configurations {
+    deployerJars
+}
+
+repositories {
+    mavenCentral()
+}
+
+// 判断版本是Release or Snapshots
+def isReleaseBuild() {
+    return !VERSION.contains("SNAPSHOT");
+}
+
+// 获取仓库url
+def getRepositoryUrl() {
+    return isReleaseBuild() ? RELEASE_URL : SNAPSHOT_URL;
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
+            }
+
+            pom.version = VERSION
+            pom.artifactId = ARTIFACT_ID
+            pom.groupId = GROUP_ID
+
+            repository(url: getRepositoryUrl()) {
+                authentication(userName: NAME, password: PASSWORD) // maven授权信息
+            }
+        }
+    }
+}
+
+// 进行数字签名
+signing {
+    // 当 发布版本 & 存在"uploadArchives"任务时，才执行
+    required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+// type显示指定任务类型或任务, 这里指定要执行Javadoc这个task,这个task在gradle中已经定义
+task androidJavadocs(type: Javadoc) {
+    // 设置源码所在的位置
+    source = android.sourceSets.main.java.sourceFiles
+}
+
+// 生成javadoc.jar
+task androidJavadocsJar(type: Jar) {
+    // 指定文档名称
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+// 生成sources.jar
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.sourceFiles
+}
+
+// 产生相关配置文件的任务
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
