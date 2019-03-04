@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/options_rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/options_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/spacing_3"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/cl_ico_select" />
+
+        <TextView
+            android:id="@+id/options_tv"
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:layout_marginLeft="15dp"
+            android:layout_toLeftOf="@id/options_iv"
+            android:gravity="left|center_vertical"
+            android:layoutDirection="rtl"
+            android:singleLine="true"
+            android:textColor="@color/color_041d29"
+            android:textSize="@dimen/font_size_13"
+            tools:text="选项" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp"
+        android:background="#f6f6f6" />
+</LinearLayout>

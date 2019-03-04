@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TextItemView">
+        <attr name="tiv_text" format="string" />
+        <attr name="tiv_textColor" format="color" />
+        <attr name="tiv_textSize" format="dimension" />
+        <attr name="tiv_ucode" format="string" />
+        <attr name="tiv_iconSize" format="dimension" />
+        <attr name="tiv_iconColor" format="color" />
+    </declare-styleable>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TextThemeView">
+        <attr name="ttv_leftView" format="reference" />
+        <attr name="ttv_rightView" format="reference" />
+        <attr name="ttv_title" format="string|reference" />
+        <attr name="ttv_titleSize" format="dimension" />
+        <attr name="ttv_titleColor" format="color" />
+        <attr name="ttv_titleGravity" format="enum">
+            <enum name="left" value="1" />
+            <enum name="right" value="3" />
+            <enum name="center" value="5" />
+        </attr>
+        <attr name="ttv_isBlod" format="boolean" />
+        <attr name="ttv_defButtonTextSize" format="dimension" />
+        <attr name="ttv_defButtonTextColor" format="color" />
+        <attr name="ttv_defButtonText" format="string" />
+        <attr name="ttv_defButtonId" format="string" />
+        <attr name="ttv_visibilityViewIds" format="string" />
+        <attr name="ttv_hiddenViewIds" format="string" />
+    </declare-styleable>
+</resources>

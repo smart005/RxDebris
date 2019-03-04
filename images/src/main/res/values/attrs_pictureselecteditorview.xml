@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <declare-styleable name="PictureSelectEditorView">
+        <attr name="iev_isAlignMiddle" format="boolean" />
+        <attr name="iev_maxImageCount" format="integer" />
+        <attr name="iev_eachRowNumber" format="integer" />
+        <attr name="iev_isAllowModify" format="boolean" />
+        <attr name="iev_isAllowDel" format="boolean" />
+        <attr name="iev_addBackgoundResource" format="reference" />
+        <attr name="iev_isAddImage" format="boolean" />
+        <attr name="iev_delImage" format="reference" />
+        <attr name="iev_delImageMarginTop" format="dimension" />
+        <attr name="iev_delImageMarginLeft" format="dimension" />
+        <attr name="iev_isAllowDrager" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="ImageEditorView">
+        <attr name="iev_isAutoUploadImage" format="boolean" />
+    </declare-styleable>
+</resources>

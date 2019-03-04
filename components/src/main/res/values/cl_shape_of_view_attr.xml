@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ShapeOfView">
+        <attr name="sov_clip_drawable" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="TriangleView">
+        <attr name="tv_triangle_percentLeft" format="float" />
+        <attr name="tv_triangle_percentBottom" format="float" />
+        <attr name="tv_triangle_percentRight" format="float" />
+    </declare-styleable>
+    <declare-styleable name="StarView">
+        <attr name="sv_star_noOfPoints" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="PolygonView">
+        <attr name="pv_polygon_noOfSides" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="CircleView">
+        <attr name="cv_circle_borderWidth" format="dimension" />
+        <attr name="cv_circle_borderColor" format="color" />
+    </declare-styleable>
+    <declare-styleable name="DiagonalView">
+        <attr name="dv_diagonal_angle" format="integer" />
+        <attr name="dv_diagonal_position" format="enum">
+            <enum name="bottom" value="1" />
+            <enum name="top" value="2" />
+            <enum name="left" value="3" />
+            <enum name="right" value="4" />
+        </attr>
+        <attr name="dv_diagonal_direction" format="enum">
+            <enum name="left" value="1" />
+            <enum name="right" value="2" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="ArcView">
+        <attr name="av_arc_height" format="dimension" />
+        <attr name="av_arc_position" format="enum">
+            <enum name="bottom" value="1" />
+            <enum name="top" value="2" />
+            <enum name="left" value="3" />
+            <enum name="right" value="4" />
+        </attr>
+        <attr name="av_arc_cropDirection" format="enum">
+            <enum name="inside" value="1" />
+            <enum name="outside" value="2" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="BubbleView">
+        <attr name="bv_bubble_borderRadius" format="dimension" />
+        <attr name="bv_bubble_arrowHeight" format="dimension" />
+        <attr name="bv_bubble_arrowWidth" format="dimension" />
+        <attr name="bv_bubble_arrowPosition" format="enum">
+            <enum name="bottom" value="1" />
+            <enum name="top" value="2" />
+            <enum name="left" value="3" />
+            <enum name="right" value="4" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="RoundRectView">
+        <attr name="rrv_topLeftRadius" format="dimension" />
+        <attr name="rrv_topRightRadius" format="dimension" />
+        <attr name="rrv_bottomLeftRadius" format="dimension" />
+        <attr name="rrv_bottomRightRadius" format="dimension" />
+        <attr name="rrv_borderWidth" format="dimension" />
+        <attr name="rrv_borderColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="CutCornerView">
+        <attr name="ccv_topLeftSize" format="dimension" />
+        <attr name="ccv_topRightSize" format="dimension" />
+        <attr name="ccv_bottomLeftSize" format="dimension" />
+        <attr name="ccv_bottomRightSize" format="dimension" />
+    </declare-styleable>
+</resources>

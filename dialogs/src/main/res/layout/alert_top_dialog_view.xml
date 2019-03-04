@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/alert_top_dialog_background"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/dialog_title_tv"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_38"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/spacing_12"
+        android:paddingRight="@dimen/spacing_8"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/font_size_16"
+        tools:text="标题" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/color_f6f6f6" />
+
+    <TextView
+        android:id="@+id/dialog_content_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/color_ffffff"
+        android:gravity="center"
+        android:minHeight="@dimen/spacing_88"
+        android:paddingLeft="@dimen/spacing_8"
+        android:paddingTop="@dimen/spacing_6"
+        android:paddingRight="@dimen/spacing_6"
+        android:paddingBottom="@dimen/spacing_8"
+        android:textColor="@color/color_333333"
+        android:textSize="@dimen/font_size_16" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/color_f6f6f6" />
+
+    <LinearLayout
+        android:id="@+id/dialog_buttons_ll"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_42"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/spacing_8"
+        android:paddingRight="@dimen/spacing_8" />
+</LinearLayout>

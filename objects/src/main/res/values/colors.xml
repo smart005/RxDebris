@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="semi_transparent">#30000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="color_f5f4f3">#f5f4f3</color>
+    <color name="color_fafaf9">#fafaf9</color>
+    <color name="color_dcd9d5">#dcd9d5</color>
+    <color name="color_323232">#323232</color>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/color_ffffff"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/cl_message_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/spacing_8"
+        android:paddingTop="@dimen/spacing_2"
+        android:paddingRight="@dimen/spacing_8"
+        android:paddingBottom="@dimen/spacing_2"
+        android:textColor="@color/color_041d29"
+        android:textSize="@dimen/font_size_13"
+        tools:text="消息" />
+
+    <EditText
+        android:id="@+id/cl_message_et"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_34"
+        android:layout_marginLeft="@dimen/spacing_15"
+        android:layout_marginTop="@dimen/spacing_10"
+        android:layout_marginRight="@dimen/spacing_15"
+        android:layout_marginBottom="@dimen/spacing_12"
+        android:background="@drawable/dialog_input_text_bg"
+        android:inputType="text"
+        android:paddingLeft="@dimen/spacing_4"
+        android:paddingTop="@dimen/spacing_2"
+        android:paddingRight="@dimen/spacing_4"
+        android:paddingBottom="@dimen/spacing_2"
+        android:textColor="@color/color_041d29"
+        android:textSize="@dimen/font_size_14"
+        tools:text="文本" />
+</LinearLayout>

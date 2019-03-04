@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="VariableButton">
+        <attr name="vb_borderColor" format="color" />
+        <attr name="vb_borderWidth" format="dimension" />
+        <attr name="vb_bottomLeftRadius" format="dimension" />
+        <attr name="vb_bottomRightRadius" format="dimension" />
+        <attr name="vb_topLeftRadius" format="dimension" />
+        <attr name="vb_topRightRadius" format="dimension" />
+        <attr name="vb_backgroundColor" format="color" />
+        <attr name="vb_pressBackgroundColor" format="color" />
+        <attr name="vb_disableBackgroundColor" format="color" />
+        <attr name="vb_background" format="reference" />
+        <attr name="vb_text" format="string" />
+        <attr name="vb_textColor" format="color" />
+        <attr name="vb_textSize" format="dimension" />
+        <attr name="vb_paddingLeft" format="dimension" />
+        <attr name="vb_paddingRight" format="dimension" />
+        <attr name="vb_paddingTop" format="dimension" />
+        <attr name="vb_paddingBottom" format="dimension" />
+        <attr name="vb_textGravity" format="enum">
+            <enum name="center" value="0" />
+            <enum name="left" value="1" />
+            <enum name="top" value="2" />
+            <enum name="right" value="3" />
+            <enum name="bottom" value="4" />
+        </attr>
+        <attr name="vb_isEnabled" format="boolean" />
+    </declare-styleable>
+</resources>

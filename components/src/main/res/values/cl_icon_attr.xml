@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="IconView">
+        <attr name="itv_ucode" format="string" />
+        <attr name="itv_fontStyle" format="enum">
+            <enum name="icon" value="0" />
+            <enum name="agencyb" value="1" />
+            <enum name="iconText" value="2" />
+        </attr>
+        <attr name="itv_isShowDelLine" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="IconFontView">
+        <attr name="iftv_ucode" format="string" />
+        <attr name="iftv_iconSize" format="dimension" />
+        <attr name="iftv_iconColor" format="color" />
+        <attr name="iftv_textColor" format="color" />
+        <attr name="iftv_textSize" format="dimension" />
+        <attr name="iftv_textDirection" format="enum">
+            <enum name="left" value="0" />
+            <enum name="top" value="1" />
+            <enum name="right" value="2" />
+            <enum name="bottom" value="3" />
+        </attr>
+        <attr name="iftv_textFontSpacing" format="dimension" />
+        <attr name="iftv_text" format="string" />
+        <attr name="iftv_iconGravity" format="enum">
+            <enum name="left" value="0" />
+            <enum name="top" value="1" />
+            <enum name="right" value="2" />
+            <enum name="bottom" value="3" />
+            <enum name="center_vertical" value="4" />
+            <enum name="center_horizontal" value="5" />
+        </attr>
+        <attr name="iftv_textGravity" format="enum">
+            <enum name="left" value="0" />
+            <enum name="top" value="1" />
+            <enum name="right" value="2" />
+            <enum name="bottom" value="3" />
+            <enum name="center_vertical" value="4" />
+            <enum name="center_horizontal" value="5" />
+        </attr>
+        <attr name="iftv_textStyle" format="enum">
+            <enum name="none" value="0" />
+            <enum name="agencyb" value="1" />
+        </attr>
+    </declare-styleable>
+</resources>

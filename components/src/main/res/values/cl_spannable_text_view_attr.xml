@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SpannableTextView">
+        <attr name="stv_isEnableUnderline" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="SpannableCheckBox">
+        <attr name="scb_isEnableUnderline" format="boolean" />
+        <attr name="scb_chbButtonDrawable" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="IconSpannableCheckBox">
+        <attr name="iscb_isEnableUnderline" format="boolean" />
+        <attr name="iscb_chbButtonDrawable" format="reference" />
+        <attr name="iscb_iconColor" format="color" />
+        <attr name="iscb_iconSize" format="dimension" />
+        <attr name="iscb_icon" format="string" />
+        <attr name="iscb_text" format="string|reference" />
+        <attr name="iscb_textColor" format="color" />
+        <attr name="iscb_iconTextPadding" format="dimension" />
+        <attr name="iscb_checked" format="boolean" />
+    </declare-styleable>
+</resources>

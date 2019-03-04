@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#181819"
+        android:orientation="vertical">
+
+        <com.cloud.components.themes.TextThemeView
+            android:id="@+id/head_ttv"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="#ffffff"
+            app:ttv_defButtonText="完成(0/9)"
+            app:ttv_leftView="@layout/cl_return_view"
+            app:ttv_titleSize="16sp" />
+
+        <FrameLayout
+            android:id="@+id/image_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</layout>
