@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="semi_transparent">#30000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="color_f5f4f3">#f5f4f3</color>
+    <color name="color_fafaf9">#fafaf9</color>
+    <color name="color_dcd9d5">#dcd9d5</color>
+    <color name="color_323232">#323232</color>
+
+    <color name="drop_list_item_press_color">#F5F4F3</color>
+    <color name="drop_list_item_normal_color">#FAFAF9</color>
+    <color name="dialog_btn_two_press_color">#E39C37</color>
+    <color name="dialog_btn_two_normal_color">#6B6B6B</color>
+    <color name="toast_errorColor">#D50000</color>
+    <color name="toast_infoColor">#3F51B5</color>
+    <color name="toast_successColor">#388E3C</color>
+    <color name="toast_warningColor">#FFA900</color>
+    <color name="toast_normalColor">#353A3E</color>
+</resources>

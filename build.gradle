@@ -1,10 +1,9 @@
 buildscript {
     repositories {
         maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/' }
-        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
+        classpath 'com.android.tools.build:gradle:3.2.1'
         classpath 'org.greenrobot:greendao-gradle-plugin:3.2.2'
     }
 }

@@ -36,3 +36,4 @@ dependencies {
     api project(':objects')
     api project(':components')
 }
+apply from: 'nexus-push.gradle'
