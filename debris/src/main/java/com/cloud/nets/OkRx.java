@@ -98,10 +98,14 @@ public class OkRx {
         if (okRxConfigParams == null) {
             okRxConfigParams = new OkRxConfigParams();
         }
+        return this;
+    }
+
+    //构建相关配置
+    public void build() {
         //缓存okRxConfigParams参数
         OkHttpClient client = newHttpClient(okRxConfigParams);
         MemoryCache.getInstance().setSoftCache(OkRxKeys.okhttpClientKey, client);
-        return this;
     }
 
     /**
