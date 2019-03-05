@@ -6,9 +6,9 @@ import com.cloud.nets.annotations.APIUrlInterfaceClass;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.events.OnAuthCallInfoListener;
 import com.cloud.nets.filters.ReturnCodeCheck;
+import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.nets.properties.OkRxValidParam;
 import com.cloud.objects.ObjectJudge;
-import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.events.Func2;
 import com.cloud.objects.events.OnRequestApiUrl;
 import com.cloud.objects.observable.ObservableComponent;
@@ -131,8 +131,8 @@ public class BaseOkrxService extends BaseService {
                 //第二个参数为service
                 OkRxValidParam validParam = requestValid.check((S) params[1], String.valueOf(params[5]));
                 //若状态码拦截被禁用后，则对应实现也无须处理
-                RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
-                if (builder.isNetStatusCodeIntercept()) {
+                OkRxConfigParams okRxConfigParams = OkRx.getInstance().getOkRxConfigParams();
+                if (okRxConfigParams.isNetStatusCodeIntercept()) {
                     ReturnCodeCheck codeCheck = new ReturnCodeCheck();
                     validParam.setReturnCodeFilter(codeCheck.getCodeFilter((S) params[1]));
                 }

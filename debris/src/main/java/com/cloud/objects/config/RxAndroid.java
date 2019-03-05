@@ -53,14 +53,6 @@ public class RxAndroid {
          */
         private String loggeruTag = "";
         /**
-         * 是否处理请求结果,即请求成功后是否进行各状态验证(默认为false)
-         */
-        private boolean isProcessNetResults = false;
-        /**
-         * 是否进行网络状态码拦截(默认为false)
-         */
-        private boolean isNetStatusCodeIntercept = false;
-        /**
          * 缓存数据库名称
          */
         private String databaseName = "";
@@ -168,57 +160,6 @@ public class RxAndroid {
         }
 
         /**
-         * 是否处理请求结果,即请求成功后是否进行各状态验证(默认为false)
-         *
-         * @return true-根据code返回码做失败与成功处理;false-直接返回对象;
-         */
-        public boolean isProcessNetResults() {
-            Boolean processNetResults = getParamsObject("ProcessNetResults");
-            if (processNetResults == null) {
-                isProcessNetResults = false;
-            } else {
-                isProcessNetResults = processNetResults;
-            }
-            return isProcessNetResults;
-        }
-
-        /**
-         * 设置是否处理请求结果,即请求成功后是否进行各状态验证(默认为false)
-         *
-         * @param processNetResults true-根据code返回码做失败与成功处理;false-直接返回对象;
-         * @return RxAndroidBuilder
-         */
-        public RxAndroidBuilder setProcessNetResults(boolean processNetResults) {
-            isProcessNetResults = processNetResults;
-            return this;
-        }
-
-        /**
-         * 是否进行网络状态码拦截(默认为false)
-         *
-         * @return true-服务类中的注解ReturnCodeFilter关联的处理类作过滤;false-禁用拦截;
-         */
-        public boolean isNetStatusCodeIntercept() {
-            Boolean status = getParamsObject("NetStatusCodeIntercept");
-            if (status == null) {
-                isNetStatusCodeIntercept = false;
-            } else {
-                isNetStatusCodeIntercept = status;
-            }
-            return isNetStatusCodeIntercept;
-        }
-
-        /**
-         * 设置进行网络状态码拦截(默认为false)
-         *
-         * @param netStatusCodeIntercept true-开启拦截;false-禁用拦截;
-         */
-        public RxAndroidBuilder setNetStatusCodeIntercept(boolean netStatusCodeIntercept) {
-            isNetStatusCodeIntercept = netStatusCodeIntercept;
-            return this;
-        }
-
-        /**
          * 获取缓存数据库名称
          *
          * @return 数据库名称
@@ -269,10 +210,6 @@ public class RxAndroid {
             map.put("Debug", isDebug);
             //日志全局标识
             map.put("LoggeruTag", loggeruTag);
-            //网络结果处理与否状态
-            map.put("ProcessNetResults", isProcessNetResults);
-            //网络状态拦截
-            map.put("NetStatusCodeIntercept", isNetStatusCodeIntercept);
             //缓存数据库名称
             map.put("CacheDatabaseName", databaseName);
         }

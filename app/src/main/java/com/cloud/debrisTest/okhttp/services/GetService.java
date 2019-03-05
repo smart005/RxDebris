@@ -29,7 +29,7 @@ public class GetService extends BaseOkrxService {
     //若不需要token验证则加注解即可
     //@ApiCheckAnnotation
     //网络请求-不做缓存
-    //@ApiCheckAnnotation(IsTokenValid = true)
+    //@ApiCheckAnnotation(isTokenValid = true)
     //网络缓存会根据设置的cacheKey+请求条件作缓存处理;(如[recommand_info_siteId_42_pageSize_1_pageNumber_20])
     //网络请求-在缓存未失效时网络数据与缓存只会返回其中一个,缓存失效后先请求网络->再缓存->最后返回;
     //@ApiCheckAnnotation(isCallNCData = false, isCache = true, cacheTime = 1, cacheTimeUnit = TimeUnit.MINUTES, cacheKey = "recommand_info")
@@ -48,7 +48,7 @@ public class GetService extends BaseOkrxService {
         requestObject(IGetAPI.class, this, baseSubscriber, new Func2<RetrofitParams, IGetAPI, HashMap<String, Object>>() {
             @Override
             public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
-                return getAPI.requestRecommandInfo(siteId, 3);
+                return getAPI.requestRecommandInfo(siteId,3);
             }
         });
     }

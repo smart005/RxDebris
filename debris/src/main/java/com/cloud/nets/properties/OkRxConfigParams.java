@@ -24,8 +24,6 @@ public class OkRxConfigParams {
     private int retryCount = 3;
     //公共头参数
     private HashMap<String, String> headers = null;
-    //true-debug模式;false-非debug模式(相关日志不打印)
-    private boolean isDebug = false;
     //api成功返回码.接口返回时code对应码只有在集合中才能成功返回
     //set中的value保证唯一
     private Set<String> apiSuccessRetCodes = null;
@@ -35,6 +33,14 @@ public class OkRxConfigParams {
     private Set<String> unauthorizedRet = null;
     //返回码在此集合中则过虑掉toast消息提醒
     private Set<String> messageFilterRetCodes = null;
+    /**
+     * 是否处理请求结果,即请求成功后是否进行各状态验证(默认为false)
+     */
+    private boolean isProcessNetResults = false;
+    /**
+     * 是否进行网络状态码拦截(默认为false)
+     */
+    private boolean isNetStatusCodeIntercept = false;
 
     public long getConnectTimeout() {
         return connectTimeout;
@@ -79,14 +85,6 @@ public class OkRxConfigParams {
         this.headers = headers;
     }
 
-    public boolean isDebug() {
-        return isDebug;
-    }
-
-    public void setDebug(boolean debug) {
-        isDebug = debug;
-    }
-
     public Set<String> getApiSuccessRetCodes() {
         if (apiSuccessRetCodes == null) {
             apiSuccessRetCodes = new HashSet<String>();
@@ -129,5 +127,21 @@ public class OkRxConfigParams {
 
     public void setMessageFilterRetCodes(Set<String> messageFilterRetCodes) {
         this.messageFilterRetCodes = messageFilterRetCodes;
+    }
+
+    public boolean isProcessNetResults() {
+        return isProcessNetResults;
+    }
+
+    public void setProcessNetResults(boolean processNetResults) {
+        isProcessNetResults = processNetResults;
+    }
+
+    public boolean isNetStatusCodeIntercept() {
+        return isNetStatusCodeIntercept;
+    }
+
+    public void setNetStatusCodeIntercept(boolean netStatusCodeIntercept) {
+        isNetStatusCodeIntercept = netStatusCodeIntercept;
     }
 }

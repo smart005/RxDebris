@@ -12,7 +12,6 @@ import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.HandlerManager;
 import com.cloud.objects.ObjectJudge;
-import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.ResultState;
 import com.cloud.objects.events.Runnable1;
 import com.cloud.objects.logs.Logger;
@@ -185,8 +184,8 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
         this.reqQueueItemHashMap = reqQueueItemHashMap;
         this.apiRequestKey = apiRequestKey;
         //如果isProcessNetResults==false则直接返回交由外面处理
-        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
-        if (builder.isProcessNetResults()) {
+        OkRxConfigParams okRxConfigParams = OkRx.getInstance().getOkRxConfigParams();
+        if (okRxConfigParams.isProcessNetResults()) {
             ScheduledThreadPoolExecutor multiTaskExecutor = getMultiTaskExecutor();
             ThreadPoolUtils.getInstance().addTask(multiTaskExecutor, new ApiCallWith(t, isLastCall, requestStartTime, requestTotalTime));
         } else {

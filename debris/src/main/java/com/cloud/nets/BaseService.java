@@ -11,6 +11,7 @@ import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.events.OnApiRetCodesFilterListener;
 import com.cloud.nets.events.OnAuthCallInfoListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
+import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
 import com.cloud.nets.events.OnHttpRequestHeadersListener;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.nets.properties.ByteRequestItem;
@@ -143,17 +144,20 @@ public class BaseService {
         try {
             if (!TextUtils.isEmpty(retrofitParams.getRequestUrl())) {
                 String requestUrl = retrofitParams.getRequestUrl();
-                //头信息
-                HashMap<String, String> headParams = retrofitParams.getHeadParams();
+                //全局头设置的信息
+                HashMap<String, String> mHeaders = bindGlobalHeaders();
+                //接口头信息
+                mHeaders.putAll(retrofitParams.getHeadParams());
                 //检查头部是否已添加token，没有则添加
                 if (!TextUtils.isEmpty(token)) {
                     if (validParam.getApiCheckAnnotation().isTokenValid()) {
                         String tokenName = retrofitParams.getTokenName();
                         if (!TextUtils.isEmpty(tokenName)) {
-                            headParams.put(tokenName, token);
+                            mHeaders.put(tokenName, token);
                         }
                     }
                 }
+
                 //设置返回码监听
                 if (returnCodeFilter == null) {
                     returnCodeFilter = validParam.getReturnCodeFilter();
@@ -163,25 +167,25 @@ public class BaseService {
                 if (retrofitParams.getRequestType() == RequestType.BYTES) {
                     HashMap<String, Object> updateByteParams = getUploadByteParams(retrofitParams);
                     List<ByteRequestItem> uploadByteItems = getUploadByteItems(retrofitParams);
-                    subBytes(requestUrl, headParams, updateByteParams, uploadByteItems, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                    subBytes(requestUrl, mHeaders, updateByteParams, uploadByteItems, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                 } else {
                     //请求参数
                     if (retrofitParams.getRequestType() == RequestType.POST) {
-                        post(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        post(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.DELETE) {
-                        delete(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        delete(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.PUT) {
-                        put(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        put(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.PATCH) {
-                        patch(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        patch(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.HEAD) {
-                        head(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        head(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.POST) {
-                        options(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        options(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.TRACE) {
-                        trace(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        trace(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else {
-                        get(requestUrl, headParams, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                        get(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     }
                 }
             } else {
@@ -191,6 +195,30 @@ public class BaseService {
             finishedRequest(baseService, completedAction);
             Logger.error(e);
         }
+    }
+
+    //绑定全局头信息
+    private HashMap<String, String> bindGlobalHeaders() {
+        HashMap<String, String> headParams = new HashMap<String, String>();
+        HashMap<String, String> defaultHeaderParams = OkRx.getInstance().getHeaderParams();
+        if (!ObjectJudge.isNullOrEmpty(defaultHeaderParams)) {
+            for (Map.Entry<String, String> entry : defaultHeaderParams.entrySet()) {
+                headParams.put(entry.getKey(), entry.getValue());
+            }
+        }
+        //从监听对象中获取
+        OnGlobalReuqestHeaderListener headerListener = OkRx.getInstance().getOnGlobalReuqestHeaderListener();
+        if (headerListener == null) {
+            return headParams;
+        }
+        HashMap<String, String> globalHeaderParams = headerListener.onHeaderParams();
+        if (ObjectJudge.isNullOrEmpty(globalHeaderParams)) {
+            return headParams;
+        }
+        for (Map.Entry<String, String> entry : globalHeaderParams.entrySet()) {
+            headParams.put(entry.getKey(), entry.getValue());
+        }
+        return headParams;
     }
 
     private void finishedRequest(final BaseService baseService, final Action0 completedAction) {
@@ -237,8 +265,8 @@ public class BaseService {
                 data = JsonUtils.newNull(dataClass);
             }
             //开启拦截且拦截符合的返回码
-            RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
-            if (builder.isNetStatusCodeIntercept()) {
+            OkRxConfigParams okRxConfigParams = OkRx.getInstance().getOkRxConfigParams();
+            if (okRxConfigParams.isNetStatusCodeIntercept()) {
                 if (!filterMatchRetCodes(data)) {
                     //成功回调
                     successAction.call(data, apiRequestKey, reqQueueItemHashMap, isLastCall, requestStartTime, requestTotalTime);
@@ -399,8 +427,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -461,8 +489,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -522,8 +550,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -584,8 +612,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -646,8 +674,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -708,8 +736,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -770,8 +798,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -831,8 +859,8 @@ public class BaseService {
                 new Action2<String, String>() {
                     @Override
                     public void call(String apiRequestKey, String responseString) {
-                        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-                        if (globalHeaders.isDebug()) {
+                        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+                        if (builder.isDebug()) {
                             finallPrintLog(apiRequestKey, responseString);
                         }
                     }
@@ -1128,8 +1156,9 @@ public class BaseService {
                         successfulListener.onCompleted(baseSubscriber.getExtra());
                     }
                 }, apiRequestKey);
-        OkRxConfigParams globalHeaders = OkRx.getInstance().getOkRxConfigParams();
-        if (globalHeaders.isDebug()) {
+
+        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+        if (builder.isDebug()) {
             printLog(apiRequestKey, retrofitParams);
         }
     }
