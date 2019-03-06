@@ -4,7 +4,10 @@ import android.text.TextUtils;
 
 import com.cloud.cache.RxCache;
 import com.cloud.nets.OkRx;
+import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.callback.StringCallback;
+import com.cloud.nets.enums.CallStatus;
+import com.cloud.nets.enums.DataType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.enums.RequestType;
@@ -31,7 +34,7 @@ public class OkRxHeadRequest extends BaseRequest {
     private String responseString = "";
 
     @Override
-    public void call(String url, final HashMap<String, String> headers, final HashMap<String, Object> params, final boolean isCache, final String cacheKey, final long cacheTime, Action4<String, String, HashMap<String, ReqQueueItem>, Boolean> successAction, Action1<RequestState> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique, Action2<String, HashMap<String, String>> headersAction) {
+    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action1<RequestState> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique, Action2<String, HashMap<String, String>> headersAction) {
         if (TextUtils.isEmpty(url)) {
             if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                 reqQueueItemHashMap.remove(apiRequestKey);
@@ -41,30 +44,56 @@ public class OkRxHeadRequest extends BaseRequest {
             }
             return;
         }
-        if (isCache) {
-            String ckey = String.format("%s%s", cacheKey, getAllParamsJoin(headers, params));
+        //网络请求-在缓存未失效时网络数据与缓存只会返回其中一个,缓存失效后先请求网络->再缓存->最后返回;
+        //即首次请求或缓存失效的情况会走网络,否则每次只取缓存数据;
+        //OnlyCache,
+        //
+        //每次只作网络请求;
+        //OnlyNet,
+        //
+        //网络请求-在缓存未失败时获取到网络数据和缓存数据均会回调,缓存失效后先请求网络->再缓存->最后返回(即此时只作网络数据的回调);
+        //1.有缓存时先回调缓存数据再请求网络数据然后[缓存+回调];
+        //2.无缓存时不作缓存回调直接请求网络数据后[缓存+回调];
+        //WeakCacheAccept,
+        //
+        //1.有缓存时先回调缓存数据再请求网络数据然后[缓存]不作网络回调;
+        //2.无缓存时不作缓存回调直接请求网络数据后[缓存]不作网络回调;
+        //WeakCache
+        RetrofitParams retrofitParams = getRetrofitParams();
+        CallStatus callStatus = retrofitParams.getCallStatus();
+        if (callStatus != CallStatus.OnlyNet) {
+            String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
             String cache = RxCache.getCacheData(ckey);
             if (successAction != null && !TextUtils.isEmpty(cache)) {
                 responseString = cache;
-                successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, !isCallNCData());
-                //如果isCallNCData==false且符合缓存时间等条件时则只取缓存数据
-                if (!isCallNCData()) {
+                successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.CacheData);
+                //1.有缓存时先回调缓存数据再请求网络数据然后[缓存+回调];
+                //2.无缓存时不作缓存回调直接请求网络数据后[缓存+回调];
+                //3.有缓存时先回调缓存数据再请求网络数据然后[缓存]不作网络回调;
+                //4.无缓存时不作缓存回调直接请求网络数据后[缓存]不作网络回调;
+                //首次请求时缓存失效的情况会走网络,否则每次只取缓存数据;
+                //具体类型参考{@link }
+                if (callStatus == CallStatus.OnlyCache) {
                     return;
                 }
             }
         }
         setRequestType(RequestType.HEAD);
-        Request.Builder builder = getBuilder(url, headers, params);
+        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams());
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
-        client.newCall(request).enqueue(new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
+        StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
             @Override
             protected void onSuccessCall(String responseString) {
-                if (isCache && !TextUtils.isEmpty(cacheKey)) {
-                    String ckey = String.format("%s%s", cacheKey, getAllParamsJoin(headers, params));
-                    RxCache.setCacheData(ckey, responseString, cacheTime, TimeUnit.MILLISECONDS);
+                RetrofitParams retrofitParams = getRetrofitParams();
+                CallStatus callStatus = retrofitParams.getCallStatus();
+                if (callStatus != CallStatus.OnlyNet && !TextUtils.isEmpty(retrofitParams.getCacheKey())) {
+                    String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
+                    RxCache.setCacheData(ckey, responseString, retrofitParams.getCacheTime(), TimeUnit.MILLISECONDS);
                 }
             }
-        });
+        };
+        callback.setCallStatus(callStatus);
+        client.newCall(request).enqueue(callback);
     }
 }

@@ -8,6 +8,9 @@ import com.cloud.mixed.h5.beans.ArgFieldItem;
 import com.cloud.mixed.h5.beans.H5GetAPIMethodArgsBean;
 import com.cloud.mixed.h5.enums.APIRequestState;
 import com.cloud.nets.OkRxManager;
+import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.CallStatus;
+import com.cloud.nets.enums.DataType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
@@ -97,17 +100,18 @@ public class H5InteractionAPIUtils {
                                       final String target,
                                       RequestContentType requestContentType,
                                       final Func2<Object, APIRequestState, APIReturnResult> callback) {
+        RetrofitParams retrofitParams = new RetrofitParams();
+        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        requestParams.putAll(params);
+        retrofitParams.setCallStatus(CallStatus.OnlyNet);
+        retrofitParams.setRequestContentType(requestContentType);
         OkRxManager.getInstance().delete(url,
                 headers,
-                params,
-                false,
-                "",
-                0,
-                true,
+                retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
                             apiReturnResult.setResponse(response);
@@ -137,17 +141,17 @@ public class H5InteractionAPIUtils {
                                      final String target,
                                      RequestContentType requestContentType,
                                      final Func2<Object, APIRequestState, APIReturnResult> callback) {
+        RetrofitParams retrofitParams = new RetrofitParams();
+        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        requestParams.putAll(params);
+        retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().patch(url,
                 headers,
-                params,
-                false,
-                "",
-                0,
-                true,
+                retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
                             apiReturnResult.setResponse(response);
@@ -175,17 +179,17 @@ public class H5InteractionAPIUtils {
                                    final String target,
                                    RequestContentType requestContentType,
                                    final Func2<Object, APIRequestState, APIReturnResult> callback) {
+        RetrofitParams retrofitParams = new RetrofitParams();
+        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        requestParams.putAll(params);
+        retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().put(url,
                 headers,
-                params,
-                false,
-                "",
-                0,
-                true,
+                retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
                             apiReturnResult.setResponse(response);
@@ -216,17 +220,17 @@ public class H5InteractionAPIUtils {
                                     final String target,
                                     RequestContentType requestContentType,
                                     final Func2<Object, APIRequestState, APIReturnResult> callback) {
+        RetrofitParams retrofitParams = new RetrofitParams();
+        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        requestParams.putAll(params);
+        retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().post(url,
                 headers,
-                params,
-                false,
-                "",
-                0,
-                true,
+                retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
                             apiReturnResult.setResponse(response);
@@ -256,16 +260,16 @@ public class H5InteractionAPIUtils {
                                    HashMap<String, Object> params,
                                    final String target,
                                    final Func2<Object, APIRequestState, APIReturnResult> callback) {
+        RetrofitParams retrofitParams = new RetrofitParams();
+        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        requestParams.putAll(params);
+        retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().get(url,
                 headers,
-                params,
-                false,
-                "",
-                0,
-                true,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                retrofitParams,
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
                             apiReturnResult.setResponse(response);

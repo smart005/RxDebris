@@ -6,14 +6,18 @@ import com.cloud.cache.MemoryCache;
 import com.cloud.cache.RxCache;
 import com.cloud.nets.cookie.CookieJarImpl;
 import com.cloud.nets.cookie.store.SPCookieStore;
+import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnConfigParamsListener;
 import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
+import com.cloud.nets.events.OnRequestErrorListener;
 import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.utils.JsonUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -39,12 +43,23 @@ public class OkRx {
     private OnGlobalReuqestHeaderListener globalReuqestHeaderListener = null;
     //监听请求头参数
     private HashMap headers = null;
+    //网络请求失败监听
+    private OnRequestErrorListener onRequestErrorListener = null;
+    //网络请求时用户授权相关回调监听
+    private OnAuthListener onAuthListener = null;
+    //用于http socket connect fail处理
+    private Set<String> failDomainList = new HashSet<String>();
 
     public static OkRx getInstance() {
         if (okRx == null) {
             okRx = new OkRx();
         }
         return okRx;
+    }
+
+    //在连接失败判断用,外面无须调用;
+    public Set<String> getFailDomainList() {
+        return failDomainList;
     }
 
     /**
@@ -139,18 +154,30 @@ public class OkRx {
     /**
      * 获取http client对象
      *
+     * @param isNewConnect 是否重新创建连接
      * @return OkHttpClient
      */
-    public OkHttpClient getOkHttpClient() {
-        Object objectValue = MemoryCache.getInstance().getSoftCache(OkRxKeys.okhttpClientKey);
-        if ((objectValue instanceof OkHttpClient)) {
-            OkHttpClient httpClient = (OkHttpClient) objectValue;
-            return httpClient;
+    public OkHttpClient getOkHttpClient(boolean isNewConnect) {
+        if (!isNewConnect) {
+            Object objectValue = MemoryCache.getInstance().getSoftCache(OkRxKeys.okhttpClientKey);
+            if ((objectValue instanceof OkHttpClient)) {
+                OkHttpClient httpClient = (OkHttpClient) objectValue;
+                return httpClient;
+            }
         }
         OkRxConfigParams configParams = getOkRxConfigParams();
         OkHttpClient client = newHttpClient(configParams);
         MemoryCache.getInstance().setSoftCache(OkRxKeys.okhttpClientKey, client);
         return client;
+    }
+
+    /**
+     * 获取http client对象
+     *
+     * @return OkHttpClient
+     */
+    public OkHttpClient getOkHttpClient() {
+        return getOkHttpClient(false);
     }
 
     /**
@@ -237,5 +264,57 @@ public class OkRx {
             headers = JsonUtils.parseT(params, HashMap.class);
         }
         return headers;
+    }
+
+    /**
+     * 获取http请求失败回调监听
+     *
+     * @return OnRequestErrorListener
+     */
+    public OnRequestErrorListener getOnRequestErrorListener() {
+        if (onRequestErrorListener == null) {
+            Object errorListener = MemoryCache.getInstance().getSoftCache("NetRequestErrorListener");
+            if (errorListener instanceof OnRequestErrorListener) {
+                onRequestErrorListener = (OnRequestErrorListener) errorListener;
+            }
+        }
+        return onRequestErrorListener;
+    }
+
+    /**
+     * 设置http请求失败回调监听
+     *
+     * @param listener http失败回调监听
+     */
+    public OkRx setOnRequestErrorListener(OnRequestErrorListener listener) {
+        this.onRequestErrorListener = listener;
+        MemoryCache.getInstance().setSoftCache("NetRequestErrorListener", listener);
+        return this;
+    }
+
+    /**
+     * 获取授权相关监听
+     *
+     * @return OnAuthListener
+     */
+    public OnAuthListener getOnAuthListener() {
+        if (onAuthListener == null) {
+            Object authListener = MemoryCache.getInstance().getSoftCache("NetAuthListener");
+            if (authListener instanceof OnAuthListener) {
+                onAuthListener = (OnAuthListener) authListener;
+            }
+        }
+        return onAuthListener;
+    }
+
+    /**
+     * 设置授权相关监听
+     *
+     * @param listener 授权相关监听
+     */
+    public OkRx setOnAuthListener(OnAuthListener listener) {
+        this.onAuthListener = listener;
+        MemoryCache.getInstance().setSoftCache("NetAuthListener", listener);
+        return this;
     }
 }

@@ -4,7 +4,6 @@ import android.text.TextUtils;
 
 import com.cloud.nets.annotations.APIUrlInterfaceClass;
 import com.cloud.nets.beans.RetrofitParams;
-import com.cloud.nets.events.OnAuthCallInfoListener;
 import com.cloud.nets.filters.ReturnCodeCheck;
 import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.nets.properties.OkRxValidParam;
@@ -153,6 +152,7 @@ public class BaseOkrxService extends BaseService {
                                                        BaseSubscriber baseSubscriber,
                                                        Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction,
                                                        HashMap<String, Object> params) {
+        baseSubscriber.setInvokeMethodName(validParam.getInvokeMethodName());
         requestObject(apiClass, server, baseSubscriber, validParam, new Func2<String, S, String>() {
                     @Override
                     public String call(S server, String apiUrlTypeName) {
@@ -160,11 +160,6 @@ public class BaseOkrxService extends BaseService {
                     }
                 },
                 decApiAction,
-                new OnAuthCallInfoListener() {
-                    @Override
-                    public void onCallInfo(String response) {
-                        // TODO: 2019/3/1
-                    }
-                }, params);
+                params);
     }
 }

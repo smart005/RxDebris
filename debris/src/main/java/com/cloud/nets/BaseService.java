@@ -8,8 +8,10 @@ import com.cloud.nets.annotations.ApiCheckAnnotation;
 import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.ReturnCodeFilter;
 import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.CallStatus;
+import com.cloud.nets.enums.DataType;
 import com.cloud.nets.events.OnApiRetCodesFilterListener;
-import com.cloud.nets.events.OnAuthCallInfoListener;
+import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
 import com.cloud.nets.events.OnHttpRequestHeadersListener;
@@ -136,7 +138,7 @@ public class BaseService {
     protected <T> void baseConfig(final BaseService baseService,
                                   final RetrofitParams retrofitParams,
                                   OkRxValidParam validParam,
-                                  final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                                  final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                                   Action0 errorAction,
                                   Action0 completedAction,
                                   String apiRequestKey) {
@@ -240,13 +242,13 @@ public class BaseService {
         }
     }
 
-    private <T> void successDealWith(Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+    private <T> void successDealWith(Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                                      Class<T> dataClass,
                                      BaseService baseService,
                                      String response,
                                      String apiRequestKey,
                                      HashMap<String, ReqQueueItem> reqQueueItemHashMap,
-                                     boolean isLastCall,
+                                     DataType dataType,
                                      long requestStartTime,
                                      long requestTotalTime,
                                      final Action0 completedAction) {
@@ -269,11 +271,11 @@ public class BaseService {
             if (okRxConfigParams.isNetStatusCodeIntercept()) {
                 if (!filterMatchRetCodes(data)) {
                     //成功回调
-                    successAction.call(data, apiRequestKey, reqQueueItemHashMap, isLastCall, requestStartTime, requestTotalTime);
+                    successAction.call(data, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
                 }
             } else {
                 //成功回调
-                successAction.call(data, apiRequestKey, reqQueueItemHashMap, isLastCall, requestStartTime, requestTotalTime);
+                successAction.call(data, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
             }
         }
     }
@@ -316,7 +318,7 @@ public class BaseService {
                               List<ByteRequestItem> byteRequestItems,
                               final BaseService baseService,
                               final Class<T> dataClass,
-                              final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                              final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                               final Action0 errorAction,
                               final Action0 completedAction,
                               final String apiRequestKey) {
@@ -328,7 +330,7 @@ public class BaseService {
                 new Action3<String, String, HashMap<String, ReqQueueItem>>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, true, 0, 0, completedAction);
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, DataType.NetData, 0, 0, completedAction);
                     }
                 },
                 new Action1<RequestState>() {
@@ -378,7 +380,7 @@ public class BaseService {
                            final RetrofitParams retrofitParams,
                            final BaseService baseService,
                            final Class<T> dataClass,
-                           final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                           final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                            final Action0 errorAction,
                            final Action0 completedAction,
                            final String apiRequestKey) {
@@ -386,16 +388,12 @@ public class BaseService {
         OkRxManager.getInstance().trace(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
+                retrofitParams,
                 retrofitParams.getRequestContentType(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -440,7 +438,7 @@ public class BaseService {
                              final RetrofitParams retrofitParams,
                              final BaseService baseService,
                              final Class<T> dataClass,
-                             final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                             final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                              final Action0 errorAction,
                              final Action0 completedAction,
                              final String apiRequestKey) {
@@ -448,16 +446,12 @@ public class BaseService {
         OkRxManager.getInstance().options(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
+                retrofitParams,
                 retrofitParams.getRequestContentType(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -502,7 +496,7 @@ public class BaseService {
                           final RetrofitParams retrofitParams,
                           final BaseService baseService,
                           final Class<T> dataClass,
-                          final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                          final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                           final Action0 errorAction,
                           final Action0 completedAction,
                           final String apiRequestKey) {
@@ -510,15 +504,11 @@ public class BaseService {
         OkRxManager.getInstance().head(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                retrofitParams,
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -563,7 +553,7 @@ public class BaseService {
                            final RetrofitParams retrofitParams,
                            final BaseService baseService,
                            final Class<T> dataClass,
-                           final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                           final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                            final Action0 errorAction,
                            final Action0 completedAction,
                            final String apiRequestKey) {
@@ -571,16 +561,12 @@ public class BaseService {
         OkRxManager.getInstance().patch(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
+                retrofitParams,
                 retrofitParams.getRequestContentType(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -625,7 +611,7 @@ public class BaseService {
                          final RetrofitParams retrofitParams,
                          final BaseService baseService,
                          final Class<T> dataClass,
-                         final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                         final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                          final Action0 errorAction,
                          final Action0 completedAction,
                          final String apiRequestKey) {
@@ -633,16 +619,12 @@ public class BaseService {
         OkRxManager.getInstance().put(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
+                retrofitParams,
                 retrofitParams.getRequestContentType(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -687,7 +669,7 @@ public class BaseService {
                             final RetrofitParams retrofitParams,
                             final BaseService baseService,
                             final Class<T> dataClass,
-                            final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                            final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                             final Action0 errorAction,
                             final Action0 completedAction,
                             final String apiRequestKey) {
@@ -695,16 +677,12 @@ public class BaseService {
         OkRxManager.getInstance().delete(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
+                retrofitParams,
                 retrofitParams.getRequestContentType(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -749,7 +727,7 @@ public class BaseService {
                           final RetrofitParams retrofitParams,
                           final BaseService baseService,
                           final Class<T> dataClass,
-                          final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                          final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                           final Action0 errorAction,
                           final Action0 completedAction,
                           final String apiRequestKey) {
@@ -757,16 +735,12 @@ public class BaseService {
         OkRxManager.getInstance().post(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
+                retrofitParams,
                 retrofitParams.getRequestContentType(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -811,7 +785,7 @@ public class BaseService {
                          final RetrofitParams retrofitParams,
                          final BaseService baseService,
                          final Class<T> dataClass,
-                         final Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long> successAction,
+                         final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
                          final Action0 errorAction,
                          final Action0 completedAction,
                          final String apiRequestKey) {
@@ -819,15 +793,11 @@ public class BaseService {
         OkRxManager.getInstance().get(
                 requestUrl,
                 headers,
-                retrofitParams.getParams(),
-                retrofitParams.isCache(),
-                retrofitParams.getCacheKey(),
-                retrofitParams.getCacheTime(),
-                retrofitParams.isCallNCData(),
-                new Action4<String, String, HashMap<String, ReqQueueItem>, Boolean>() {
+                retrofitParams,
+                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall) {
-                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, isLastCall, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                        successDealWith(successAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -962,14 +932,6 @@ public class BaseService {
         return params2;
     }
 
-    private <S extends BaseService> void openLogin(S s, OnAuthCallInfoListener listener) {
-        //请求token api请求中的token清空
-        s.setToken("");
-        if (listener != null) {
-            listener.onCallInfo(s.getApiName());
-        }
-    }
-
     private <T, S extends BaseService> void finishedRequest(final BaseSubscriber<T, S> baseSubscriber) {
         if (ObjectJudge.isMainThread()) {
             baseSubscriber.onCompleted();
@@ -989,12 +951,15 @@ public class BaseService {
                                                                OkRxValidParam validParam,
                                                                Func2<String, S, String> urlAction,
                                                                Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction,
-                                                               OnAuthCallInfoListener listener,
                                                                HashMap<String, Object> params) {
         try {
             //若需要登录验证则打开登录页面
             if (validParam.isNeedLogin()) {
-                openLogin(server, listener);
+                OnAuthListener authListener = OkRx.getInstance().getOnAuthListener();
+                if (authListener != null) {
+                    authListener.onLoginCall(validParam.getInvokeMethodName());
+                }
+                finishedRequest(baseSubscriber);
                 return;
             }
             //验证失败结束请求(需要判断当前请求的接口是否在线程中请求)
@@ -1027,7 +992,7 @@ public class BaseService {
                 finishedRequest(baseSubscriber);
                 return;
             }
-            ThreadPoolUtils.getInstance().singleTaskExecute(new ApiRequestRunnable<T, I, S>(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction, listener));
+            ThreadPoolUtils.getInstance().singleTaskExecute(new ApiRequestRunnable<T, I, S>(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction));
         } catch (Exception e) {
             finishedRequest(baseSubscriber);
         }
@@ -1041,27 +1006,24 @@ public class BaseService {
         private OkRxValidParam validParam;
         private RetrofitParams retrofitParams;
         private Func2<String, S, String> urlAction;
-        private OnAuthCallInfoListener listener;
 
         public ApiRequestRunnable(Class<I> apiClass,
                                   S server,
                                   final BaseSubscriber<T, S> baseSubscriber,
                                   OkRxValidParam validParam,
                                   RetrofitParams retrofitParams,
-                                  Func2<String, S, String> urlAction,
-                                  OnAuthCallInfoListener listener) {
+                                  Func2<String, S, String> urlAction) {
             this.apiClass = apiClass;
             this.server = server;
             this.baseSubscriber = baseSubscriber;
             this.validParam = validParam;
             this.retrofitParams = retrofitParams;
             this.urlAction = urlAction;
-            this.listener = listener;
         }
 
         @Override
         public void run() {
-            apiRequest(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction, listener);
+            apiRequest(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction);
         }
     }
 
@@ -1070,8 +1032,7 @@ public class BaseService {
                                                           final BaseSubscriber<T, S> baseSubscriber,
                                                           OkRxValidParam validParam,
                                                           RetrofitParams retrofitParams,
-                                                          Func2<String, S, String> urlAction,
-                                                          OnAuthCallInfoListener listener) {
+                                                          Func2<String, S, String> urlAction) {
         //设置回调是否作验证
         baseSubscriber.setValidCallResult(retrofitParams.isValidCallResult());
         //设置此接口允许返回码
@@ -1099,15 +1060,14 @@ public class BaseService {
         //缓存的过期时间,单位毫秒
         //为确保未设置缓存请求几乎不做缓存，此处默认缓存时间暂设为5秒
         ApiCheckAnnotation apiCheckAnnotation = validParam.getApiCheckAnnotation();
-        retrofitParams.setCache(apiCheckAnnotation.isCache());
+        retrofitParams.setCallStatus(apiCheckAnnotation.callStatus());
         retrofitParams.setCacheKey(apiCheckAnnotation.cacheKey());
-        if (retrofitParams.isCache()) {
+        //设置缓存时间
+        CallStatus status = retrofitParams.getCallStatus();
+        if (status != CallStatus.OnlyNet) {
             long milliseconds = ConvertUtils.toMilliseconds(apiCheckAnnotation.cacheTime(), apiCheckAnnotation.cacheTimeUnit());
             retrofitParams.setCacheTime(milliseconds);
-        } else {
-            retrofitParams.setCacheTime(5000);
         }
-        retrofitParams.setCallNCData(apiCheckAnnotation.isCallNCData());
         //拼接完整的url
         //del请求看delQuery参数是不是为空
         if (!ObjectJudge.isNullOrEmpty(retrofitParams.getDelQueryParams())) {
@@ -1127,22 +1087,23 @@ public class BaseService {
                 }
             }
         }
-        baseSubscriber.setOnAuthCallInfoListener(listener);
         String apiRequestKey = GlobalUtils.getNewGuid();
         server.<T>baseConfig(server, retrofitParams, validParam,
-                new Action6<T, String, HashMap<String, ReqQueueItem>, Boolean, Long, Long>() {
+                new Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long>() {
                     @Override
-                    public void call(T t, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, Boolean isLastCall, Long requestStartTime, Long requestTotalTime) {
+                    public void call(T t, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType, Long requestStartTime, Long requestTotalTime) {
                         //成功回调
-                        baseSubscriber.onNext(t, reqQueueItemHashMap, apiRequestKey, isLastCall, requestStartTime, requestTotalTime);
+                        baseSubscriber.onNext(t, reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
                     }
                 },
                 new Action0() {
                     @Override
                     public void call() {
+                        //失败回调
                         OnSuccessfulListener successfulListener = baseSubscriber.getOnSuccessfulListener();
                         if (successfulListener != null) {
                             successfulListener.onError(null, baseSubscriber.getExtra());
+                            successfulListener.onError(baseSubscriber.getExtra());
                         }
                     }
                 },
@@ -1182,8 +1143,8 @@ public class BaseService {
                     logsb.append(String.format("请求参数:%s\n", JsonUtils.toStr(retrofitParams.getParams())));
                 }
                 logsb.append(String.format("数据提交方式:%s\n", retrofitParams.getRequestContentType().name()));
-                logsb.append(String.format("缓存信息:isCache=%s,cacheKey=%s,cacheTime=%s\n",
-                        retrofitParams.isCache(),
+                logsb.append(String.format("缓存信息:callStatus=%s,cacheKey=%s,cacheTime=%s\n",
+                        retrofitParams.getCallStatus().name(),
                         retrofitParams.getCacheKey(),
                         retrofitParams.getCacheTime()));
                 logsb.append(String.format("返回数据类名:%s\n", retrofitParams.getDataClass().getSimpleName()));

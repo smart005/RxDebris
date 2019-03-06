@@ -1,5 +1,7 @@
 package com.cloud.nets.annotations;
 
+import com.cloud.nets.enums.CallStatus;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,11 +27,11 @@ public @interface ApiCheckAnnotation {
     boolean isTokenValid() default false;
 
     /**
-     * 是否缓存
-     * <p>
-     * return
+     * 数据回调类型默认{@link CallStatus}.OnlyNet
+     *
+     * @return CallStatus
      */
-    boolean isCache() default false;
+    CallStatus callStatus() default CallStatus.OnlyNet;
 
     /**
      * 缓存时间
@@ -51,11 +53,4 @@ public @interface ApiCheckAnnotation {
      * return
      */
     String cacheKey() default "859800517";
-
-    /**
-     * 在缓存未失败时获取到网络数据和缓存数据均会回调,缓存失效后先请求网络->再缓存->最后返回(即此时只作网络数据的回调)
-     *
-     * @return
-     */
-    boolean isCallNCData() default true;
 }

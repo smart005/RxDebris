@@ -2,6 +2,7 @@ package com.cloud.nets.beans;
 
 import android.text.TextUtils;
 
+import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.BaseUrlTypeName;
 import com.cloud.objects.enums.RequestContentType;
@@ -39,11 +40,6 @@ public class RetrofitParams {
      * del query请求参数
      */
     private HashMap<String, String> delQueryParams = null;
-
-    /**
-     * 是否缓存
-     */
-    private boolean isCache = false;
 
     /**
      * 缓存key
@@ -103,10 +99,6 @@ public class RetrofitParams {
      */
     private ApiHeadersCall apiHeadersCall = null;
     /**
-     * 请求时是否对网络数据和缓存均做回调处理
-     */
-    private boolean isCallNCData = true;
-    /**
      * 请求总时间
      */
     private long requestTotalTime = 0;
@@ -114,6 +106,10 @@ public class RetrofitParams {
      * 当前请求时间
      */
     private long currentRequestTime = 0;
+    /**
+     * 回调数据类型(默认OnlyNet)
+     */
+    private CallStatus callStatus = CallStatus.OnlyNet;
 
     public RequestType getRequestType() {
         return requestType;
@@ -143,14 +139,6 @@ public class RetrofitParams {
             params = new HashMap<String, Object>();
         }
         return params;
-    }
-
-    public boolean isCache() {
-        return isCache;
-    }
-
-    public void setCache(boolean cache) {
-        isCache = cache;
     }
 
     public String getCacheKey() {
@@ -306,14 +294,6 @@ public class RetrofitParams {
         this.apiHeadersCall = apiHeadersCall;
     }
 
-    public boolean isCallNCData() {
-        return isCallNCData;
-    }
-
-    public void setCallNCData(boolean callNCData) {
-        isCallNCData = callNCData;
-    }
-
     public long getRequestTotalTime() {
         return requestTotalTime;
     }
@@ -328,5 +308,13 @@ public class RetrofitParams {
 
     public void setCurrentRequestTime(long currentRequestTime) {
         this.currentRequestTime = currentRequestTime;
+    }
+
+    public CallStatus getCallStatus() {
+        return callStatus;
+    }
+
+    public void setCallStatus(CallStatus callStatus) {
+        this.callStatus = callStatus;
     }
 }

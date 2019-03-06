@@ -30,10 +30,9 @@ public class H5Test extends BaseActivity {
         RxMixed.getInstance().registerH5Listener(calls);
         setContentView(R.layout.h5_view);
         getWindow().setFormat(PixelFormat.TRANSLUCENT);
-//        h5Test = (H5WebView<OnH5WebViewListener>) findViewById(R.id.h5_test);
-        h5Test.bindInterface("cloud");
+        h5Test = (H5WebView<OnH5WebViewListener>) findViewById(R.id.h5_test);
+        h5Test.bindInterface("mibao");
         h5Test.load("http://www.slcore.com:201");
-
     }
 
     public OnH5WebViewListener calls = new OnH5WebViewListener() {
@@ -65,12 +64,12 @@ public class H5Test extends BaseActivity {
 
         @Override
         public void nativeSchemeCall(String scheme) {
-            super.nativeSchemeCall(scheme);
+
         }
 
         @Override
         public void getSelectText(String selectText) {
-            super.getSelectText(selectText);
+
         }
 
         @Override
@@ -80,7 +79,7 @@ public class H5Test extends BaseActivity {
 
         @Override
         public void onCallTel(String tel) {
-            super.onCallTel(tel);
+
         }
 
         @Override

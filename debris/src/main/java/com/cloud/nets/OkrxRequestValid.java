@@ -33,6 +33,7 @@ public class OkrxRequestValid {
      */
     public <T extends BaseService> OkRxValidParam check(T t, String invokeMethodName) {
         OkRxValidParam validParam = new OkRxValidParam();
+        validParam.setInvokeMethodName(invokeMethodName);
         if (t == null) {
             validParam.setFlag(false);
             return validParam;

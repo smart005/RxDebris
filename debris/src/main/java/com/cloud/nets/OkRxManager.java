@@ -2,6 +2,8 @@ package com.cloud.nets;
 
 import android.graphics.Bitmap;
 
+import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.DataType;
 import com.cloud.nets.properties.ByteRequestItem;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.nets.requests.OkRxBitmapRequest;
@@ -45,12 +47,8 @@ public class OkRxManager {
 
     public void get(String url,
                     HashMap<String, String> headers,
-                    HashMap<String, Object> params,
-                    boolean isCache,
-                    String cacheKey,
-                    long cacheTime,
-                    boolean isCallNCData,
-                    Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                    RetrofitParams retrofitParams,
+                    Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                     String apiUnique,
                     Action2<String, HashMap<String, String>> headersAction,
                     Action1<RequestState> completeAction,
@@ -58,19 +56,15 @@ public class OkRxManager {
                     String apiRequestKey,
                     HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxGetRequest request = new OkRxGetRequest();
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void post(String url,
                      HashMap<String, String> headers,
-                     HashMap<String, Object> params,
-                     boolean isCache,
-                     String cacheKey,
-                     long cacheTime,
-                     boolean isCallNCData,
+                     RetrofitParams retrofitParams,
                      RequestContentType requestContentType,
-                     Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      String apiUnique,
                      Action2<String, HashMap<String, String>> headersAction,
                      Action1<RequestState> completeAction,
@@ -78,19 +72,15 @@ public class OkRxManager {
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxPostRequest request = new OkRxPostRequest(requestContentType);
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void delete(String url,
                        HashMap<String, String> headers,
-                       HashMap<String, Object> params,
-                       boolean isCache,
-                       String cacheKey,
-                       long cacheTime,
-                       boolean isCallNCData,
+                       RetrofitParams retrofitParams,
                        RequestContentType requestContentType,
-                       Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                       Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                        String apiUnique,
                        Action2<String, HashMap<String, String>> headersAction,
                        Action1<RequestState> completeAction,
@@ -98,19 +88,15 @@ public class OkRxManager {
                        String apiRequestKey,
                        HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxDeleteRequest request = new OkRxDeleteRequest(requestContentType);
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void put(String url,
                     HashMap<String, String> headers,
-                    HashMap<String, Object> params,
-                    boolean isCache,
-                    String cacheKey,
-                    long cacheTime,
-                    boolean isCallNCData,
+                    RetrofitParams retrofitParams,
                     RequestContentType requestContentType,
-                    Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                    Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                     String apiUnique,
                     Action2<String, HashMap<String, String>> headersAction,
                     Action1<RequestState> completeAction,
@@ -118,19 +104,15 @@ public class OkRxManager {
                     String apiRequestKey,
                     HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxPutRequest request = new OkRxPutRequest(requestContentType);
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void patch(String url,
                       HashMap<String, String> headers,
-                      HashMap<String, Object> params,
-                      boolean isCache,
-                      String cacheKey,
-                      long cacheTime,
-                      boolean isCallNCData,
+                      RetrofitParams retrofitParams,
                       RequestContentType requestContentType,
-                      Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                      Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                       String apiUnique,
                       Action2<String, HashMap<String, String>> headersAction,
                       Action1<RequestState> completeAction,
@@ -138,18 +120,14 @@ public class OkRxManager {
                       String apiRequestKey,
                       HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxPatchRequest request = new OkRxPatchRequest(requestContentType);
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void head(String url,
                      HashMap<String, String> headers,
-                     HashMap<String, Object> params,
-                     boolean isCache,
-                     String cacheKey,
-                     long cacheTime,
-                     boolean isCallNCData,
-                     Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                     RetrofitParams retrofitParams,
+                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      String apiUnique,
                      Action2<String, HashMap<String, String>> headersAction,
                      Action1<RequestState> completeAction,
@@ -157,19 +135,15 @@ public class OkRxManager {
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxHeadRequest request = new OkRxHeadRequest();
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void options(String url,
                         HashMap<String, String> headers,
-                        HashMap<String, Object> params,
-                        boolean isCache,
-                        String cacheKey,
-                        long cacheTime,
-                        boolean isCallNCData,
+                        RetrofitParams retrofitParams,
                         RequestContentType requestContentType,
-                        Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                        Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                         String apiUnique,
                         Action2<String, HashMap<String, String>> headersAction,
                         Action1<RequestState> completeAction,
@@ -177,19 +151,15 @@ public class OkRxManager {
                         String apiRequestKey,
                         HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxOptionsRequest request = new OkRxOptionsRequest(requestContentType);
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void trace(String url,
                       HashMap<String, String> headers,
-                      HashMap<String, Object> params,
-                      boolean isCache,
-                      String cacheKey,
-                      long cacheTime,
-                      boolean isCallNCData,
+                      RetrofitParams retrofitParams,
                       RequestContentType requestContentType,
-                      Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                      Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                       String apiUnique,
                       Action2<String, HashMap<String, String>> headersAction,
                       Action1<RequestState> completeAction,
@@ -197,8 +167,8 @@ public class OkRxManager {
                       String apiRequestKey,
                       final HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxTraceRequest request = new OkRxTraceRequest(requestContentType);
-        request.setCallNCData(isCallNCData);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
     }
 
     public void download(String url,
@@ -227,18 +197,16 @@ public class OkRxManager {
 
     public void uploadFile(String url,
                            HashMap<String, String> headers,
-                           HashMap<String, Object> params,
-                           boolean isCache,
-                           String cacheKey,
-                           long cacheTime,
+                           RetrofitParams retrofitParams,
                            RequestContentType requestContentType,
-                           Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                           Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                            Action1<RequestState> completeAction,
                            Action2<String, String> printLogAction,
                            String apiRequestKey,
                            HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxPostRequest request = new OkRxPostRequest(requestContentType);
-        request.call(url, headers, params, isCache, cacheKey, cacheTime, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, "", null);
+        request.setRetrofitParams(retrofitParams);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, "", null);
     }
 
     public void uploadBytes(String url,

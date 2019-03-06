@@ -3,6 +3,8 @@ package com.cloud.nets.requests;
 import android.graphics.Bitmap;
 
 import com.cloud.nets.OkRxKeys;
+import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.DataType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
@@ -40,14 +42,17 @@ public class BaseRequest {
 
     private RequestType requestType = null;
     private RequestContentType requestContentType = null;
-    private boolean isCallNCData = true;
+    private RetrofitParams retrofitParams;
 
-    public boolean isCallNCData() {
-        return isCallNCData;
+    public RetrofitParams getRetrofitParams() {
+        if (retrofitParams == null) {
+            retrofitParams = new RetrofitParams();
+        }
+        return retrofitParams;
     }
 
-    public void setCallNCData(boolean callNCData) {
-        isCallNCData = callNCData;
+    public void setRetrofitParams(RetrofitParams retrofitParams) {
+        this.retrofitParams = retrofitParams;
     }
 
     protected void setRequestType(RequestType requestType) {
@@ -56,11 +61,7 @@ public class BaseRequest {
 
     public void call(String url,
                      HashMap<String, String> headers,
-                     HashMap<String, Object> params,
-                     boolean isCache,
-                     String cacheKey,
-                     long cacheTime,
-                     Action4<String, String, HashMap<String, ReqQueueItem>,Boolean> successAction,
+                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      Action1<RequestState> completeAction,
                      Action2<String, String> printLogAction,
                      String apiRequestKey,
@@ -258,9 +259,9 @@ public class BaseRequest {
         }
         //判断原url中是否包含?
         if (StringUtils.isContains(url, "?")) {
-            return url + "&" + builder.toString();
+            return String.format("%s&time=%s&%s", url, System.currentTimeMillis(), builder.toString());
         } else {
-            return url + "?" + builder.toString();
+            return String.format("%s?time=%s&%s", url, System.currentTimeMillis(), builder.toString());
         }
     }
 

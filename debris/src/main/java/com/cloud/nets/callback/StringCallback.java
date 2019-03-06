@@ -2,6 +2,10 @@ package com.cloud.nets.callback;
 
 import android.text.TextUtils;
 
+import com.cloud.nets.OkRx;
+import com.cloud.nets.enums.CallStatus;
+import com.cloud.nets.enums.DataType;
+import com.cloud.nets.events.OnRequestErrorListener;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
@@ -13,10 +17,14 @@ import com.cloud.objects.logs.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -31,7 +39,7 @@ import okhttp3.ResponseBody;
 public abstract class StringCallback implements Callback {
 
     //处理成功回调
-    private Action4<String, String, HashMap<String, ReqQueueItem>, Boolean> successAction = null;
+    private Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction = null;
     //请求完成时回调(成功或失败)
     private Action1<RequestState> completeAction = null;
     //请求完成时输出日志
@@ -46,10 +54,16 @@ public abstract class StringCallback implements Callback {
     private String apiUnique = "";
     //header回调
     private Action2<String, HashMap<String, String>> headersAction = null;
+    //请求回调状态
+    private CallStatus callStatus = CallStatus.OnlyNet;
+
+    public void setCallStatus(CallStatus callStatus) {
+        this.callStatus = callStatus;
+    }
 
     protected abstract void onSuccessCall(String responseString);
 
-    public StringCallback(Action4<String, String, HashMap<String, ReqQueueItem>, Boolean> successAction,
+    public StringCallback(Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                           Action1<RequestState> completeAction,
                           Action2<String, String> printLogAction,
                           HashMap<String, ReqQueueItem> reqQueueItemHashMap,
@@ -67,12 +81,35 @@ public abstract class StringCallback implements Callback {
 
     @Override
     public void onFailure(Call call, IOException e) {
+        if (call.isCanceled()) {
+            Request request = call.request();
+            HttpUrl url = request.url();
+            String host = url.host();
+            Set<String> domainList = OkRx.getInstance().getFailDomainList();
+            if (domainList.contains(host)) {
+                //如果域名已在失败列表在新创建连接并重新请求仍失败,服务器地址有问题或当前网络异常;
+                //此时直接返回即可
+                return;
+            }
+            domainList.add(host);
+            //如果连接已经被取消时则重新建立
+            OkHttpClient client = OkRx.getInstance().getOkHttpClient(true);
+            //创建新请求
+            Call clone = call.clone();
+            client.newCall(clone.request()).enqueue(this);
+            return;
+        }
         if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
             queueItem.setReqNetCompleted(true);
         }
         if (completeAction != null) {
             completeAction.call(RequestState.Error);
+        }
+        //抛出失败回调到全局监听
+        OnRequestErrorListener errorListener = OkRx.getInstance().getOnRequestErrorListener();
+        if (errorListener != null) {
+            errorListener.onFailure(call, e);
         }
     }
 
@@ -102,6 +139,14 @@ public abstract class StringCallback implements Callback {
     @Override
     public void onResponse(Call call, Response response) {
         try {
+            //请求成功后将连接从缓存列表移除
+            Request request = call.request();
+            HttpUrl url = request.url();
+            String host = url.host();
+            Set<String> domainList = OkRx.getInstance().getFailDomainList();
+            if (domainList.contains(host)) {
+                domainList.remove(host);
+            }
             if (response == null || !response.isSuccessful()) {
                 if (completeAction != null) {
                     completeAction.call(RequestState.Error);
@@ -117,7 +162,10 @@ public abstract class StringCallback implements Callback {
             }
             if (successAction != null) {
                 responseString = body.string();
-                successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, true);
+                if (callStatus != CallStatus.WeakCache) {
+                    //此状态下不做网络回调但做缓存
+                    successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
+                }
 
                 onSuccessCall(responseString);
 

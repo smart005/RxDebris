@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 
+import com.cloud.nets.OkRx;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
@@ -17,10 +18,14 @@ import com.cloud.objects.logs.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -64,6 +69,24 @@ public class BitmapCallback implements Callback {
 
     @Override
     public void onFailure(Call call, IOException e) {
+        if (call.isCanceled()) {
+            Request request = call.request();
+            HttpUrl url = request.url();
+            String host = url.host();
+            Set<String> domainList = OkRx.getInstance().getFailDomainList();
+            if (domainList.contains(host)) {
+                //如果域名已在失败列表在新创建连接并重新请求仍失败,服务器地址有问题或当前网络异常;
+                //此时直接返回即可
+                return;
+            }
+            domainList.add(host);
+            //如果连接已经被取消时则重新建立
+            OkHttpClient client = OkRx.getInstance().getOkHttpClient(true);
+            //创建新请求
+            Call clone = call.clone();
+            client.newCall(clone.request()).enqueue(this);
+            return;
+        }
         if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
             reqQueueItemHashMap.remove(apiRequestKey);
         }
@@ -102,6 +125,14 @@ public class BitmapCallback implements Callback {
     @Override
     public void onResponse(Call call, Response response) {
         try {
+            //请求成功后将连接从缓存列表移除
+            Request request = call.request();
+            HttpUrl url = request.url();
+            String host = url.host();
+            Set<String> domainList = OkRx.getInstance().getFailDomainList();
+            if (domainList.contains(host)) {
+                domainList.remove(host);
+            }
             if (response == null || !response.isSuccessful()) {
                 if (completeAction != null) {
                     completeAction.call(RequestState.Error);

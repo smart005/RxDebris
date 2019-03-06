@@ -3,6 +3,7 @@ package com.cloud.nets.requests;
 import android.text.TextUtils;
 
 import com.cloud.nets.OkRx;
+import com.cloud.nets.events.OnRequestErrorListener;
 import com.cloud.nets.properties.ByteRequestItem;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
@@ -99,6 +100,11 @@ public class OkRxUploadByteRequest {
                     }
                     if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                         reqQueueItemHashMap.remove(apiRequestKey);
+                    }
+                    //抛出失败回调到全局监听
+                    OnRequestErrorListener errorListener = OkRx.getInstance().getOnRequestErrorListener();
+                    if (errorListener != null) {
+                        errorListener.onFailure(call, e);
                     }
                 }
 

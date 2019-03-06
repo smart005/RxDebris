@@ -38,6 +38,10 @@ public class OkRxValidParam {
      * 当前请求时间
      */
     private long currentRequestTime = 0;
+    /**
+     * 请求方法名
+     */
+    private String invokeMethodName = "";
 
     public ApiCheckAnnotation getApiCheckAnnotation() {
         return apiCheckAnnotation;
@@ -93,5 +97,13 @@ public class OkRxValidParam {
 
     public void setCurrentRequestTime(long currentRequestTime) {
         this.currentRequestTime = currentRequestTime;
+    }
+
+    public String getInvokeMethodName() {
+        return invokeMethodName;
+    }
+
+    public void setInvokeMethodName(String invokeMethodName) {
+        this.invokeMethodName = invokeMethodName;
     }
 }
