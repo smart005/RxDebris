@@ -2,6 +2,7 @@ package com.cloud.objects.logs;
 
 import android.content.Context;
 
+import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.utils.GlobalUtils;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -14,7 +15,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
  * Modifier:
  * ModifyContent:
  */
-public class CrashHandler implements UncaughtExceptionHandler {
+public abstract class CrashHandler implements UncaughtExceptionHandler {
 
     /**
      * 程序的Context对象
@@ -25,6 +26,9 @@ public class CrashHandler implements UncaughtExceptionHandler {
      * 系统默认的UncaughtException处理类
      */
     private UncaughtExceptionHandler mDefaultHandler;
+
+    //在release下日志拦截监听
+    protected abstract void onReleaseLogIntercept(Throwable throwable);
 
     /**
      * 初始化,注册Context对象, 获取系统默认的UncaughtException处理器, 设置该CrashHandler为程序的默认处理器
@@ -69,8 +73,14 @@ public class CrashHandler implements UncaughtExceptionHandler {
         if (msg == null) {
             return false;
         }
-        CrashFileTask crashFileTask = new CrashFileTask();
-        crashFileTask.writeLog(ex);
+        //debug状态下才记录日志
+        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+        if (builder.isDebug() || builder.isBetaVersion()) {
+            CrashFileTask crashFileTask = new CrashFileTask();
+            crashFileTask.writeLog(ex);
+        } else {
+            onReleaseLogIntercept(ex);
+        }
         return true;
     }
 }

@@ -28,7 +28,7 @@ public class Logger {
 
             PrettyFormatStrategy.Builder builder = PrettyFormatStrategy.newBuilder();
             formatStrategy = builder.showThreadInfo(true)
-                    .methodCount(1)
+                    .methodCount(5)
                     .methodOffset(0)
                     .tag(loggeruTag)
                     .build();

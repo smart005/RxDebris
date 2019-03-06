@@ -12,36 +12,6 @@ public class ToastUtils {
     private static Toast buildToast(Context context, CharSequence message, int duration, int yOffset) {
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, yOffset);
-//        ToastThemeProperties properties = BaseCConfig.getInstance().getToastThemeProperties(context);
-//        if (properties != null) {
-//            View view = toast.getView();
-//            ConfigItem bg = properties.getBackgroundResource();
-//            if (!TextUtils.isEmpty(bg.getType()) && !TextUtils.isEmpty(bg.getName())) {
-//                ResFolderType folderType = ResFolderType.getResFolderType(bg.getType());
-//                int bgRresId = ResUtils.getResource(context, bg.getName(), folderType);
-//                if (bgRresId != -1 && bgRresId != 0) {
-//                    //设置背景
-//                    view.setBackgroundResource(bgRresId);
-//                }
-//            }
-//            //文本颜色、大小
-//            if (!TextUtils.isEmpty(properties.getTextColor())) {
-//                TextView tv = (TextView) view.findViewById(android.R.id.message);
-//                if (tv == null) {
-//                    ViewGroup group = (ViewGroup) view;
-//                    if (group != null) {
-//                        tv = (TextView) group.getChildAt(0);
-//                    }
-//                }
-//                if (tv != null) {
-//                    tv.setTextColor(Color.parseColor(properties.getTextColor()));
-//                    if (properties.getTextSize() > 0) {
-//                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, properties.getTextSize());
-//                    }
-//                    tv.setText(message);
-//                }
-//            }
-//        }
         return toast;
     }
 

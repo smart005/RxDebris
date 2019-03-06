@@ -9,6 +9,11 @@ android {
         targetSdkVersion 18
         versionCode 1
         versionName "1.0.0"
+
+        ndk {
+            //选择要添加的对应cpu类型的.so库。
+            abiFilters 'armeabi'
+        }
     }
 
     buildTypes {
@@ -20,6 +25,21 @@ android {
     lintOptions {
         abortOnError false
     }
+    dexOptions {
+        jumboMode = true
+        preDexLibraries = true
+        javaMaxHeapSize "4g"
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
 }
 greendao {
     schemaVersion 1
@@ -28,10 +48,12 @@ greendao {
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    //noinspection GradleCompatible
-    api 'com.android.support:support-v4:28.0.0'
-    api 'com.android.support:design:28.0.0'
-    api 'com.android.support:appcompat-v7:28.0.0'
+    //noinspection GradleDependency,GradleCompatible
+    api 'com.android.support:support-v4:26.1.0'
+    //noinspection GradleDependency,GradleCompatible
+//    api 'com.android.support:design:26.1.0'
+    //noinspection GradleDependency,GradleCompatible
+    api 'com.android.support:appcompat-v7:26.1.0'
     api 'com.alibaba:fastjson:1.2.46'
     api 'io.reactivex.rxjava2:rxjava:2.2.5'
     api 'io.reactivex.rxjava2:rxandroid:2.0.1'
@@ -40,6 +62,8 @@ dependencies {
     //https://github.com/tbruyelle/RxPermissions
     api 'com.github.tbruyelle:rxpermissions:0.10.2'
     api 'com.squareup.okhttp3:okhttp:3.12.1'
+    //腾讯浏览器
+    api 'com.cloud:tbs:4.3.0'
 }
 
 apply from: 'nexus-push.gradle'

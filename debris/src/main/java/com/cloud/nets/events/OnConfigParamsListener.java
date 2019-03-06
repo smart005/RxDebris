@@ -1,6 +1,5 @@
 package com.cloud.nets.events;
 
-import com.cloud.nets.OkRx;
 import com.cloud.nets.properties.OkRxConfigParams;
 
 /**
@@ -15,8 +14,8 @@ public interface OnConfigParamsListener {
     /**
      * 通过此回调返回自定义配置参数
      *
-     * @param okRx okRx
+     * @param configParams 默认配置参数
      * @return 自定义配置参数
      */
-    public OkRxConfigParams onConfigParamsCall(OkRx okRx);
+    public OkRxConfigParams onConfigParamsCall(OkRxConfigParams configParams);
 }

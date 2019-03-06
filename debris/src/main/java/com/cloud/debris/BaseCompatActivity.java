@@ -3,6 +3,7 @@ package com.cloud.debris;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.cloud.debris.enums.StatisticalTypes;
 import com.cloud.debris.event.OnLifeCycleStatistical;
 import com.cloud.debris.event.OnSupperProperties;
 
@@ -14,7 +15,7 @@ import com.cloud.debris.event.OnSupperProperties;
  * Modifier:
  * ModifyContent:
  */
-public abstract class BaseCompatActivity extends AppCompatActivity implements OnSupperProperties, OnLifeCycleStatistical {
+public class BaseCompatActivity extends AppCompatActivity implements OnSupperProperties, OnLifeCycleStatistical {
 
     private BundleData bundleData = null;
 
@@ -161,5 +162,15 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements On
     @Override
     public <T> T getParcelableBundle(String key) {
         return bundleData.getParcelableBundle(key);
+    }
+
+    @Override
+    public <T> T onStatisticalClassObject(StatisticalTypes statisticalTypes) {
+        return null;
+    }
+
+    @Override
+    public void setStatisticalClassObject(StatisticalTypes statisticalTypes, Object statisticalClassObject) {
+
     }
 }

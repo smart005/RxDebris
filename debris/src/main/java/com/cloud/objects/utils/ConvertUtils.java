@@ -41,6 +41,32 @@ public class ConvertUtils {
     }
 
     /**
+     * 图片文件转bitmap
+     *
+     * @param filePath 图片文件
+     * @return bitmap对象
+     */
+    public static Bitmap toBitmap(String filePath) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
+        return bitmap;
+    }
+
+    /**
+     * 图片文件转bitmap
+     *
+     * @param options  图片options对象
+     * @param filePath 图片文件
+     * @return bitmap对象
+     */
+    public static Bitmap toBitmap(BitmapFactory.Options options, String filePath) {
+        options.inPurgeable = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
+        return bitmap;
+    }
+
+    /**
      * 数字Object对象转int型
      * <p>
      * param obj          要转换的对象

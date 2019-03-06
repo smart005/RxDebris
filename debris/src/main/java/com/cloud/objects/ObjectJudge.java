@@ -23,6 +23,7 @@ import com.cloud.objects.storage.FilenameUtils;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -512,5 +513,21 @@ public class ObjectJudge {
      */
     public static boolean isMainThread() {
         return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+    /**
+     * 判断某项条件是否被枚举集合所包含
+     *
+     * @param condition   条件
+     * @param collections 枚举集合
+     * @return true-包含;false-不包含;
+     */
+    public static boolean isContains(String condition, String... collections) {
+        if (TextUtils.isEmpty(condition) || isNullOrEmpty(collections)) {
+            return false;
+        }
+        List<String> lst = Arrays.asList(collections);
+        boolean contains = lst.contains(condition);
+        return contains;
     }
 }

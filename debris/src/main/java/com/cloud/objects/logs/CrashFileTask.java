@@ -24,7 +24,7 @@ import java.util.Properties;
  * Modifier:
  * ModifyContent:
  */
-public class CrashFileTask {
+class CrashFileTask {
 
     private final String STACK_TRACE = "STACK_TRACE";
     /**
@@ -50,7 +50,7 @@ public class CrashFileTask {
 
     /**
      * 收集程序崩溃的设备信息
-     *
+     * <p>
      * param ctx
      */
     private Properties collectCrashDeviceInfo() {
@@ -72,7 +72,7 @@ public class CrashFileTask {
 
     /**
      * 获取错误信息
-     *
+     * <p>
      * param ex
      * return
      */
@@ -95,7 +95,7 @@ public class CrashFileTask {
 
     /**
      * 保存日志
-     *
+     * <p>
      * param crashInfo        错误信息
      * param mDeviceCrashInfo 设置相关信息
      * param level            错误等级

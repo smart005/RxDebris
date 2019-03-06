@@ -1,9 +1,9 @@
 package com.cloud.debrisTest;
 
-import android.app.Application;
-
 import com.cloud.cache.greens.DBManager;
 import com.cloud.cache.greens.OnDatabasePathListener;
+import com.cloud.debris.BaseApplication;
+import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnConfigParamsListener;
@@ -23,11 +23,10 @@ import java.io.File;
  * Modifier:
  * ModifyContent:
  */
-public class TestApplication extends Application {
-    @Override
-    public void onCreate() {
-        super.onCreate();
+public class TestApplication extends BaseApplication {
 
+    @Override
+    public void onApplicationCreated() {
         RxAndroid.getInstance().getBuilder()
                 .setDebug(true)
                 //日志打印时统一标识
@@ -51,11 +50,10 @@ public class TestApplication extends Application {
                     }
                 });
         //网络框架初始化
-        OkRx.getInstance()
+        OkRx.getInstance().initialize(this)
                 .setOnConfigParamsListener(new OnConfigParamsListener() {
                     @Override
-                    public OkRxConfigParams onConfigParamsCall(OkRx okRx) {
-                        OkRxConfigParams configParams = okRx.getOkRxConfigParams();
+                    public OkRxConfigParams onConfigParamsCall(OkRxConfigParams configParams) {
                         //true-网络请求成功后内部处理相关状态;false-网络请求success后直接返回;
                         configParams.setProcessNetResults(false);
                         //是否进行网络状态码拦截(默认为false)
@@ -71,6 +69,23 @@ public class TestApplication extends Application {
                         Logger.info(response);
                         return JsonUtils.parseT(response, dataClass);
                     }
-                }).initialize(this);
+                }).build();
+        //x5内核
+        RxMixed.getInstance().build(this);
+    }
+
+    @Override
+    public void onAppSiwtchToBack() {
+
+    }
+
+    @Override
+    public void onAppSiwtchToFront() {
+
+    }
+
+    @Override
+    public void onReleaseLogIntercept(Throwable throwable) {
+
     }
 }

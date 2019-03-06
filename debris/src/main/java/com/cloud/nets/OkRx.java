@@ -93,7 +93,7 @@ public class OkRx {
     public OkRx initialize(Context context) {
         this.applicationContext = context;
         if (onConfigParamsListener != null) {
-            okRxConfigParams = onConfigParamsListener.onConfigParamsCall(this);
+            okRxConfigParams = onConfigParamsListener.onConfigParamsCall(getDefaultConfigParams());
         }
         if (okRxConfigParams == null) {
             okRxConfigParams = new OkRxConfigParams();
@@ -155,16 +155,29 @@ public class OkRx {
 
     /**
      * 获取okrx全局配置参数
+     * (不要在application初始化时调用)
      *
      * @return
      */
     public OkRxConfigParams getOkRxConfigParams() {
         if (okRxConfigParams == null) {
             if (onConfigParamsListener != null) {
-                okRxConfigParams = onConfigParamsListener.onConfigParamsCall(this);
+                okRxConfigParams = onConfigParamsListener.onConfigParamsCall(getDefaultConfigParams());
             }
         }
         //再次判断若全局参数为空则重新创建参数
+        if (okRxConfigParams == null) {
+            okRxConfigParams = new OkRxConfigParams();
+        }
+        return okRxConfigParams;
+    }
+
+    /**
+     * 获取默认参数配置
+     *
+     * @return OkRxConfigParams
+     */
+    public OkRxConfigParams getDefaultConfigParams() {
         if (okRxConfigParams == null) {
             okRxConfigParams = new OkRxConfigParams();
         }

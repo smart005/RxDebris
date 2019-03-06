@@ -49,6 +49,11 @@ public class RxAndroid {
          */
         private boolean isDebug = false;
         /**
+         * 是否beta版本
+         * true-对于全局日志即便isDebug==false也会记录在本地文件目录中;false-不作记录;
+         */
+        private boolean isBetaVersion = false;
+        /**
          * 日志统一tag显示名
          */
         private String loggeruTag = "";
@@ -181,6 +186,21 @@ public class RxAndroid {
             return this;
         }
 
+        public boolean isBetaVersion() {
+            Boolean betaVersion = getParamsObject("BetaVersion");
+            if (betaVersion == null) {
+                isBetaVersion = false;
+            } else {
+                isBetaVersion = betaVersion;
+            }
+            return isBetaVersion;
+        }
+
+        public RxAndroidBuilder setBetaVersion(boolean betaVersion) {
+            isBetaVersion = betaVersion;
+            return this;
+        }
+
         /**
          * 对部分信息持久化
          */
@@ -212,6 +232,8 @@ public class RxAndroid {
             map.put("LoggeruTag", loggeruTag);
             //缓存数据库名称
             map.put("CacheDatabaseName", databaseName);
+            //设置beta状态
+            map.put("BetaVersion", isBetaVersion);
         }
     }
 
