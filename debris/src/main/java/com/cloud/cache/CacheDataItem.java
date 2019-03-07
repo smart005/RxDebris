@@ -2,10 +2,10 @@ package com.cloud.cache;
 
 
 import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
 import org.greenrobot.greendao.annotation.Property;
+import org.greenrobot.greendao.annotation.Generated;
 
 /**
  * Author lijinghuan
@@ -51,21 +51,34 @@ public class CacheDataItem {
     @Property(nameInDb = "longValue")
     private long longValue = 0;
 
-    @Generated(hash = 178030439)
+    /**
+     * 间隔缓存时间
+     */
+    @Property(nameInDb = "intervalCacheTime")
+    private long intervalCacheTime = 0;
+    /**
+     * 缓存开始时间
+     */
+    @Property(nameInDb = "startTime")
+    private long startTime = 0;
+
+    @Generated(hash = 638517416)
     public CacheDataItem(String key, String value, long effective, boolean flag,
-            int iniValue, long longValue) {
+            int iniValue, long longValue, long intervalCacheTime, long startTime) {
         this.key = key;
         this.value = value;
         this.effective = effective;
         this.flag = flag;
         this.iniValue = iniValue;
         this.longValue = longValue;
+        this.intervalCacheTime = intervalCacheTime;
+        this.startTime = startTime;
     }
 
     @Generated(hash = 2035359245)
     public CacheDataItem() {
     }
-    
+
     /**
      * 获取缓存键
      */
@@ -78,7 +91,7 @@ public class CacheDataItem {
 
     /**
      * 设置缓存键
-     *
+     * <p>
      * param key
      */
     public void setKey(String key) {
@@ -97,7 +110,7 @@ public class CacheDataItem {
 
     /**
      * 设置缓存值
-     *
+     * <p>
      * param value
      */
     public void setValue(String value) {
@@ -113,7 +126,7 @@ public class CacheDataItem {
 
     /**
      * 设置到期时间(缓存时间+时间段)
-     *
+     * <p>
      * param effective
      */
     public void setEffective(long effective) {
@@ -129,7 +142,7 @@ public class CacheDataItem {
 
     /**
      * 设置状态
-     *
+     * <p>
      * param flag
      */
     public void setFlag(boolean flag) {
@@ -145,7 +158,7 @@ public class CacheDataItem {
 
     /**
      * 设置int值
-     *
+     * <p>
      * param iniValue
      */
     public void setIniValue(int iniValue) {
@@ -161,10 +174,26 @@ public class CacheDataItem {
 
     /**
      * 设置long值
-     *
+     * <p>
      * param longValue
      */
     public void setLongValue(long longValue) {
         this.longValue = longValue;
+    }
+
+    public long getIntervalCacheTime() {
+        return intervalCacheTime;
+    }
+
+    public void setIntervalCacheTime(long intervalCacheTime) {
+        this.intervalCacheTime = intervalCacheTime;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 }

@@ -56,6 +56,16 @@ public abstract class StringCallback implements Callback {
     private Action2<String, HashMap<String, String>> headersAction = null;
     //请求回调状态
     private CallStatus callStatus = CallStatus.OnlyNet;
+    //是否取消间隔缓存回调
+    private boolean isCancelIntervalCacheCall = false;
+
+    public boolean isCancelIntervalCacheCall() {
+        return isCancelIntervalCacheCall;
+    }
+
+    public void setCancelIntervalCacheCall(boolean cancelIntervalCacheCall) {
+        isCancelIntervalCacheCall = cancelIntervalCacheCall;
+    }
 
     public void setCallStatus(CallStatus callStatus) {
         this.callStatus = callStatus;
@@ -82,22 +92,21 @@ public abstract class StringCallback implements Callback {
     @Override
     public void onFailure(Call call, IOException e) {
         if (call.isCanceled()) {
-            Request request = call.request();
-            HttpUrl url = request.url();
-            String host = url.host();
-            Set<String> domainList = OkRx.getInstance().getFailDomainList();
-            if (domainList.contains(host)) {
-                //如果域名已在失败列表在新创建连接并重新请求仍失败,服务器地址有问题或当前网络异常;
-                //此时直接返回即可
+            return;
+        }
+        String message = e.getMessage() == null ? "" : e.getMessage();
+        if (message.contains("Unable to resolve host")) {
+            return;
+        }
+        if (!call.isExecuted()) {
+            if (!failReConnect(call)) {
+                //抛出失败回调到全局监听
+                OnRequestErrorListener errorListener = OkRx.getInstance().getOnRequestErrorListener();
+                if (errorListener != null) {
+                    errorListener.onFailure(call, e);
+                }
                 return;
             }
-            domainList.add(host);
-            //如果连接已经被取消时则重新建立
-            OkHttpClient client = OkRx.getInstance().getOkHttpClient(true);
-            //创建新请求
-            Call clone = call.clone();
-            client.newCall(clone.request()).enqueue(this);
-            return;
         }
         if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -111,6 +120,25 @@ public abstract class StringCallback implements Callback {
         if (errorListener != null) {
             errorListener.onFailure(call, e);
         }
+    }
+
+    private boolean failReConnect(Call call) {
+        Request request = call.request();
+        HttpUrl url = request.url();
+        String host = url.host();
+        Set<String> domainList = OkRx.getInstance().getFailDomainList();
+        if (domainList.contains(host)) {
+            //如果域名已在失败列表在新创建连接并重新请求仍失败,服务器地址有问题或当前网络异常;
+            //此时直接返回即可
+            return false;
+        }
+        domainList.add(host);
+        //如果连接已经被取消时则重新建立
+        OkHttpClient client = OkRx.getInstance().getOkHttpClient(true);
+        //创建新请求
+        Call clone = call.clone();
+        client.newCall(clone.request()).enqueue(this);
+        return true;
     }
 
     private void headerDealWith(Response response) {
@@ -162,7 +190,7 @@ public abstract class StringCallback implements Callback {
             }
             if (successAction != null) {
                 responseString = body.string();
-                if (callStatus != CallStatus.WeakCache) {
+                if (callStatus != CallStatus.WeakCache && !isCancelIntervalCacheCall()) {
                     //此状态下不做网络回调但做缓存
                     successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
                 }

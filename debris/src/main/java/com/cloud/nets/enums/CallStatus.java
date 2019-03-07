@@ -15,6 +15,12 @@ public enum CallStatus {
      */
     OnlyCache,
     /**
+     * 1.在缓存未失效先返回缓存数据,若在{@link com.cloud.nets.annotations.ApiCheckAnnotation}.cacheTime()
+     * 时间内但cacheIntervalTime()已失效(其中cacheTime()>cacheIntervalTime())此时只请求网络缓存但不回调;
+     * 2.缓存失效后先请求网络->再缓存->最后返回;
+     */
+    PersistentIntervalCache,
+    /**
      * 每次只作网络请求;
      */
     OnlyNet,

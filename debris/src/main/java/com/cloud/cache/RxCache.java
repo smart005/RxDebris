@@ -32,22 +32,34 @@ public class RxCache {
 
     /**
      * 设置缓存数据
-     * <p>
-     * param cacheKey 缓存键
-     * param value    缓存数据
-     * param saveTime 缓存时间
-     * param timeUnit 时间单位
+     *
+     * @param cacheKey 缓存键
+     * @param value    缓存数据
+     * @param saveTime 缓存时间
+     * @param timeUnit 时间单位
      */
-    private static <T> void setBaseCacheData(String cacheKey,
-                                             T value,
-                                             long saveTime,
-                                             TimeUnit timeUnit) {
+    public static <T> void setBaseCacheData(String cacheKey, T value, long saveTime, TimeUnit timeUnit) {
+        setBaseCacheData(cacheKey, value, saveTime, timeUnit, 0);
+    }
+
+    /**
+     * 设置缓存数据
+     *
+     * @param cacheKey          缓存键
+     * @param value             缓存数据
+     * @param saveTime          缓存时间
+     * @param timeUnit          时间单位
+     * @param intervalCacheTime 间隔缓存时间(单位毫秒)
+     */
+    public static <T> void setBaseCacheData(String cacheKey, T value, long saveTime, TimeUnit timeUnit, long intervalCacheTime) {
         try {
             if (TextUtils.isEmpty(cacheKey) || value == null) {
                 return;
             }
             remove(cacheKey);
             CacheDataItem dataItem = new CacheDataItem();
+            dataItem.setStartTime(System.currentTimeMillis());
+            dataItem.setIntervalCacheTime(intervalCacheTime);
             if (saveTime > 0 && timeUnit != null) {
                 long time = ConvertUtils.toMilliseconds(saveTime, timeUnit);
                 if (time > 0) {
@@ -89,12 +101,22 @@ public class RxCache {
     /**
      * 获取缓存数据
      *
+     * @param cacheKey 缓存键
+     * @return CacheDataItem
+     */
+    public static CacheDataItem getBaseCacheData(String cacheKey) {
+        return getBaseCacheData(cacheKey, false);
+    }
+
+    /**
+     * 获取缓存数据
+     *
      * @param
      * @param cacheKey      缓存键
      * @param isLimitations true必须通过有效验证;false有效为0则不验证否则进行时效验证;
      *                      return
      */
-    private static CacheDataItem getBaseCacheData(String cacheKey, boolean isLimitations) {
+    public static CacheDataItem getBaseCacheData(String cacheKey, boolean isLimitations) {
         try {
             if (TextUtils.isEmpty(cacheKey)) {
                 return null;
@@ -182,11 +204,7 @@ public class RxCache {
      * param saveTime 缓存时间
      * param timeUnit 时间单位
      */
-    public static void setCacheData(
-            String cacheKey,
-            String value,
-            long saveTime,
-            TimeUnit timeUnit) {
+    public static void setCacheData(String cacheKey, String value, long saveTime, TimeUnit timeUnit) {
         setBaseCacheData(cacheKey, value, saveTime, timeUnit);
     }
 

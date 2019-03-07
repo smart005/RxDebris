@@ -43,6 +43,16 @@ public class BaseRequest {
     private RequestType requestType = null;
     private RequestContentType requestContentType = null;
     private RetrofitParams retrofitParams;
+    //是否取消间隔缓存回调
+    private boolean isCancelIntervalCacheCall = false;
+
+    public boolean isCancelIntervalCacheCall() {
+        return isCancelIntervalCacheCall;
+    }
+
+    public void setCancelIntervalCacheCall(boolean cancelIntervalCacheCall) {
+        isCancelIntervalCacheCall = cancelIntervalCacheCall;
+    }
 
     public RetrofitParams getRetrofitParams() {
         if (retrofitParams == null) {

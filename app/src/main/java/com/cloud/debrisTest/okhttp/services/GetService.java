@@ -5,11 +5,11 @@ import com.cloud.debrisTest.okhttp.annotations.IGetAPI;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
 import com.cloud.nets.BaseOkrxService;
 import com.cloud.nets.BaseSubscriber;
-import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.annotations.APIUrlInterfaceClass;
 import com.cloud.nets.annotations.ApiCheckAnnotation;
 import com.cloud.nets.annotations.RequestTimeLimit;
 import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.objects.events.Func2;
 
@@ -35,7 +35,7 @@ public class GetService extends BaseOkrxService {
     //网络请求-在缓存未失效时网络数据与缓存只会返回其中一个,缓存失效后先请求网络->再缓存->最后返回;
     //@ApiCheckAnnotation(callStatus = CallStatus.OnlyCache, cacheTime = 1, cacheTimeUnit = TimeUnit.MINUTES, cacheKey = "recommand_info")
     //网络请求-在缓存未失败时获取到网络数据和缓存数据均会回调,缓存失效后先请求网络->再缓存->最后返回(即此时只作网络数据的回调);
-    @ApiCheckAnnotation(callStatus = CallStatus.WeakCacheAccept, cacheTime = 1, cacheTimeUnit = TimeUnit.MINUTES, cacheKey = "recommand_info")
+    @ApiCheckAnnotation(callStatus = CallStatus.PersistentIntervalCache, cacheIntervalTime = 10000, cacheTime = 1, cacheTimeUnit = TimeUnit.MINUTES, cacheKey = "recommand_info")
     //请求时间限制;可在请求方法或接口定义上添加;接口定义上设置的值优先于请求方法设置的值;
     @RequestTimeLimit(totalTime = "2", unit = TimeUnit.SECONDS)
     public void requestRecommandInfo(final int siteId, OnSuccessfulListener<RecommandInfo> successfulListener) {

@@ -2,6 +2,7 @@ package com.cloud.nets.requests;
 
 import android.text.TextUtils;
 
+import com.cloud.cache.CacheDataItem;
 import com.cloud.cache.RxCache;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.RetrofitParams;
@@ -64,13 +65,14 @@ public class OkRxDeleteRequest extends BaseRequest {
         //1.有缓存时先回调缓存数据再请求网络数据然后[缓存]不作网络回调;
         //2.无缓存时不作缓存回调直接请求网络数据后[缓存]不作网络回调;
         //WeakCache
+        setCancelIntervalCacheCall(false);
         RetrofitParams retrofitParams = getRetrofitParams();
         CallStatus callStatus = retrofitParams.getCallStatus();
         if (callStatus != CallStatus.OnlyNet) {
             String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
-            String cache = RxCache.getCacheData(ckey);
-            if (successAction != null && !TextUtils.isEmpty(cache)) {
-                responseString = cache;
+            CacheDataItem dataItem = RxCache.getBaseCacheData(ckey, true);
+            if (successAction != null && dataItem != null && !TextUtils.isEmpty(dataItem.getValue())) {
+                responseString = dataItem.getValue();
                 successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.CacheData);
                 //1.有缓存时先回调缓存数据再请求网络数据然后[缓存+回调];
                 //2.无缓存时不作缓存回调直接请求网络数据后[缓存+回调];
@@ -80,6 +82,14 @@ public class OkRxDeleteRequest extends BaseRequest {
                 //具体类型参考{@link }
                 if (callStatus == CallStatus.OnlyCache) {
                     return;
+                } else if (callStatus == CallStatus.PersistentIntervalCache) {
+                    long intervalCacheTime = dataItem.getIntervalCacheTime();
+                    long stime = dataItem.getStartTime() + intervalCacheTime;
+                    if (stime > System.currentTimeMillis()) {
+                        //如果stime大于当前时间表示在间隔时间的有效范围内不作网络请求
+                        setCancelIntervalCacheCall(true);
+                        return;
+                    }
                 }
             }
         }
@@ -94,10 +104,11 @@ public class OkRxDeleteRequest extends BaseRequest {
                 CallStatus callStatus = retrofitParams.getCallStatus();
                 if (callStatus != CallStatus.OnlyNet && !TextUtils.isEmpty(retrofitParams.getCacheKey())) {
                     String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
-                    RxCache.setCacheData(ckey, responseString, retrofitParams.getCacheTime(), TimeUnit.MILLISECONDS);
+                    RxCache.setBaseCacheData(ckey, responseString, retrofitParams.getCacheTime(), TimeUnit.MILLISECONDS, retrofitParams.getIntervalCacheTime());
                 }
             }
         };
+        callback.setCancelIntervalCacheCall(isCancelIntervalCacheCall());
         callback.setCallStatus(callStatus);
         client.newCall(request).enqueue(callback);
     }

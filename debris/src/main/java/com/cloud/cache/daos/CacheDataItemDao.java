@@ -30,6 +30,8 @@ public class CacheDataItemDao extends AbstractDao<CacheDataItem, String> {
         public final static Property Flag = new Property(3, boolean.class, "flag", false, "flag");
         public final static Property IniValue = new Property(4, int.class, "iniValue", false, "iniValue");
         public final static Property LongValue = new Property(5, long.class, "longValue", false, "longValue");
+        public final static Property IntervalCacheTime = new Property(6, long.class, "intervalCacheTime", false, "intervalCacheTime");
+        public final static Property StartTime = new Property(7, long.class, "startTime", false, "startTime");
     }
 
 
@@ -50,7 +52,9 @@ public class CacheDataItemDao extends AbstractDao<CacheDataItem, String> {
                 "\"effective\" INTEGER NOT NULL ," + // 2: effective
                 "\"flag\" INTEGER NOT NULL ," + // 3: flag
                 "\"iniValue\" INTEGER NOT NULL ," + // 4: iniValue
-                "\"longValue\" INTEGER NOT NULL );"); // 5: longValue
+                "\"longValue\" INTEGER NOT NULL ," + // 5: longValue
+                "\"intervalCacheTime\" INTEGER NOT NULL ," + // 6: intervalCacheTime
+                "\"startTime\" INTEGER NOT NULL );"); // 7: startTime
         // Add Indexes
         db.execSQL("CREATE UNIQUE INDEX " + constraint + "IDX_rx_cache_data_key ON \"rx_cache_data\"" +
                 " (\"key\" ASC);");
@@ -79,6 +83,8 @@ public class CacheDataItemDao extends AbstractDao<CacheDataItem, String> {
         stmt.bindLong(4, entity.getFlag() ? 1L: 0L);
         stmt.bindLong(5, entity.getIniValue());
         stmt.bindLong(6, entity.getLongValue());
+        stmt.bindLong(7, entity.getIntervalCacheTime());
+        stmt.bindLong(8, entity.getStartTime());
     }
 
     @Override
@@ -98,6 +104,8 @@ public class CacheDataItemDao extends AbstractDao<CacheDataItem, String> {
         stmt.bindLong(4, entity.getFlag() ? 1L: 0L);
         stmt.bindLong(5, entity.getIniValue());
         stmt.bindLong(6, entity.getLongValue());
+        stmt.bindLong(7, entity.getIntervalCacheTime());
+        stmt.bindLong(8, entity.getStartTime());
     }
 
     @Override
@@ -113,7 +121,9 @@ public class CacheDataItemDao extends AbstractDao<CacheDataItem, String> {
             cursor.getLong(offset + 2), // effective
             cursor.getShort(offset + 3) != 0, // flag
             cursor.getInt(offset + 4), // iniValue
-            cursor.getLong(offset + 5) // longValue
+            cursor.getLong(offset + 5), // longValue
+            cursor.getLong(offset + 6), // intervalCacheTime
+            cursor.getLong(offset + 7) // startTime
         );
         return entity;
     }
@@ -126,6 +136,8 @@ public class CacheDataItemDao extends AbstractDao<CacheDataItem, String> {
         entity.setFlag(cursor.getShort(offset + 3) != 0);
         entity.setIniValue(cursor.getInt(offset + 4));
         entity.setLongValue(cursor.getLong(offset + 5));
+        entity.setIntervalCacheTime(cursor.getLong(offset + 6));
+        entity.setStartTime(cursor.getLong(offset + 7));
      }
     
     @Override

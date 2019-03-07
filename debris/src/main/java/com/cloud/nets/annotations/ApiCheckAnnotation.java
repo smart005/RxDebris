@@ -34,6 +34,15 @@ public @interface ApiCheckAnnotation {
     CallStatus callStatus() default CallStatus.OnlyNet;
 
     /**
+     * 缓存间隔时间与{@link CallStatus}.PersistentIntervalCache一起使用
+     * 在cacheTime()时间(cacheTime()>cacheIntervalTime())范围内,
+     * 当cacheIntervalTime()失效时只请求网络缓存但不回调;
+     *
+     * @return
+     */
+    long cacheIntervalTime() default 0;
+
+    /**
      * 缓存时间
      * <p>
      * return

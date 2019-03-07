@@ -2,9 +2,9 @@ package com.cloud.nets.beans;
 
 import android.text.TextUtils;
 
-import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.BaseUrlTypeName;
+import com.cloud.nets.enums.CallStatus;
 import com.cloud.objects.enums.RequestContentType;
 import com.cloud.objects.enums.RequestType;
 
@@ -110,6 +110,10 @@ public class RetrofitParams {
      * 回调数据类型(默认OnlyNet)
      */
     private CallStatus callStatus = CallStatus.OnlyNet;
+    /**
+     * 间隔缓存时间
+     */
+    private long intervalCacheTime = 0;
 
     public RequestType getRequestType() {
         return requestType;
@@ -316,5 +320,13 @@ public class RetrofitParams {
 
     public void setCallStatus(CallStatus callStatus) {
         this.callStatus = callStatus;
+    }
+
+    public long getIntervalCacheTime() {
+        return intervalCacheTime;
+    }
+
+    public void setIntervalCacheTime(long intervalCacheTime) {
+        this.intervalCacheTime = intervalCacheTime;
     }
 }

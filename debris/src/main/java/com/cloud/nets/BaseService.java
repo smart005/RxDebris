@@ -1062,6 +1062,7 @@ public class BaseService {
         ApiCheckAnnotation apiCheckAnnotation = validParam.getApiCheckAnnotation();
         retrofitParams.setCallStatus(apiCheckAnnotation.callStatus());
         retrofitParams.setCacheKey(apiCheckAnnotation.cacheKey());
+        retrofitParams.setIntervalCacheTime(apiCheckAnnotation.cacheIntervalTime());
         //设置缓存时间
         CallStatus status = retrofitParams.getCallStatus();
         if (status != CallStatus.OnlyNet) {
