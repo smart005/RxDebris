@@ -8,6 +8,7 @@ import com.cloud.nets.OkRx;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnConfigParamsListener;
 import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
+import com.cloud.nets.events.OnHeaderCookiesListener;
 import com.cloud.nets.events.OnRequestErrorListener;
 import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.objects.config.RxAndroid;
@@ -18,6 +19,7 @@ import com.cloud.objects.utils.JsonUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 
@@ -85,6 +87,15 @@ public class TestApplication extends BaseApplication {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         //网络请求失败回调
+                    }
+                })
+                .setOnHeaderCookiesListener(new OnHeaderCookiesListener() {
+                    @Override
+                    public Map<String, String> onCookiesCall() {
+                        Map<String, String> cookies = new HashMap<String, String>();
+//                        cookies.put("hhwl_cookies", "108社区");
+                        cookies.put("TC108Client", "ui=434060");
+                        return cookies;
                     }
                 })
                 .build();

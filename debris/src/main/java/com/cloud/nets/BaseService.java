@@ -263,11 +263,7 @@ public class BaseService {
             } else {
                 data = jsonListener.onBeanParsingJson(response, dataClass);
             }
-            //如果data==null则赋初始值
-            if (data == null) {
-                data = JsonUtils.newNull(dataClass);
-            }
-            //如果仍为空则回调错误
+            //如果空则回调错误
             if (data == null) {
                 sendErrorAction(errorAction, baseService);
                 return;

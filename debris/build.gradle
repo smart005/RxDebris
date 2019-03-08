@@ -22,6 +22,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    dataBinding {
+        enabled = true
+    }
     lintOptions {
         abortOnError false
     }
@@ -51,8 +54,6 @@ dependencies {
     //noinspection GradleDependency,GradleCompatible
     api 'com.android.support:support-v4:26.1.0'
     //noinspection GradleDependency,GradleCompatible
-//    api 'com.android.support:design:26.1.0'
-    //noinspection GradleDependency,GradleCompatible
     api 'com.android.support:appcompat-v7:26.1.0'
     api 'com.alibaba:fastjson:1.2.46'
     api 'io.reactivex.rxjava2:rxjava:2.2.5'
@@ -64,6 +65,9 @@ dependencies {
     api 'com.squareup.okhttp3:okhttp:3.12.1'
     //腾讯浏览器
     api 'com.cloud:tbs:4.3.0'
+    //glide
+    api 'com.github.bumptech.glide:glide:4.6.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.0'
 }
 
 apply from: 'nexus-push.gradle'

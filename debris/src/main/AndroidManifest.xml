@@ -23,5 +23,13 @@
                 <action android:name="com.cloud.ebus.ebusProcessDataService" />
             </intent-filter>
         </service>
+
+        <activity
+            android:name=".MultiImageSelectorActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".cropimage.CropImageActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
     </application>
 </manifest>

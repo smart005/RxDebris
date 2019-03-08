@@ -124,6 +124,9 @@ public class OkRxGetRequest extends BaseRequest {
         };
         callback.setCancelIntervalCacheCall(isCancelIntervalCacheCall());
         callback.setCallStatus(callStatus);
+        //绑定cookies
+        bindCookies(client, request.url());
+        //请求网络
         client.newCall(request).enqueue(callback);
     }
 }

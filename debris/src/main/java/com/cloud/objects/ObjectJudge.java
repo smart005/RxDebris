@@ -58,7 +58,7 @@ public class ObjectJudge {
      * return
      */
     public static <K, V> Boolean isNullOrEmpty(TreeMap<K, V> list) {
-        if (list != null && !list.isEmpty() && list.size() > 0) {
+        if (list != null && !list.isEmpty()) {
             return false;
         } else {
             return true;
@@ -72,7 +72,7 @@ public class ObjectJudge {
      * return
      */
     public static Boolean isNullOrEmpty(HashSet<?> haslist) {
-        if (haslist != null && !haslist.isEmpty() && haslist.size() > 0) {
+        if (haslist != null && !haslist.isEmpty()) {
             return false;
         } else {
             return true;
@@ -86,7 +86,21 @@ public class ObjectJudge {
      * return
      */
     public static Boolean isNullOrEmpty(HashMap<?, ?> haslist) {
-        if (haslist != null && !haslist.isEmpty() && haslist.size() > 0) {
+        if (haslist != null && !haslist.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 判断列表是否为空
+     * <p>
+     * param map 需要检测的列表集合
+     * return
+     */
+    public static Boolean isNullOrEmpty(Map<?, ?> map) {
+        if (map != null && !map.isEmpty()) {
             return false;
         } else {
             return true;
@@ -100,7 +114,7 @@ public class ObjectJudge {
      * return
      */
     public static Boolean isNullOrEmpty(Hashtable<?, ?> haslist) {
-        if (haslist != null && !haslist.isEmpty() && haslist.size() > 0) {
+        if (haslist != null && !haslist.isEmpty()) {
             return false;
         } else {
             return true;
@@ -142,7 +156,7 @@ public class ObjectJudge {
      * return
      */
     public static Boolean isNullOrEmpty(List<?> list) {
-        if (list != null && !list.isEmpty() && list.size() > 0) {
+        if (list != null && !list.isEmpty()) {
             return false;
         } else {
             return true;
@@ -156,7 +170,7 @@ public class ObjectJudge {
      * return
      */
     public static Boolean isNullOrEmpty(Collection<?> list) {
-        if (list != null && !list.isEmpty() && list.size() > 0) {
+        if (list != null && !list.isEmpty()) {
             return false;
         } else {
             return true;

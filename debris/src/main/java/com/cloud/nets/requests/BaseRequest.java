@@ -1,10 +1,13 @@
 package com.cloud.nets.requests;
 
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 
+import com.cloud.nets.OkRx;
 import com.cloud.nets.OkRxKeys;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.events.OnHeaderCookiesListener;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
@@ -14,19 +17,29 @@ import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action3;
 import com.cloud.objects.events.Action4;
+import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.StringUtils;
+import com.cloud.objects.utils.ValidUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import okhttp3.Cookie;
 import okhttp3.FormBody;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
@@ -108,8 +121,7 @@ public class BaseRequest {
         if (!ObjectJudge.isNullOrEmpty(headers)) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 builder.removeHeader(entry.getKey());
-                String value = entry.getValue() + "";
-                builder.header(entry.getKey(), value);
+                builder.header(entry.getKey(), entry.getValue());
             }
         }
         if (requestType != RequestType.GET) {
@@ -290,5 +302,85 @@ public class BaseRequest {
             }
         }
         return builder.toString();
+    }
+
+    protected void bindCookies(OkHttpClient client, HttpUrl url) {
+        try {
+            //获取cookies列表
+            OnHeaderCookiesListener cookiesListener = OkRx.getInstance().getOnHeaderCookiesListener();
+            Map<String, String> map = cookiesListener.onCookiesCall();
+            if (ObjectJudge.isNullOrEmpty(map)) {
+                return;
+            }
+            //获取已有cookie对象
+            List<Cookie> cookies = client.cookieJar().loadForRequest(url);
+            //移除包含中文cookies
+            Set<String> keys = removeContainChineseRepeatCookies(cookies, map);
+            //添加cookie
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                Cookie.Builder builder = new Cookie.Builder();
+                String key = getCookieCode(entry.getKey());
+                String value = getCookieCode(entry.getValue());
+                Cookie cookie = builder.name(key).value(value).domain(url.host()).build();
+                if (keys.contains(key)) {
+                    removeHasCookie(cookies, key);
+                }
+                cookies.add(cookie);
+            }
+            //重新设置到http
+            client.cookieJar().saveFromResponse(url, cookies);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+    }
+
+    private String getCookieCode(String value) {
+        if (value == null) {
+            return "";
+        }
+        String matche = ValidUtils.matche("[\\u4e00-\\u9fa5]", value);
+        if (TextUtils.isEmpty(matche)) {
+            return value;
+        } else {
+            try {
+                return URLEncoder.encode(value, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                return "";
+            }
+        }
+    }
+
+    private Set<String> removeContainChineseRepeatCookies(List<Cookie> cookies, Map<String, String> map) {
+        Set<String> keys = new HashSet<String>();
+        Iterator<Cookie> iterator = cookies.iterator();
+        while (iterator.hasNext()) {
+            Cookie next = iterator.next();
+            String matche = ValidUtils.matche("[\\u4e00-\\u9fa5]", next.value());
+            //如果有包含中文或在新增队列中移除
+            if (!TextUtils.isEmpty(matche) || map.containsKey(next.name())) {
+                //包含中文
+                iterator.remove();
+            } else {
+                //如果有重复移除
+                if (keys.contains(next.name())) {
+                    iterator.remove();
+                } else {
+                    keys.add(next.name());
+                }
+            }
+        }
+        return keys;
+    }
+
+    private void removeHasCookie(List<Cookie> cookies, String key) {
+        Iterator<Cookie> iterator = cookies.iterator();
+        while (iterator.hasNext()) {
+            Cookie next = iterator.next();
+            String name = next.name();
+            if (TextUtils.equals(String.valueOf(name).trim(), String.valueOf(key))) {
+                iterator.remove();
+                break;
+            }
+        }
     }
 }

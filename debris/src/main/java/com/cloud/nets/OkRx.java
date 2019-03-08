@@ -10,6 +10,7 @@ import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnConfigParamsListener;
 import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
+import com.cloud.nets.events.OnHeaderCookiesListener;
 import com.cloud.nets.events.OnRequestErrorListener;
 import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.objects.ObjectJudge;
@@ -49,6 +50,8 @@ public class OkRx {
     private OnAuthListener onAuthListener = null;
     //用于http socket connect fail处理
     private Set<String> failDomainList = new HashSet<String>();
+    //头部cookies监听
+    private OnHeaderCookiesListener onHeaderCookiesListener = null;
 
     public static OkRx getInstance() {
         if (okRx == null) {
@@ -315,6 +318,33 @@ public class OkRx {
     public OkRx setOnAuthListener(OnAuthListener listener) {
         this.onAuthListener = listener;
         MemoryCache.getInstance().setSoftCache("NetAuthListener", listener);
+        return this;
+    }
+
+    /**
+     * 获取http cookies追加监听
+     *
+     * @return OnHeaderCookiesListener
+     */
+    public OnHeaderCookiesListener getOnHeaderCookiesListener() {
+        if (onHeaderCookiesListener == null) {
+            Object cookiesListener = MemoryCache.getInstance().getSoftCache("$_OnHeaderCookiesListener");
+            if (cookiesListener instanceof OnHeaderCookiesListener) {
+                onHeaderCookiesListener = (OnHeaderCookiesListener) cookiesListener;
+            }
+        }
+        return onHeaderCookiesListener;
+    }
+
+    /**
+     * 设置http cookies追加监听
+     *
+     * @param listener OnHeaderCookiesListener
+     * @return OkRx
+     */
+    public OkRx setOnHeaderCookiesListener(OnHeaderCookiesListener listener) {
+        this.onHeaderCookiesListener = listener;
+        MemoryCache.getInstance().setSoftCache("$_OnHeaderCookiesListener", listener);
         return this;
     }
 }

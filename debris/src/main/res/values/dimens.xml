@@ -333,4 +333,8 @@
     <dimen name="spacing_298">298dp</dimen>
     <dimen name="spacing_299">299dp</dimen>
     <dimen name="spacing_300">300dp</dimen>
+
+    <dimen name="mis_image_size">120dp</dimen>
+    <dimen name="mis_space_size">2dp</dimen>
+    <dimen name="mis_folder_cover_size">72dp</dimen>
 </resources>

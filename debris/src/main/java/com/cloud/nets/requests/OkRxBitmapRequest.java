@@ -42,6 +42,9 @@ public class OkRxBitmapRequest extends BaseRequest {
         Request.Builder builder = getBuilder(url, headers, params).get();
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
+        //绑定cookies
+        bindCookies(client, request.url());
+        //请求网络
         client.newCall(request).enqueue(new BitmapCallback(successAction, completeAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction));
     }
 }
