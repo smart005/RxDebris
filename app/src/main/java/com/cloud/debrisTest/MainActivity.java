@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.cloud.debris.BaseActivity;
+import com.cloud.debris.utils.RedirectUtils;
 import com.cloud.debrisTest.databinding.MainViewBinding;
 
 /**
@@ -27,6 +28,14 @@ public class MainActivity extends BaseActivity {
     }
 
     public void OnNetFrameClick(View view) {
+        RedirectUtils.startActivity(this, OKHttpSimple.class);
+    }
 
+    public void OnH5Click(View view) {
+        RedirectUtils.startActivity(this, H5Test.class);
+    }
+
+    public void OnImageFunctionClick(View view) {
+        RedirectUtils.startActivity(this, ImagesActivity.class);
     }
 }

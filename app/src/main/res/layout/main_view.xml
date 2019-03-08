@@ -16,6 +16,21 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="@{(view)->handler.OnNetFrameClick(view)}" />
+            android:onClick="@{(view)->handler.OnNetFrameClick(view)}"
+            android:text="网络框架" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnH5Click(view)}"
+            android:text="H5与Native交互" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnImageFunctionClick(view)}"
+            android:text="图片相关功能" />
     </LinearLayout>
 </layout>

@@ -25,10 +25,10 @@
         </service>
 
         <activity
-            android:name=".MultiImageSelectorActivity"
+            android:name="com.cloud.images.MultiImageSelectorActivity"
             android:configChanges="orientation|screenSize" />
         <activity
-            android:name=".cropimage.CropImageActivity"
+            android:name="com.cloud.images.cropimage.CropImageActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
     </application>
