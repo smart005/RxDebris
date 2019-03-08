@@ -15,7 +15,7 @@ public class OKHttpSimple extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.okhttp_view);
 
         getService.requestRecommandInfo(42, recommandListener);
     }
