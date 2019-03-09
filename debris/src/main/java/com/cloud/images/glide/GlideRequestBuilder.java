@@ -307,7 +307,7 @@ public class GlideRequestBuilder {
                 properties.setHeight(optimize.getHeight());
                 //设置动画
                 DrawableCrossFadeFactory drawableCrossFadeFactory = new DrawableCrossFadeFactory
-                        .Builder(300)
+                        .Builder(150)
                         .setCrossFadeEnabled(true)
                         .build();
                 //https://www.jianshu.com/p/28f5bcee409f
