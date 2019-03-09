@@ -1,8 +1,12 @@
-package com.cloud.debrisTest;
+package com.cloud.debrisTest.okhttp;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.cloud.debrisTest.R;
+import com.cloud.debrisTest.databinding.OkhttpViewBinding;
+import com.cloud.debrisTest.models.NetModel;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
 import com.cloud.debrisTest.okhttp.services.GetService;
 import com.cloud.nets.enums.DataType;
@@ -12,10 +16,13 @@ import com.cloud.objects.utils.JsonUtils;
 
 public class OKHttpSimple extends AppCompatActivity {
 
+    private OkhttpViewBinding binding = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.okhttp_view);
+        binding = DataBindingUtil.setContentView(this, R.layout.okhttp_view);
+        binding.setModel(new NetModel());
 
         getService.requestRecommandInfo(42, recommandListener);
     }
@@ -25,7 +32,10 @@ public class OKHttpSimple extends AppCompatActivity {
         public void onSuccessful(RecommandInfo recommandInfo, DataType dataType, Object... extras) {
             //具体接口请求成功回调;
             //如果有缓存且存在缓存和网络均会回调时则isLastCall==true表示最后一次回调
-            Logger.info(JsonUtils.toStr(recommandInfo));
+            String json = JsonUtils.toStr(recommandInfo);
+            Logger.info(json);
+            NetModel model = binding.getModel();
+            model.setNetdata(json);
         }
 
         @Override

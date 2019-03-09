@@ -1,8 +1,12 @@
 package com.cloud.debrisTest;
 
+import com.cloud.cache.daos.CacheDataItemDao;
+import com.cloud.cache.daos.OptionsItemDao;
 import com.cloud.cache.greens.DBManager;
 import com.cloud.cache.greens.OnDatabasePathListener;
 import com.cloud.debris.BaseApplication;
+import com.cloud.debrisTest.images.ImageSuffixCombination;
+import com.cloud.images.RxImage;
 import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
@@ -56,7 +60,11 @@ public class TestApplication extends BaseApplication {
                     public File onDatabaseRootPath() {
                         return StorageUtils.getDir("data");
                     }
-                });
+                },
+                CacheDataItemDao.class,
+                OptionsItemDao.class);
+        //dao对象也可以通过以下方式绑定
+        //.bindDaos();
         //网络框架初始化
         OkRx.getInstance().initialize(this)
                 .setOnConfigParamsListener(new OnConfigParamsListener() {
@@ -73,7 +81,6 @@ public class TestApplication extends BaseApplication {
                     @Override
                     public Object onBeanParsingJson(String response, Class dataClass) {
                         //如果有父类嵌套子类的情况这里可自行处理
-                        Logger.info(response);
                         return JsonUtils.parseT(response, dataClass);
                     }
                 })
@@ -101,6 +108,13 @@ public class TestApplication extends BaseApplication {
                 .build();
         //x5内核
         RxMixed.getInstance().build(this);
+        //图片配置
+        RxImage.getInstance().getBuilder()
+                //图片缓存目录名称(根目录:sdcard存在取RxAndroid.setExternalCacheRootDir()
+                //设置的目录;sdcard不存在取RxAndroid.setInternalCacheRootDir()设置的目录)
+                .setImageCacheDirName("images")
+                //用于glide请求远程图片时追加第三方优化后缀(如阿里、七牛等)
+                .setOnImageUrlCombinationListener(new ImageSuffixCombination());
     }
 
     @Override
@@ -115,6 +129,6 @@ public class TestApplication extends BaseApplication {
 
     @Override
     public void onReleaseLogIntercept(Throwable throwable) {
-
+        Logger.error(throwable);
     }
 }

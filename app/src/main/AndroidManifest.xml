@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
         <activity
             android:name="com.cloud.debrisTest.MainActivity"
             android:windowSoftInputMode="stateHidden|adjustResize">
@@ -22,13 +23,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OKHttpSimple"
+            android:name=".okhttp.OKHttpSimple"
             android:screenOrientation="portrait" />
         <activity
             android:name=".H5Test"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ImagesActivity"
+            android:name=".images.ImagesActivity"
             android:screenOrientation="portrait" />
     </application>
 

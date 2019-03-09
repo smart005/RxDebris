@@ -31,5 +31,9 @@
             android:name="com.cloud.images.cropimage.CropImageActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+
+        <meta-data
+            android:name="com.cloud.images.glide.GlideConfiguration"
+            android:value="GlideModule" />
     </application>
 </manifest>

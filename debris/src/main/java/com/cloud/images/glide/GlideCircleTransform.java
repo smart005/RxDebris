@@ -4,9 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.support.annotation.NonNull;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 
 import java.security.MessageDigest;
 
@@ -18,11 +19,7 @@ import java.security.MessageDigest;
  * Modifier:
  * ModifyContent:
  */
-public class GlideCircleTransform extends BitmapTransformation {
-    @Override
-    protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-        return circleCrop(pool, toTransform);
-    }
+public class GlideCircleTransform extends CenterCrop {
 
     private Bitmap circleCrop(BitmapPool pool, Bitmap source) {
         if (source == null) return null;
@@ -48,7 +45,13 @@ public class GlideCircleTransform extends BitmapTransformation {
     }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) {
-        messageDigest.reset();
+    protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+        Bitmap transform = super.transform(pool, toTransform, outWidth, outHeight);
+        return circleCrop(pool, transform);
+    }
+
+    @Override
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+        super.updateDiskCacheKey(messageDigest);
     }
 }

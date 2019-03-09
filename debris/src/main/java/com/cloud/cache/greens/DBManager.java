@@ -39,11 +39,12 @@ public class DBManager {
      * @param context    上下文
      * @param listener   数据库目录回调,null为应用目录
      * @param daoClasses 表对应的dao类
+     * @return DBManager
      */
     @SafeVarargs
-    public final void initialize(Context context,
-                                 OnDatabasePathListener listener,
-                                 Class<? extends AbstractDao<?, ?>>... daoClasses) {
+    public final DBManager initialize(Context context,
+                                      OnDatabasePathListener listener,
+                                      Class<? extends AbstractDao<?, ?>>... daoClasses) {
         applicationContext = context;
         RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
         String databaseName = builder.getDatabaseName();
@@ -51,6 +52,24 @@ public class DBManager {
         RxSqliteOpenHelper mhelper = new RxSqliteOpenHelper(context, databaseName, listener, array);
         helperHashMap.put(databaseName, mhelper);
         MemoryCache.getInstance().setSoftCache("CacheDatabasePathListener", listener);
+        return this;
+    }
+
+    /**
+     * 绑定所有greendao生成的dao实体(数据字段升级时会自动迁移)
+     *
+     * @param daoClasses 表对应的dao类
+     * @return DBManager
+     */
+    public DBManager bindDaos(Class<? extends AbstractDao<?, ?>>... daoClasses) {
+        Object listener = MemoryCache.getInstance().getSoftCache("CacheDatabasePathListener");
+        if (listener instanceof OnDatabasePathListener) {
+            OnDatabasePathListener pathListener = (OnDatabasePathListener) listener;
+            if (applicationContext != null) {
+                return initialize(applicationContext, pathListener, daoClasses);
+            }
+        }
+        return this;
     }
 
     private Class<? extends AbstractDao<?, ?>>[] toJoinArray(Class<? extends AbstractDao<?, ?>> object, Class<? extends AbstractDao<?, ?>>... params) {
@@ -76,7 +95,7 @@ public class DBManager {
         if (!helperHashMap.containsKey(databaseName)) {
             if (applicationContext != null) {
                 Object listener = MemoryCache.getInstance().getSoftCache("CacheDatabasePathListener");
-                if (listener != null && (listener instanceof OnDatabasePathListener)) {
+                if (listener instanceof OnDatabasePathListener) {
                     OnDatabasePathListener databasePathListener = (OnDatabasePathListener) listener;
                     initialize(applicationContext, databasePathListener);
                 }

@@ -318,11 +318,9 @@ public class ImageSelectDialog {
     private void onlyTakingResultProcess(final Activity activity, int resultCode) {
         if (resultCode == activity.RESULT_OK) {
             if (this.takingFile != null) {
-                RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
-                File dir = builder.getImageCacheDir();
                 List<File> imgPaths = new ArrayList<File>();
                 imgPaths.add(takingFile);
-                Luban.compress(imgPaths, dir)
+                Luban.compress(imgPaths)
                         .putGear(Luban.CUSTOM_GEAR)
                         .setMaxSize(maxFileSize)
                         .setMaxWidth(maxImageWidth)
@@ -395,8 +393,7 @@ public class ImageSelectDialog {
                 for (String path : paths) {
                     imgPaths.add(new File(path));
                 }
-                RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
-                Luban.compress(imgPaths, builder.getImageCacheDir())
+                Luban.compress(imgPaths)
                         .putGear(Luban.CUSTOM_GEAR)
                         .setMaxSize(maxFileSize)
                         .setMaxWidth(maxImageWidth)
@@ -459,8 +456,7 @@ public class ImageSelectDialog {
 //                        String path = cursor.getString(column_index);
             if (imgfile != null && imgfile.exists()) {
                 //压缩图片
-                RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
-                Luban.compress(imgfile, builder.getImageCacheDir())
+                Luban.compress(imgfile)
                         .setMaxSize(maxFileSize)
                         .setMaxWidth(maxImageWidth)
                         .setMaxHeight(maxImageHeight)

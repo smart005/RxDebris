@@ -1,6 +1,7 @@
 package com.cloud.images.glide;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
@@ -22,7 +23,7 @@ import com.bumptech.glide.module.GlideModule;
 public class GlideConfiguration implements GlideModule {
 
     @Override
-    public void applyOptions(Context context, GlideBuilder builder) {
+    public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
         //内存缓存
         MemorySizeCalculator.Builder calculatorBuilder = new MemorySizeCalculator.Builder(context);
         MemorySizeCalculator build = calculatorBuilder.build();
@@ -39,8 +40,7 @@ public class GlideConfiguration implements GlideModule {
     }
 
     @Override
-    public void registerComponents(Context context, Glide glide, Registry registry) {
-//        registry.getRegistry(InputStream.class, new GlideImageLoader.Factory());
-//        registry.replace(GlideUrl.class, InputStream.class,new )
+    public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+
     }
 }
