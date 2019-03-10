@@ -17,9 +17,13 @@
         tools:ignore="ProtectedPermissions" />
     <!--摄像头权限-->
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.hardware.camera" />
     <!--打电话权限-->
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <!--短信权限-->
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
     <!--kill process 权限-->
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <application>
@@ -33,7 +37,8 @@
 
         <activity
             android:name="com.cloud.images.MultiImageSelectorActivity"
-            android:configChanges="orientation|screenSize" />
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.cloud.images.cropimage.CropImageActivity"
             android:launchMode="singleTop"

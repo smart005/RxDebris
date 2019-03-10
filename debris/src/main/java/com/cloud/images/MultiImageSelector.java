@@ -78,7 +78,10 @@ public class MultiImageSelector {
 
     public void start(final FragmentActivity activity, final int requestCode) {
         RxPermissions rxPermissions = new RxPermissions(activity);
-        Disposable disposable = rxPermissions.request(Manifest.permission.CAMERA)
+        Disposable disposable = rxPermissions.request(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .subscribe(new Consumer<Boolean>() {
                     @Override
                     public void accept(Boolean granted) {
@@ -93,7 +96,10 @@ public class MultiImageSelector {
 
     public void start(final Fragment fragment, final int requestCode) {
         RxPermissions rxPermissions = new RxPermissions(fragment);
-        Disposable disposable = rxPermissions.request(Manifest.permission.CAMERA)
+        Disposable disposable = rxPermissions.request(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .subscribe(new Consumer<Boolean>() {
                     @Override
                     public void accept(Boolean granted) {

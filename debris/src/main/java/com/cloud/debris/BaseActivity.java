@@ -173,4 +173,8 @@ public class BaseActivity extends Activity implements OnSupperProperties, OnLife
     public void setStatisticalClassObject(StatisticalTypes statisticalTypes, Object statisticalClassObject) {
 
     }
+
+    protected Activity getActivity() {
+        return this;
+    }
 }

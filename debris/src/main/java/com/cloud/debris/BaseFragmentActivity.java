@@ -173,4 +173,8 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
     public void setStatisticalClassObject(StatisticalTypes statisticalTypes, Object statisticalClassObject) {
 
     }
+
+    protected FragmentActivity getActivity() {
+        return this;
+    }
 }

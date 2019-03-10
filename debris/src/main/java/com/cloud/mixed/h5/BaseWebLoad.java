@@ -2,12 +2,14 @@ package com.cloud.mixed.h5;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -26,7 +28,10 @@ import com.cloud.debris.R;
 import com.cloud.dialogs.BaseMessageBox;
 import com.cloud.dialogs.enums.DialogButtonsEnum;
 import com.cloud.dialogs.enums.MsgBoxClickButtonEnum;
+import com.cloud.images.beans.SelectImageProperties;
+import com.cloud.images.figureset.ImageSelectDialog;
 import com.cloud.mixed.RxMixed;
+import com.cloud.objects.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RuleParams;
 import com.cloud.objects.logs.Logger;
@@ -69,6 +74,8 @@ public abstract class BaseWebLoad extends WebView {
     private boolean isParseError = false;
     //初始是否已重载url
     private boolean isOverriedUrl = false;
+    private ValueCallback<Uri> uploadMsg;
+    private ValueCallback<Uri[]> sdk5UploadMsg;
 
     public BaseWebLoad(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -149,6 +156,7 @@ public abstract class BaseWebLoad extends WebView {
             if (settings != null) {
                 settings.setJavaScriptEnabled(true);
                 settings.setJavaScriptCanOpenWindowsAutomatically(true);
+                //是否可访问本地文件，默认值true
                 settings.setAllowFileAccess(true);
                 settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
                 settings.setSupportZoom(true);
@@ -164,6 +172,12 @@ public abstract class BaseWebLoad extends WebView {
                 settings.setPluginState(WebSettings.PluginState.ON_DEMAND);
                 settings.setDefaultZoom(WebSettings.ZoomDensity.MEDIUM);
                 settings.setDefaultTextEncodingName("utf-8");
+                settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+                //是否可访问Content Provider的资源，默认值true
+                settings.setAllowContentAccess(true);
+                //允许webview对文件的操作
+                settings.setAllowUniversalAccessFromFileURLs(true);
+                settings.setAllowFileAccessFromFileURLs(true);
                 File database = this.getContext().getDir("database", Context.MODE_PRIVATE);
                 if (database != null) {
                     settings.setDatabasePath(database.getPath());
@@ -192,8 +206,13 @@ public abstract class BaseWebLoad extends WebView {
                     }
                 }
             }
-            CookieSyncManager.createInstance(getContext());
-            CookieSyncManager.getInstance().sync();
+            if (RxMixed.getInstance().isInitedX5()) {
+                CookieSyncManager.createInstance(getContext());
+                CookieSyncManager.getInstance().sync();
+            } else {
+                android.webkit.CookieSyncManager.createInstance(getContext());
+                android.webkit.CookieSyncManager.getInstance().sync();
+            }
             this.setClickable(true);
         } catch (Exception e) {
             Logger.error(e);
@@ -212,7 +231,7 @@ public abstract class BaseWebLoad extends WebView {
             public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
                 //7.0以上执行
                 isOverriedUrl = true;
-                return onOverrideUrlLoading(webView, webResourceRequest.getUrl().getPath());
+                return onOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
             }
 
             @Override
@@ -314,20 +333,53 @@ public abstract class BaseWebLoad extends WebView {
             //扩展浏览器上传文件
             //3.0++版本
             public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-                openFileChooserImpl(uploadMsg);
+                if (BaseWebLoad.this.uploadMsg == null) {
+                    BaseWebLoad.this.uploadMsg = uploadMsg;
+                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                    if (selectedListener == null) {
+                        return;
+                    }
+                    selectedListener.openFileChooserImpl(uploadMsg, null);
+                }
             }
 
             //3.0--版本
             public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-                openFileChooserImpl(uploadMsg);
+                if (BaseWebLoad.this.uploadMsg == null) {
+                    BaseWebLoad.this.uploadMsg = uploadMsg;
+                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                    if (selectedListener == null) {
+                        return;
+                    }
+                    selectedListener.openFileChooserImpl(uploadMsg, null);
+                }
             }
 
             public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType, String capture) {
-                openFileChooserImpl(valueCallback);
+                if (BaseWebLoad.this.sdk5UploadMsg != null) {
+                    return;
+                }
+                if (BaseWebLoad.this.uploadMsg == null) {
+                    BaseWebLoad.this.uploadMsg = valueCallback;
+                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                    if (selectedListener == null) {
+                        return;
+                    }
+                    selectedListener.openFileChooserImpl(valueCallback, null);
+                }
             }
 
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> uploadMsg, WebChromeClient.FileChooserParams fileChooserParams) {
-                openFileChooserImplForSdk5(uploadMsg);
+                if (BaseWebLoad.this.uploadMsg != null) {
+                    return true;
+                }
+                if (BaseWebLoad.this.sdk5UploadMsg == null) {
+                    BaseWebLoad.this.sdk5UploadMsg = uploadMsg;
+                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                    if (selectedListener != null) {
+                        selectedListener.openFileChooserImpl(null, uploadMsg);
+                    }
+                }
                 return true;
             }
         });
@@ -337,6 +389,52 @@ public abstract class BaseWebLoad extends WebView {
 
             }
         });
+    }
+
+    /**
+     * 上传图片
+     *
+     * @param selectImageProperties 已选择的图片
+     */
+    public void uploadFiles(List<SelectImageProperties> selectImageProperties) {
+        if (ObjectJudge.isNullOrEmpty(selectImageProperties)) {
+            return;
+        }
+        try {
+            //7.0之前手机只能逐张上传图片
+            SelectImageProperties properties = selectImageProperties.get(0);
+            Uri uri = Uri.parse(properties.getImagePath());
+            if (uploadMsg != null) {
+                uploadMsg.onReceiveValue(uri);
+                uploadMsg = null;
+                //回调function $_cl_upload_native_file(path){}js方法方便h5处理
+                this.loadUrl("javascript:window.cl_upload_native_file('" + properties.getImagePath() + "');");
+            } else if (sdk5UploadMsg != null) {
+                Uri[] uris = new Uri[1];
+                uris[0] = uri;
+                sdk5UploadMsg.onReceiveValue(uris);
+                sdk5UploadMsg = null;
+                //回调function $_cl_upload_native_file(path){}js方法方便h5处理
+                this.loadUrl("javascript:window.cl_upload_native_file('" + properties.getImagePath() + "');");
+            }
+            //结束后需要重置上传，否则h5调用native回调只能执行一次
+            finishFileUpload();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 完成或取消文件上传
+     */
+    private void finishFileUpload() {
+        if (uploadMsg != null) {
+            uploadMsg.onReceiveValue(null);
+        } else if (sdk5UploadMsg != null) {
+            sdk5UploadMsg.onReceiveValue(null);
+        }
+        uploadMsg = null;
+        sdk5UploadMsg = null;
     }
 
     private BaseMessageBox mbox = new BaseMessageBox() {
@@ -437,25 +535,6 @@ public abstract class BaseWebLoad extends WebView {
      * @param title webview标题
      */
     protected void onReceivedTitle(String title) {
-
-    }
-
-    /**
-     * 重写WebChromeClient的openFileChooser回调
-     * 扩展浏览器上传文件 3.0++版本
-     *
-     * @param uploadMsg 要上传的文件
-     */
-    protected void openFileChooserImpl(ValueCallback<Uri> uploadMsg) {
-
-    }
-
-    /**
-     * 重写WebChromeClient的onShowFileChooser回调
-     *
-     * @param uploadMsg 要上传的文件
-     */
-    protected void openFileChooserImplForSdk5(ValueCallback<Uri[]> uploadMsg) {
 
     }
 
@@ -662,16 +741,46 @@ public abstract class BaseWebLoad extends WebView {
      * 获取选择的文本
      */
     public void getSelectText() {
-        String interfaceName = "";
-        Object tag = this.getTag(405409710);
-        if (tag != null && tag instanceof String) {
-            interfaceName = String.valueOf(tag).trim();
+        this.loadUrl("javascript:window.cl_cloud_group_jsm.getSelectText(window.getSelection?window.getSelection().toString():document.selection.createRange().text);");
+    }
+
+    /**
+     * 需在Activity的onActivityResult回调
+     *
+     * @param activity    activity
+     * @param requestCode requestCode
+     * @param resultCode  resultCode
+     * @param data        data
+     */
+    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+        imageSelectDialog.onActivityResult(activity, requestCode, resultCode, data);
+    }
+
+    private ImageSelectDialog imageSelectDialog = new ImageSelectDialog() {
+        @Override
+        protected void onSelectCompleted(List<SelectImageProperties> selectImageProperties, Object extra) {
+            uploadFiles(selectImageProperties);
         }
-        if (interfaceName.length() > 0) {
-            interfaceName = String.format(".%s", interfaceName);
-            this.loadUrl(String.format("javascript:window%s.getSelectText(window.getSelection().toString());", interfaceName));
-        } else {
-            this.loadUrl("javascript:window.getSelectText(window.getSelection().toString());");
-        }
+    };
+
+    /**
+     * 选择本地图片
+     *
+     * @param activity FragmentActivity
+     */
+    public void selectLocalImages(final FragmentActivity activity) {
+        HandlerManager.getInstance().post(new Runnable() {
+            @Override
+            public void run() {
+                //选择后图片最大压缩大小
+                imageSelectDialog.setMaxFileSize(1024);
+                //最多选择图片数量
+                imageSelectDialog.setMaxSelectNumber(1);
+                //是否显示拍照选项
+                imageSelectDialog.setShowTakingPictures(true);
+                //显示图片选择
+                imageSelectDialog.show(activity);
+            }
+        });
     }
 }

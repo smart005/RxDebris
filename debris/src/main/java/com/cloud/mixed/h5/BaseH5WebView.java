@@ -1,11 +1,9 @@
 package com.cloud.mixed.h5;
 
 import android.content.Context;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
-import com.tencent.smtt.sdk.ValueCallback;
 import com.tencent.smtt.sdk.WebView;
 
 /**
@@ -28,32 +26,6 @@ class BaseH5WebView extends BaseWebLoad {
         if (listener != null) {
             listener.onTitle(title);
         }
-    }
-
-    @Override
-    protected void openFileChooserImpl(ValueCallback<Uri> uploadMsg) {
-        OnH5WebViewListener listener = getWebListener();
-        if (listener == null) {
-            return;
-        }
-        OnFileChooserCall chooserCall = listener.getOnFileChooserCall();
-        if (chooserCall == null) {
-            return;
-        }
-        chooserCall.onFileChooser(uploadMsg);
-    }
-
-    @Override
-    protected void openFileChooserImplForSdk5(ValueCallback<Uri[]> uploadMsg) {
-        OnH5WebViewListener listener = getWebListener();
-        if (listener == null) {
-            return;
-        }
-        OnFileChooserCall chooserCall = listener.getOnFileChooserCall();
-        if (chooserCall == null) {
-            return;
-        }
-        chooserCall.onFileChooserSdk5(uploadMsg);
     }
 
     @Override

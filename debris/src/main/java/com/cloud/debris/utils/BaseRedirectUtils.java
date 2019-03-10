@@ -1,15 +1,23 @@
 package com.cloud.debris.utils;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
+import com.cloud.dialogs.toasty.ToastUtils;
 import com.cloud.objects.ClickEvent;
 import com.cloud.objects.ObjectJudge;
+import com.tbruyelle.rxpermissions2.RxPermissions;
+
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * Author lijinghuan
@@ -152,9 +160,9 @@ public class BaseRedirectUtils {
      * @param requestCode   回调onActivityResult中接收的requestCode参数
      */
     public static void startActivityForResult(Activity activity,
-                                                 String packageName,
-                                                 String classFullName,
-                                                 int requestCode) {
+                                              String packageName,
+                                              String classFullName,
+                                              int requestCode) {
         startActivityForResult(activity, packageName, classFullName, null, requestCode);
     }
 
@@ -168,10 +176,10 @@ public class BaseRedirectUtils {
      * @param requestCode   回调onActivityResult中接收的requestCode参数
      */
     public static void startActivityForResult(Activity activity,
-                                                 String packageName,
-                                                 String classFullName,
-                                                 Bundle bundle,
-                                                 int requestCode) {
+                                              String packageName,
+                                              String classFullName,
+                                              Bundle bundle,
+                                              int requestCode) {
         if (TextUtils.isEmpty(classFullName)) {
             return;
         }
@@ -278,21 +286,65 @@ public class BaseRedirectUtils {
     /**
      * 启动通话界面
      *
-     * @param context     上下文
+     * @param activity    上下文
      * @param phonenumber 电话号码
      */
-    public static void startTel(Context context, String phonenumber) {
-        Intent intent = null;
-        if (TextUtils.isEmpty(phonenumber)) {
-            return;
-        }
-        if (phonenumber.contains("tel")) {
-            intent = new Intent(Intent.ACTION_CALL, Uri.parse(phonenumber));
-        } else {
-            intent = new Intent(Intent.ACTION_CALL, Uri.parse(String.format(
-                    "tel:%s", phonenumber)));
-        }
-        context.startActivity(intent);
+    public static void startTel(final FragmentActivity activity, final String phonenumber) {
+        RxPermissions rxPermissions = new RxPermissions(activity);
+        @SuppressLint("InlinedApi")
+        Disposable disposable = rxPermissions.request(Manifest.permission.CALL_PHONE, Manifest.permission.READ_CALL_LOG)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean granted) {
+                        if (granted) {
+                            Intent intent = null;
+                            if (TextUtils.isEmpty(phonenumber)) {
+                                return;
+                            }
+                            if (phonenumber.contains("tel")) {
+                                intent = new Intent(Intent.ACTION_CALL, Uri.parse(phonenumber));
+                            } else {
+                                intent = new Intent(Intent.ACTION_CALL, Uri.parse(String.format(
+                                        "tel:%s", phonenumber)));
+                            }
+                            activity.startActivity(intent);
+                        } else {
+                            ToastUtils.showLong(activity, "拨打电话权限未开启,请转到设置页面开启.");
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 启动发送短信界面
+     *
+     * @param activity    上下文
+     * @param phonenumber 电话号码
+     */
+    public static void startSms(final FragmentActivity activity, final String phonenumber) {
+        RxPermissions rxPermissions = new RxPermissions(activity);
+        @SuppressLint("InlinedApi")
+        Disposable disposable = rxPermissions.request(Manifest.permission.CALL_PHONE, Manifest.permission.READ_CALL_LOG)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean granted) {
+                        if (granted) {
+                            Intent intent = null;
+                            if (TextUtils.isEmpty(phonenumber)) {
+                                return;
+                            }
+                            if (phonenumber.contains("sms") || phonenumber.contains("smsto")) {
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(phonenumber));
+                            } else {
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(
+                                        "smsto:%s", phonenumber)));
+                            }
+                            activity.startActivity(intent);
+                        } else {
+                            ToastUtils.showLong(activity, "发送短信权限未开启,请转到设置页面开启.");
+                        }
+                    }
+                });
     }
 
     /**

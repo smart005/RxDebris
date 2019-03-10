@@ -89,9 +89,13 @@ public class JavascriptMethods {
 
     }
 
-    //setting file chooser call
-    public OnFileChooserCall getOnFileChooserCall() {
-        return null;
+    /**
+     * sms call
+     *
+     * @param sms web format (sms:xxxxxxxx)
+     */
+    public void onCallSms(String sms) {
+
     }
 
     /**

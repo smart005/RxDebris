@@ -10,7 +10,9 @@ import android.view.View;
 import com.cloud.objects.utils.GlobalUtils;
 import com.tencent.smtt.sdk.WebView;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @Author lijinghuan
@@ -50,10 +52,10 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
         //init after register script object
         final L webListener = getWebListener();
         if (webListener != null) {
+            //回调native方法
+            this.addJavascriptInterface(new JavascriptMethods(webListener), "cl_cloud_group_jsm");
             //注册子类时超类脚本不会被回调,通过JavascriptMethods回调
             this.addJavascriptInterface(webListener, interfaceName);
-            //回调native方法
-            this.addJavascriptInterface(new JavascriptMethods(webListener), interfaceName);
         }
     }
 
@@ -85,11 +87,24 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
         }
     }
 
-    @Override
-    protected boolean onOverrideUrlLoading(WebView view, String url) {
-        if (TextUtils.isEmpty(url)) {
-            return false;
+    private boolean downloadFile(String url) {
+        //拦截apk地址(如果以apk为后缀的则直接下载)
+        //取url路径
+        Uri uri = Uri.parse(url);
+        String path = uri.getPath();
+        String suffixName = GlobalUtils.getSuffixName(path);
+        List<String> suffixs = Arrays.asList("apk", "rar");
+        if (!TextUtils.isEmpty(suffixName) && suffixs.contains(suffixName)) {
+            L listener = getWebListener();
+            if (listener != null) {
+                listener.download(url, "");
+            }
+            return true;
         }
+        return false;
+    }
+
+    private boolean callTel(String url) {
         if (url.contains("tel:")) {
             L listener = getWebListener();
             if (listener != null) {
@@ -97,16 +112,35 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
             }
             return true;
         }
-        //拦截apk地址(如果以apk为后缀的则直接下载)
-        //取url路径
-        Uri uri = Uri.parse(url);
-        String path = uri.getPath();
-        String suffixName = GlobalUtils.getSuffixName(path);
-        if (!TextUtils.isEmpty(suffixName) && TextUtils.equals(suffixName, "apk")) {
+        return false;
+    }
+
+    private boolean callSms(String url) {
+        if (url.contains("sms:")||url.contains("smsto:")) {
             L listener = getWebListener();
             if (listener != null) {
-                listener.download(url, "");
+                listener.onCallSms(url);
             }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean onOverrideUrlLoading(WebView view, String url) {
+        if (TextUtils.isEmpty(url)) {
+            return false;
+        }
+        //拨打电话
+        if (callTel(url)) {
+            return true;
+        }
+        //发送短信
+        if (callSms(url)) {
+            return true;
+        }
+        //文件下载
+        if (downloadFile(url)) {
             return true;
         }
         //拦截有效schemeUrl

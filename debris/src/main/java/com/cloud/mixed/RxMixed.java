@@ -3,6 +3,7 @@ package com.cloud.mixed;
 import android.content.Context;
 
 import com.cloud.cache.MemoryCache;
+import com.cloud.mixed.h5.OnH5ImageSelectedListener;
 import com.cloud.mixed.h5.OnH5WebViewListener;
 import com.cloud.objects.events.OnRecyclingListener;
 import com.tencent.smtt.sdk.CookieSyncManager;
@@ -21,6 +22,8 @@ public class RxMixed implements OnRecyclingListener {
     private static RxMixed rxMixed = null;
     //x5 view是否初始化完成
     private boolean isInitedX5 = false;
+    //webview图片选择回调
+    private OnH5ImageSelectedListener onH5ImageSelectedListener;
 
     @Override
     public void recycling() {
@@ -95,5 +98,32 @@ public class RxMixed implements OnRecyclingListener {
         };
         //x5内核初始化接口
         QbSdk.initX5Environment(applicationContext, cb);
+    }
+
+    /**
+     * 获取h5选择native图片监听
+     *
+     * @return OnH5ImageSelectedListener
+     */
+    public OnH5ImageSelectedListener getOnH5ImageSelectedListener() {
+        if (onH5ImageSelectedListener == null) {
+            Object selectedListener = MemoryCache.getInstance().getSoftCache("$_H5ImageSelectedListener");
+            if (selectedListener instanceof OnH5ImageSelectedListener) {
+                onH5ImageSelectedListener = (OnH5ImageSelectedListener) selectedListener;
+            }
+        }
+        return onH5ImageSelectedListener;
+    }
+
+    /**
+     * 设置h5选择native图片监听
+     *
+     * @param listener 图片选择监听
+     * @return RxMixed
+     */
+    public RxMixed setOnH5ImageSelectedListener(OnH5ImageSelectedListener listener) {
+        this.onH5ImageSelectedListener = listener;
+        MemoryCache.getInstance().setSoftCache("$_H5ImageSelectedListener", listener);
+        return this;
     }
 }

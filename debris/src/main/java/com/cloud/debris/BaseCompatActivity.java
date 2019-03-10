@@ -173,4 +173,8 @@ public class BaseCompatActivity extends AppCompatActivity implements OnSupperPro
     public void setStatisticalClassObject(StatisticalTypes statisticalTypes, Object statisticalClassObject) {
 
     }
+
+    protected AppCompatActivity getActivity() {
+        return this;
+    }
 }
