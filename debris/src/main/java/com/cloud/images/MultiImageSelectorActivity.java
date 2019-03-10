@@ -3,7 +3,9 @@ package com.cloud.images;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
@@ -62,6 +64,14 @@ public class MultiImageSelectorActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.cl_mis_activity_default);
         binding.headTtv.setOnThemeViewKeyListener(this);
+
+        //android 7.0系统解决拍照的问题
+        //https://blog.csdn.net/guiping_ding/article/details/78502290
+        if (Build.VERSION.SDK_INT >= 18) {
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+            builder.detectFileUriExposure();
+        }
 
         final Intent intent = getIntent();
         mDefaultCount = intent.getIntExtra(EXTRA_SELECT_COUNT, DEFAULT_IMAGE_SIZE);

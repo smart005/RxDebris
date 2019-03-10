@@ -1,6 +1,5 @@
 package com.cloud.images.figureset;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.net.Uri;
@@ -8,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -84,7 +84,7 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
     }
 
     @Override
-    public void setActivity(Activity activity) {
+    public void setActivity(FragmentActivity activity) {
         super.setActivity(activity);
         selectImageItems.clear();
         delImageItems.clear();
@@ -150,7 +150,7 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
             return;
         }
         isStartSubmit = false;
-        imageSelectWith(position, fileName, imgUri.getPath());
+        imageSelectWith(position, imgUri);
     }
 
     @Override
@@ -219,7 +219,7 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
         return list;
     }
 
-    private void fileUpload(String filePath, String fileName, int position, boolean showUploadProgress) {
+    private void fileUpload(Uri uri, int position, boolean showUploadProgress) {
 //        UploadUtils uploadUtils = new UploadUtils() {
 //            @Override
 //            protected void onUploadProgress(float progress, String uploadKey) {
@@ -268,7 +268,7 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
 //                remoteUploaded(uploadKey);
 //            }
 //        };
-        File imgFile = new File(filePath);
+        File imgFile = new File(String.format("file://%s", uri.getPath()));
         if (!imgFile.exists()) {
             return;
         }
@@ -314,7 +314,10 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
             } else {
                 for (Map.Entry<Integer, SelectImageItem> entry : selectImageItems.entrySet()) {
                     SelectImageItem value = entry.getValue();
-                    images.add(value.imagePath);
+                    if (value.uri == null || value.uri == Uri.EMPTY) {
+                        continue;
+                    }
+                    images.add(value.uri.getPath());
                 }
                 onReviewImageListener.onReview(images, position);
             }
@@ -397,7 +400,7 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
                     int position = 0;
                     for (Map.Entry<Integer, SelectImageItem> entry : map.entrySet()) {
                         SelectImageItem value = entry.getValue();
-                        fileUpload(value.imagePath, value.fileName, position, false);
+                        fileUpload(value.uri, position, false);
                         position++;
                     }
                 }
@@ -459,16 +462,15 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
     };
 
     @Override
-    public void onBindDefaultImages(int position, String fileName, String filePath) {
+    public void onBindDefaultImages(int position, Uri uri) {
         isStartSubmit = false;
-        imageSelectWith(position, fileName, filePath);
+        imageSelectWith(position, uri);
     }
 
-    private void imageSelectWith(int position, String fileName, String filePath) {
+    private void imageSelectWith(int position, Uri uri) {
         //添加已选择的图片
         SelectImageItem selectImageItem = new SelectImageItem();
-        selectImageItem.imagePath = filePath;
-        selectImageItem.fileName = fileName;
+        selectImageItem.uri = uri;
         selectImageItem.position = position;
         selectImageItems.put(position, selectImageItem);
         if (onImageSelectedListener != null) {
@@ -477,7 +479,7 @@ public class ImageEditorView extends PictureSelectEditorView implements OnPictur
         }
         //如果自动上传再上传图片，上传成功后将地址添加到已完成列表
         if (isAutoUploadImage) {
-            fileUpload(filePath, fileName, position, false);
+            fileUpload(uri, position, false);
         }
     }
 }

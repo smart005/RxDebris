@@ -1,6 +1,9 @@
 package com.cloud.images.glide;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Priority;
@@ -8,7 +11,12 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
+import com.bumptech.glide.request.transition.Transition;
+import com.cloud.objects.events.Action1;
+import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action3;
 
 /**
@@ -247,12 +255,10 @@ public class GlideRequestBuilder {
 
     /**
      * 渲染图片
-     *
-     * @param imageView 图片控件
      */
-    public void into(ImageView imageView) {
+    private ImageRuleProperties into() {
         if (manager == null) {
-            return;
+            return null;
         }
         ImageRuleProperties properties = new ImageRuleProperties();
         properties.setRoundCorners(optimize.getRoundCorners());
@@ -286,9 +292,22 @@ public class GlideRequestBuilder {
             } else {
                 optimize.setRequestBuilder(manager.load(optimize.getUriImage()));
             }
+        } else if (optimize.getImageType() == GlideImageType.bitmapImage) {
+            //bitmap只针对网络图片
+            RequestBuilder<Bitmap> requestBuilder = manager.asBitmap();
+            if (glideUrl != null) {
+                glideUrl.setProperties(properties);
+                optimize.setBitmapRequestBuilder(requestBuilder.load(glideUrl));
+            } else if (optimize.getFileImage() != null) {
+                optimize.setBitmapRequestBuilder(requestBuilder.load(optimize.getFileImage()));
+            } else if (optimize.getResImage() != 0) {
+                optimize.setBitmapRequestBuilder(requestBuilder.load(optimize.getResImage()));
+            } else if (optimize.getUriImage() != null) {
+                optimize.setBitmapRequestBuilder(requestBuilder.load(optimize.getUriImage()));
+            }
         } else {
             if (glideUrl == null) {
-                return;
+                return null;
             }
             //初始url拼接相关属性
             glideUrl.setProperties(properties);
@@ -299,6 +318,20 @@ public class GlideRequestBuilder {
             } else {
                 optimize.setRequestBuilder(manager.load(glideUrl));
             }
+        }
+        return properties;
+    }
+
+    /**
+     * 渲染图片
+     *
+     * @param imageView 图片控件
+     * @param call      图片加载完成回调
+     */
+    public void into(ImageView imageView, final Action2<Drawable, Transition<? super Drawable>> call) {
+        ImageRuleProperties properties = this.into();
+        if (properties == null) {
+            return;
         }
         getBuilder(imageView, properties, new Action3<RequestBuilder<Drawable>, ImageView, ImageRuleProperties>() {
             @Override
@@ -313,8 +346,70 @@ public class GlideRequestBuilder {
                 //https://www.jianshu.com/p/28f5bcee409f
                 RequestBuilder<Drawable> transition = builder.transition(DrawableTransitionOptions.with(drawableCrossFadeFactory));
                 //渲染图片
-                transition.into(imageView);
+                if (call == null) {
+                    transition.into(imageView);
+                } else {
+                    transition.into(new DrawableImageViewTarget(imageView) {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            super.onResourceReady(resource, transition);
+                            call.call(resource, transition);
+                        }
+                    });
+                }
             }
         });
+    }
+
+    /**
+     * 渲染图片
+     *
+     * @param imageView 图片控件
+     */
+    public void into(ImageView imageView) {
+        into(imageView, null);
+    }
+
+    /**
+     * 获取bitmap图片
+     *
+     * @param call bitmap图片回调
+     */
+    public void into(Action1<Bitmap> call) {
+        if (call == null) {
+            return;
+        }
+        ImageRuleProperties properties = this.into();
+        if (properties == null) {
+            return;
+        }
+        properties.setWidth(optimize.getWidth());
+        properties.setHeight(optimize.getHeight());
+        RequestBuilder<Bitmap> builder = this.optimize.loadBitmapConfig();
+        builder.into(new BitmapTarget(properties, call));
+    }
+
+    private class BitmapTarget extends CustomTarget<Bitmap> {
+
+        private ImageRuleProperties properties;
+        private Action1<Bitmap> call;
+
+        public BitmapTarget(ImageRuleProperties properties, Action1<Bitmap> call) {
+            this.properties = properties;
+            this.call = call;
+        }
+
+        @Override
+        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+            if (call == null) {
+                return;
+            }
+            call.call(resource);
+        }
+
+        @Override
+        public void onLoadCleared(@Nullable Drawable placeholder) {
+            //占位图加载
+        }
     }
 }

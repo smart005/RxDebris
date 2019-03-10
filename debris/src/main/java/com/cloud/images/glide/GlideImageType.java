@@ -24,5 +24,9 @@ public enum GlideImageType {
     /**
      * Uri图片
      */
-    uriImage
+    uriImage,
+    /**
+     * bitmap图片
+     */
+    bitmapImage
 }

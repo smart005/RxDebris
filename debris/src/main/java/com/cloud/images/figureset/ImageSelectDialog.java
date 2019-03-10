@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
 import com.cloud.debris.R;
@@ -238,7 +239,7 @@ public class ImageSelectDialog {
      *
      * @param activity 当前窗口
      */
-    public void show(Activity activity) {
+    public void show(FragmentActivity activity) {
         this.activity = activity;
         imagePaths.clear();
         if (isTailoring && maxSelectNumber == 1) {

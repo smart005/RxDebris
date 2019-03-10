@@ -1,18 +1,18 @@
 package com.cloud.images;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.widget.Toast;
+import android.support.v4.app.FragmentActivity;
 
-import com.cloud.debris.R;
+import com.cloud.dialogs.toasty.ToastUtils;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.ArrayList;
+
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * 图片选择器
@@ -29,84 +29,88 @@ public class MultiImageSelector {
     private static MultiImageSelector sSelector;
 
     @Deprecated
-    private MultiImageSelector(Context context){
+    private MultiImageSelector(Context context) {
 
     }
 
-    private MultiImageSelector(){}
+    private MultiImageSelector() {
+    }
 
     @Deprecated
-    public static MultiImageSelector create(Context context){
-        if(sSelector == null){
+    public static MultiImageSelector create(Context context) {
+        if (sSelector == null) {
             sSelector = new MultiImageSelector(context);
         }
         return sSelector;
     }
 
-    public static MultiImageSelector create(){
-        if(sSelector == null){
+    public static MultiImageSelector create() {
+        if (sSelector == null) {
             sSelector = new MultiImageSelector();
         }
         return sSelector;
     }
 
-    public MultiImageSelector showCamera(boolean show){
+    public MultiImageSelector showCamera(boolean show) {
         mShowCamera = show;
         return sSelector;
     }
 
-    public MultiImageSelector count(int count){
+    public MultiImageSelector count(int count) {
         mMaxCount = count;
         return sSelector;
     }
 
-    public MultiImageSelector single(){
+    public MultiImageSelector single() {
         mMode = MultiImageSelectorActivity.MODE_SINGLE;
         return sSelector;
     }
 
-    public MultiImageSelector multi(){
+    public MultiImageSelector multi() {
         mMode = MultiImageSelectorActivity.MODE_MULTI;
         return sSelector;
     }
 
-    public MultiImageSelector origin(ArrayList<String> images){
+    public MultiImageSelector origin(ArrayList<String> images) {
         mOriginData = images;
         return sSelector;
     }
 
-    public void start(Activity activity, int requestCode){
-        final Context context = activity;
-        if(hasPermission(context)) {
-            activity.startActivityForResult(createIntent(context), requestCode);
-        }else{
-            Toast.makeText(context, R.string.mis_error_no_permission, Toast.LENGTH_SHORT).show();
-        }
+    public void start(final FragmentActivity activity, final int requestCode) {
+        RxPermissions rxPermissions = new RxPermissions(activity);
+        Disposable disposable = rxPermissions.request(Manifest.permission.CAMERA)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean granted) {
+                        if (granted) {
+                            activity.startActivityForResult(createIntent(activity), requestCode);
+                        } else {
+                            ToastUtils.showLong(activity, "无摄像头权限,请转到设置页面开启.");
+                        }
+                    }
+                });
     }
 
-    public void start(Fragment fragment, int requestCode){
-        final Context context = fragment.getContext();
-        if(hasPermission(context)) {
-            fragment.startActivityForResult(createIntent(context), requestCode);
-        }else{
-            Toast.makeText(context, R.string.mis_error_no_permission, Toast.LENGTH_SHORT).show();
-        }
+    public void start(final Fragment fragment, final int requestCode) {
+        RxPermissions rxPermissions = new RxPermissions(fragment);
+        Disposable disposable = rxPermissions.request(Manifest.permission.CAMERA)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean granted) {
+                        if (granted) {
+                            fragment.startActivityForResult(createIntent(fragment.getContext()), requestCode);
+                        } else {
+                            ToastUtils.showLong(fragment.getContext(), "无摄像头权限,请转到设置页面开启.");
+                        }
+                    }
+                });
     }
 
-    private boolean hasPermission(Context context){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
-            // Permission was added in API Level 16
-            return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED;
-        }
-        return true;
-    }
-
-    private Intent createIntent(Context context){
+    private Intent createIntent(Context context) {
         Intent intent = new Intent(context, MultiImageSelectorActivity.class);
         intent.putExtra(MultiImageSelectorActivity.EXTRA_SHOW_CAMERA, mShowCamera);
         intent.putExtra(MultiImageSelectorActivity.EXTRA_SELECT_COUNT, mMaxCount);
-        if(mOriginData != null){
+        if (mOriginData != null) {
             intent.putStringArrayListExtra(MultiImageSelectorActivity.EXTRA_DEFAULT_SELECTED_LIST, mOriginData);
         }
         intent.putExtra(MultiImageSelectorActivity.EXTRA_SELECT_MODE, mMode);

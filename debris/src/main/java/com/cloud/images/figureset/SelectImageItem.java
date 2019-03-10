@@ -1,5 +1,7 @@
 package com.cloud.images.figureset;
 
+import android.net.Uri;
+
 /**
  * @Author lijinghuan
  * @Email:ljh0576123@163.com
@@ -9,7 +11,6 @@ package com.cloud.images.figureset;
  * @ModifyContent:
  */
 public class SelectImageItem {
-    public String imagePath = "";
-    public String fileName = "";
+    public Uri uri = Uri.EMPTY;
     public int position = 0;
 }

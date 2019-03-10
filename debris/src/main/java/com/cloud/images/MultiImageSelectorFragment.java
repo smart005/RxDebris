@@ -114,7 +114,7 @@ public class MultiImageSelectorFragment extends Fragment {
         try {
             mCallback = (Callback) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException("The Activity must implement MultiImageSelectorFragment.Callback interface...");
+            e.printStackTrace();
         }
     }
 

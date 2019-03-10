@@ -6,6 +6,7 @@
  */
 package com.cloud.objects.utils;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -399,6 +400,7 @@ public class GlobalUtils {
      * param context
      */
     public void showNotification(Context context) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        @SuppressLint("WrongConstant")
         Object service = context.getSystemService("statusbar");
         if (service != null) {
             Method expand = service.getClass().getMethod("expandNotificationsPanel");

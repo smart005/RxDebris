@@ -25,12 +25,12 @@ public class IconLibs {
     public Typeface getIconfont(Context context, FontType fontType) {
         if (fontType == FontType.agencyb) {
             if (traditionalFont == null) {
-                traditionalFont = Typeface.createFromAsset(context.getAssets(), "fonts/AGENCYB.ttf");
+                traditionalFont = Typeface.createFromAsset(context.getAssets(), "fonts/cl_AGENCYB.ttf");
             }
             return traditionalFont;
-        }else {
+        } else {
             if (iconfont == null) {
-                iconfont = Typeface.createFromAsset(context.getAssets(), "fonts/iconfont.ttf");
+                iconfont = Typeface.createFromAsset(context.getAssets(), "fonts/cl_iconfont.ttf");
             }
             return iconfont;
         }

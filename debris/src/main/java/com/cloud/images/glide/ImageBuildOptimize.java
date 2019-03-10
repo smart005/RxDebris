@@ -1,6 +1,6 @@
 package com.cloud.images.glide;
 
-import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 
@@ -28,6 +28,8 @@ class ImageBuildOptimize {
     private RequestBuilder<Drawable> requestBuilder;
     //gif图片请求对象
     private RequestBuilder<GifDrawable> gifRequestBuilder;
+    //bitmap图片
+    private RequestBuilder<Bitmap> bitmapRequestBuilder;
     //默认占位图片
     private int placeholder = 0;
     //图片渲染宽度
@@ -75,6 +77,14 @@ class ImageBuildOptimize {
 
     public void setGifRequestBuilder(RequestBuilder<GifDrawable> gifRequestBuilder) {
         this.gifRequestBuilder = gifRequestBuilder;
+    }
+
+    public RequestBuilder<Bitmap> getBitmapRequestBuilder() {
+        return bitmapRequestBuilder;
+    }
+
+    public void setBitmapRequestBuilder(RequestBuilder<Bitmap> bitmapRequestBuilder) {
+        this.bitmapRequestBuilder = bitmapRequestBuilder;
     }
 
     public void setPlaceholder(int placeholder) {
@@ -322,7 +332,6 @@ class ImageBuildOptimize {
         this.position = position;
     }
 
-    @SuppressLint("CheckResult")
     public RequestBuilder<Drawable> loadConfig() {
         //若占位图未设置则取全局设置的默认图片
         if (this.placeholder == 0) {
@@ -336,6 +345,31 @@ class ImageBuildOptimize {
                 .skipMemoryCache(true)//设置内存缓存
                 .diskCacheStrategy(DiskCacheStrategy.ALL);
         builder = bindScaleType(builder);
+        //如果图片宽高非空则重置图片大小
+        if (width > 0 && height > 0) {
+            builder = builder.override(width, height);
+        }
+        if (isRound) {
+            //对于非gif图片,若图片太大会导致transform失败,因此先进行压缩;
+            //对于本地图片需要先压缩则处理
+            builder = builder.transform(new GlideCircleTransform());
+        }
+        return builder;
+    }
+
+    public RequestBuilder<Bitmap> loadBitmapConfig() {
+        //若占位图未设置则取全局设置的默认图片
+        if (this.placeholder == 0) {
+            RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
+            this.placeholder = builder.getDefImage();
+        }
+        RequestBuilder<Bitmap> builder = bitmapRequestBuilder.placeholder(this.placeholder)
+                .thumbnail(thumbnailScale)//缩略图相对于原图的比例
+                .priority(priority)
+                .timeout(3000)//请求超时时间
+                .skipMemoryCache(true)//设置内存缓存
+                .diskCacheStrategy(DiskCacheStrategy.ALL);
+        builder = bindBitmapScaleType(builder);
         //如果图片宽高非空则重置图片大小
         if (width > 0 && height > 0) {
             builder = builder.override(width, height);
@@ -366,6 +400,17 @@ class ImageBuildOptimize {
         }
         if (isRound) {
             builder = builder.transform(new GlideCircleTransform());
+        }
+        return builder;
+    }
+
+    private RequestBuilder<Bitmap> bindBitmapScaleType(RequestBuilder<Bitmap> builder) {
+        if (scaleType == ScaleType.centerCrop) {
+            return builder.centerCrop();
+        } else if (scaleType == ScaleType.centerInside) {
+            return builder.centerInside();
+        } else if (scaleType == ScaleType.fitCenter) {
+            return builder.fitCenter();
         }
         return builder;
     }

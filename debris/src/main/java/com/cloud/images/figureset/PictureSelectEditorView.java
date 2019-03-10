@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -19,11 +21,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.request.transition.Transition;
 import com.cloud.debris.R;
 import com.cloud.images.beans.SelectImageProperties;
+import com.cloud.images.glide.GlideOptimize;
 import com.cloud.images.linear.LinearDrager;
 import com.cloud.images.linear.OnLinearDragerListener;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.events.Action2;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
@@ -73,7 +78,7 @@ abstract class PictureSelectEditorView extends LinearLayout implements OnLinearD
         }
     });
     private HashMap<String, Integer> maskViewIds = new HashMap<String, Integer>();
-    private Activity activity = null;
+    private FragmentActivity activity = null;
     private OnPictureSelectChangedListener onPictureSelectChangedListener = null;
     private OnPictureSelectReviewOriginalImageListener onPictureSelectReviewOriginalImageListener = null;
     private OnPictureSelectDeleteListener onPictureSelectDeleteListener = null;
@@ -195,7 +200,7 @@ abstract class PictureSelectEditorView extends LinearLayout implements OnLinearD
      *
      * @param activity activity
      */
-    public void setActivity(Activity activity) {
+    public void setActivity(FragmentActivity activity) {
         this.activity = activity;
     }
 
@@ -384,13 +389,14 @@ abstract class PictureSelectEditorView extends LinearLayout implements OnLinearD
         } else {
             imageView.setTag(SEL_IMG_INDEX_TAG, imgIndex);
             imageView.setBackgroundColor(Color.WHITE);
-//            GlideProcess.load(getContext(), uri, new DrawableImageViewTarget(imageView) {
-//                @Override
-//                public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
-//                    super.onResourceReady(resource, transition);
-//                    imageView.invalidate();
-//                }
-//            });
+            GlideOptimize.with(getContext())
+                    .load(uri)
+                    .into(imageView, new Action2<Drawable, Transition<? super Drawable>>() {
+                        @Override
+                        public void call(Drawable drawable, Transition<? super Drawable> transition) {
+                            imageView.invalidate();
+                        }
+                    });
             if (isAllowDrager) {
                 imageView.setOnTouchListener(new ImageTouchListener(relativeLayout, drager));
             }
@@ -675,10 +681,7 @@ abstract class PictureSelectEditorView extends LinearLayout implements OnLinearD
                 Uri uri = Uri.parse(img);
                 if (onBindDefaultImagesListener != null) {
                     //将图片添加到已选择列表
-                    String path = img.startsWith("file://") ? img.substring("file://".length()) : img;
-                    File file = new File(path);
-                    String fileName = file.getName();
-                    onBindDefaultImagesListener.onBindDefaultImages(i, fileName, path);
+                    onBindDefaultImagesListener.onBindDefaultImages(i, uri);
                 }
                 //附加和显示图片
                 appendImage(uri, i);

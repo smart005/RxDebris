@@ -2,6 +2,8 @@ package com.cloud.images.view.viewer;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -13,10 +15,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.bumptech.glide.request.transition.Transition;
 import com.cloud.debris.R;
+import com.cloud.images.glide.GlideOptimize;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.beans.BaseImageItem;
 import com.cloud.objects.enums.RuleParams;
+import com.cloud.objects.events.Action2;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.PixelUtils;
 import com.cloud.objects.utils.ValidUtils;
@@ -231,14 +236,14 @@ public class PicasaView extends RelativeLayout {
                 }
             });
             container.addView(photoView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//            GlideProcess.load(getContext(), Uri.parse(item.getUrl()), new DrawableImageViewTarget(photoView) {
-//                @Override
-//                public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
-//                    super.onResourceReady(resource, transition);
-//                    attacher.update();
-//                }
-//            });
-            // TODO: 2019/3/1
+            GlideOptimize.with(getContext())
+                    .load(Uri.parse(item.getUrl()))
+                    .into(photoView, new Action2<Drawable, Transition<? super Drawable>>() {
+                        @Override
+                        public void call(Drawable drawable, Transition<? super Drawable> transition) {
+                            attacher.update();
+                        }
+                    });
             return photoView;
         }
 

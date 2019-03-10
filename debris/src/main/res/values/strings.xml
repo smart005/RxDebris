@@ -7,7 +7,6 @@
     <string name="mis_photo_unit">张</string>
     <string name="mis_tip_take_photo">拍摄照片</string>
     <string name="mis_error_image_not_exist">图片错误</string>
-    <string name="mis_error_no_permission">无权限</string>
     <string name="mis_permission_dialog_title">权限拒绝</string>
     <string name="mis_permission_dialog_ok">好</string>
     <string name="mis_permission_dialog_cancel">拒绝</string>

@@ -65,18 +65,78 @@ public class GlideImageModels {
     /**
      * 加载图片
      *
-     * @param file 图片文件
+     * @param url 图片url
      * @return GlideRequestBuilder
      */
-    public GlideRequestBuilder load(File file) {
+    public GlideRequestBuilder loadBitmap(String url) {
+        if (TextUtils.isEmpty(url)) {
+            return requestBuilder;
+        }
+        tempContext = null;
+        ImageBuildOptimize optimize = requestBuilder.getOptimize();
+        optimize.setDensity(this.density);
+        optimize.setImageType(GlideImageType.bitmapImage);
+        optimize.setGlideUrl(new CusGlideUrl(url));
+        optimize.setPosition(0);
+        return requestBuilder;
+    }
+
+    /**
+     * 加载图片
+     *
+     * @param file     图片文件
+     * @param isBitmap 是否bitmap图片
+     * @return GlideRequestBuilder
+     */
+    private GlideRequestBuilder load(File file, boolean isBitmap) {
         if (file == null) {
             return requestBuilder;
         }
         tempContext = null;
         ImageBuildOptimize optimize = requestBuilder.getOptimize();
         optimize.setDensity(this.density);
-        optimize.setImageType(GlideImageType.fileImage);
+        optimize.setImageType(isBitmap ? GlideImageType.bitmapImage : GlideImageType.fileImage);
         optimize.setFileImage(file);
+        optimize.setPosition(0);
+        return requestBuilder;
+    }
+
+    /**
+     * 加载图片
+     *
+     * @param file 图片文件
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder load(File file) {
+        return load(file, false);
+    }
+
+    /**
+     * 加载图片
+     *
+     * @param file 图片文件
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder loadBitmap(File file) {
+        return load(file, true);
+    }
+
+    /**
+     * 加载图片
+     *
+     * @param resId    资源图片
+     * @param isBitmap 是否bitmap图片
+     * @return GlideRequestBuilder
+     */
+    private GlideRequestBuilder load(int resId, boolean isBitmap) {
+        if (tempContext == null || resId == 0) {
+            return requestBuilder;
+        }
+        tempContext = null;
+        ImageBuildOptimize optimize = requestBuilder.getOptimize();
+        optimize.setDensity(this.density);
+        optimize.setImageType(isBitmap ? GlideImageType.bitmapImage : GlideImageType.resImage);
+        optimize.setResImage(resId);
         optimize.setPosition(0);
         return requestBuilder;
     }
@@ -88,14 +148,35 @@ public class GlideImageModels {
      * @return GlideRequestBuilder
      */
     public GlideRequestBuilder load(int resId) {
-        if (tempContext == null || resId == 0) {
+        return load(resId, false);
+    }
+
+    /**
+     * 加载图片
+     *
+     * @param resId 资源图片
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder loadBitmap(int resId) {
+        return load(resId, true);
+    }
+
+    /**
+     * 加载图片
+     *
+     * @param uri      uri图片
+     * @param isBitmap 是否bitmap图片
+     * @return GlideRequestBuilder
+     */
+    private GlideRequestBuilder load(Uri uri, boolean isBitmap) {
+        if (tempContext == null || uri == null || uri == Uri.EMPTY) {
             return requestBuilder;
         }
         tempContext = null;
         ImageBuildOptimize optimize = requestBuilder.getOptimize();
         optimize.setDensity(this.density);
-        optimize.setImageType(GlideImageType.resImage);
-        optimize.setResImage(resId);
+        optimize.setImageType(isBitmap ? GlideImageType.bitmapImage : GlideImageType.uriImage);
+        optimize.setUriImage(uri);
         optimize.setPosition(0);
         return requestBuilder;
     }
@@ -107,16 +188,17 @@ public class GlideImageModels {
      * @return GlideRequestBuilder
      */
     public GlideRequestBuilder load(Uri uri) {
-        if (tempContext == null || uri == null || uri == Uri.EMPTY) {
-            return requestBuilder;
-        }
-        tempContext = null;
-        ImageBuildOptimize optimize = requestBuilder.getOptimize();
-        optimize.setDensity(this.density);
-        optimize.setImageType(GlideImageType.uriImage);
-        optimize.setUriImage(uri);
-        optimize.setPosition(0);
-        return requestBuilder;
+        return load(uri, false);
+    }
+
+    /**
+     * 加载图片
+     *
+     * @param uri uri图片
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder loadBitmap(Uri uri) {
+        return load(uri, true);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.cloud.images.figureset;
 
+import android.net.Uri;
+
 /**
  * @Author lijinghuan
  * @Email:ljh0576123@163.com
@@ -14,8 +16,6 @@ interface OnBindDefaultImagesListener {
      * 绑定默认图片
      *
      * @param position 图片索引
-     * @param fileName 文件名
-     * @param filePath 文件路径
      */
-    public void onBindDefaultImages(int position, String fileName, String filePath);
+    public void onBindDefaultImages(int position, Uri uri);
 }
