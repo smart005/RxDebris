@@ -5,6 +5,7 @@ import android.content.Context;
 import com.cloud.cache.MemoryCache;
 import com.cloud.cache.RxCache;
 import com.cloud.nets.cookie.CookieJarImpl;
+import com.cloud.nets.cookie.store.CookieStore;
 import com.cloud.nets.cookie.store.SPCookieStore;
 import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;
 
 /**
@@ -219,7 +221,7 @@ public class OkRx {
      *
      * @return json解析监听对象
      */
-    public <T> OnBeanParsingJsonListener<T> getOnBeanParsingJsonListener() {
+    public OnBeanParsingJsonListener getOnBeanParsingJsonListener() {
         if (parsingJsonListener == null) {
             Object object = MemoryCache.getInstance().getSoftCache("BeanParsingJsonListener");
             if (object instanceof OnBeanParsingJsonListener) {
@@ -346,5 +348,35 @@ public class OkRx {
         this.onHeaderCookiesListener = listener;
         MemoryCache.getInstance().setSoftCache("$_OnHeaderCookiesListener", listener);
         return this;
+    }
+
+    /**
+     * 清除cookies
+     * 在用户退出登录时调用
+     */
+    public void clearCookies() {
+        OkHttpClient client = getOkHttpClient();
+        if (client == null) {
+            return;
+        }
+        CookieJar cookieJar = client.cookieJar();
+        if (!(cookieJar instanceof CookieJarImpl)) {
+            return;
+        }
+        CookieJarImpl cookieImpl = (CookieJarImpl) cookieJar;
+        CookieStore cookieStore = cookieImpl.getCookieStore();
+        if (cookieStore == null) {
+            return;
+        }
+        cookieStore.removeAllCookie();
+    }
+
+    /**
+     * 清除接口请求的网络缓存
+     *
+     * @param cacheKey 请求接口时设置的缓存key
+     */
+    public void clearCache(String cacheKey) {
+        RxCache.clearContainerKey(cacheKey);
     }
 }

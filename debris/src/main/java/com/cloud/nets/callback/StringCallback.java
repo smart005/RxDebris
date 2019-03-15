@@ -5,12 +5,12 @@ import android.text.TextUtils;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
-import com.cloud.nets.events.OnRequestErrorListener;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
+import com.cloud.nets.requests.ErrorWith;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestState;
-import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action4;
 import com.cloud.objects.logs.Logger;
@@ -41,7 +41,7 @@ public abstract class StringCallback implements Callback {
     //处理成功回调
     private Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction = null;
     //请求完成时回调(成功或失败)
-    private Action1<RequestState> completeAction = null;
+    private Action2<RequestState, ErrorType> completeAction = null;
     //请求完成时输出日志
     private Action2<String, String> printLogAction = null;
     //请求标识队列
@@ -58,6 +58,8 @@ public abstract class StringCallback implements Callback {
     private CallStatus callStatus = CallStatus.OnlyNet;
     //是否取消间隔缓存回调
     private boolean isCancelIntervalCacheCall = false;
+    //返回数据类型
+    private Class dataClass = null;
 
     public boolean isCancelIntervalCacheCall() {
         return isCancelIntervalCacheCall;
@@ -71,10 +73,14 @@ public abstract class StringCallback implements Callback {
         this.callStatus = callStatus;
     }
 
+    public void setDataClass(Class dataClass) {
+        this.dataClass = dataClass;
+    }
+
     protected abstract void onSuccessCall(String responseString);
 
     public StringCallback(Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
-                          Action1<RequestState> completeAction,
+                          Action2<RequestState, ErrorType> completeAction,
                           Action2<String, String> printLogAction,
                           HashMap<String, ReqQueueItem> reqQueueItemHashMap,
                           String apiRequestKey,
@@ -91,34 +97,43 @@ public abstract class StringCallback implements Callback {
 
     @Override
     public void onFailure(Call call, IOException e) {
+        if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
+            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
+            if (queueItem != null) {
+                queueItem.setReqNetCompleted(true);
+            }
+        }
         if (call.isCanceled()) {
+            if (completeAction != null) {
+                completeAction.call(RequestState.Error, ErrorType.netRequest);
+            }
             return;
         }
         String message = e.getMessage() == null ? "" : e.getMessage();
-        if (message.contains("Unable to resolve host")) {
+        if (message.contains("Unable to resolve host") ||
+                message.contains("Failed to connect")) {
+            //这里做dns处理
+            if (completeAction != null) {
+                completeAction.call(RequestState.Error, ErrorType.netRequest);
+            }
             return;
         }
         if (!call.isExecuted()) {
             if (!failReConnect(call)) {
                 //抛出失败回调到全局监听
-                OnRequestErrorListener errorListener = OkRx.getInstance().getOnRequestErrorListener();
-                if (errorListener != null) {
-                    errorListener.onFailure(call, e);
+                ErrorWith errorWith = new ErrorWith();
+                errorWith.call(call, e);
+                if (completeAction != null) {
+                    completeAction.call(RequestState.Error, ErrorType.netRequest);
                 }
-                return;
             }
-        }
-        if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
-            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-            queueItem.setReqNetCompleted(true);
-        }
-        if (completeAction != null) {
-            completeAction.call(RequestState.Error);
+            return;
         }
         //抛出失败回调到全局监听
-        OnRequestErrorListener errorListener = OkRx.getInstance().getOnRequestErrorListener();
-        if (errorListener != null) {
-            errorListener.onFailure(call, e);
+        ErrorWith errorWith = new ErrorWith();
+        errorWith.call(call, e);
+        if (completeAction != null) {
+            completeAction.call(RequestState.Error, ErrorType.netRequest);
         }
     }
 
@@ -177,40 +192,53 @@ public abstract class StringCallback implements Callback {
             }
             if (response == null || !response.isSuccessful()) {
                 if (completeAction != null) {
-                    completeAction.call(RequestState.Error);
+                    completeAction.call(RequestState.Error, ErrorType.businessProcess);
+                }
+            } else {
+                headerDealWith(response);
+                ResponseBody body = response.body();
+                if (body == null) {
+                    if (completeAction != null) {
+                        completeAction.call(RequestState.Error, ErrorType.businessProcess);
+                    }
+                } else {
+                    if (successAction != null) {
+                        responseString = body.string();
+                        //如果不是json且请求的数据类型不是基础数据类型则回调error
+                        if (dataClass == String.class ||
+                                dataClass == Integer.class ||
+                                dataClass == Double.class ||
+                                dataClass == Float.class ||
+                                dataClass == Long.class ||
+                                ObjectJudge.isJson(responseString)) {
+                            if (callStatus != CallStatus.WeakCache && !isCancelIntervalCacheCall()) {
+                                //此状态下不做网络回调但做缓存
+                                successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
+                            }
+                            onSuccessCall(responseString);
+                        } else {
+                            if (completeAction != null) {
+                                completeAction.call(RequestState.Error, ErrorType.businessProcess);
+                            }
+                        }
+                    }
                 }
             }
-            headerDealWith(response);
-            ResponseBody body = response.body();
-            if (body == null) {
-                if (completeAction != null) {
-                    completeAction.call(RequestState.Error);
-                }
-                return;
-            }
-            if (successAction != null) {
-                responseString = body.string();
-                if (callStatus != CallStatus.WeakCache && !isCancelIntervalCacheCall()) {
-                    //此状态下不做网络回调但做缓存
-                    successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
-                }
-
-                onSuccessCall(responseString);
-
-                //输出日志
-                if (printLogAction != null) {
-                    printLogAction.call(apiRequestKey, responseString);
-                }
+            //输出日志
+            if (printLogAction != null) {
+                printLogAction.call(apiRequestKey, responseString);
             }
         } catch (Exception e) {
             Logger.error(e);
         } finally {
             if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                 ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                queueItem.setReqNetCompleted(true);
+                if (queueItem != null) {
+                    queueItem.setReqNetCompleted(true);
+                }
             }
             if (completeAction != null) {
-                completeAction.call(RequestState.Completed);
+                completeAction.call(RequestState.Completed, ErrorType.none);
             }
         }
     }

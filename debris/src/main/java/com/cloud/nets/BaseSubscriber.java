@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.nets.properties.OkRxConfigParams;
@@ -341,7 +342,8 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
                 return;
             }
             if (onSuccessfulListener != null) {
-                onSuccessfulListener.onError(t, this.extra);
+                onSuccessfulListener.onError(t, ErrorType.businessProcess, this.extra);
+                onSuccessfulListener.onError(ErrorType.businessProcess, this.extra);
             }
         }
     }

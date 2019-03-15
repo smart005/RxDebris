@@ -10,6 +10,6 @@ package com.cloud.debrisTest.okhttp;
  */
 public interface ServiceAPI {
 
-    public String sq = "108sq";
-    public String mtalksvc = "mtalksvc";
+    public int sq = 1000;
+    public int mtalksvc = 2000;
 }

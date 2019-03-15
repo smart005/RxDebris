@@ -9,7 +9,7 @@
         android:id="@+id/done_cancel_bar"
         layout="@layout/cl_crop_layout_done_cancel"/>
 
-    <com.cloud.images.cropimage.CropImageView
+    <com.cloud.images2.cropimage.CropImageView
         android:id="@+id/crop_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

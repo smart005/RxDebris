@@ -1,12 +1,10 @@
 package com.cloud.nets;
 
-import android.graphics.Bitmap;
-
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ByteRequestItem;
 import com.cloud.nets.properties.ReqQueueItem;
-import com.cloud.nets.requests.OkRxBitmapRequest;
 import com.cloud.nets.requests.OkRxDeleteRequest;
 import com.cloud.nets.requests.OkRxDownloadFileRequest;
 import com.cloud.nets.requests.OkRxGetRequest;
@@ -51,7 +49,7 @@ public class OkRxManager {
                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                     String apiUnique,
                     Action2<String, HashMap<String, String>> headersAction,
-                    Action1<RequestState> completeAction,
+                    Action2<RequestState,ErrorType> completeAction,
                     Action2<String, String> printLogAction,
                     String apiRequestKey,
                     HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -67,7 +65,7 @@ public class OkRxManager {
                      Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      String apiUnique,
                      Action2<String, HashMap<String, String>> headersAction,
-                     Action1<RequestState> completeAction,
+                     Action2<RequestState,ErrorType> completeAction,
                      Action2<String, String> printLogAction,
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -83,7 +81,7 @@ public class OkRxManager {
                        Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                        String apiUnique,
                        Action2<String, HashMap<String, String>> headersAction,
-                       Action1<RequestState> completeAction,
+                       Action2<RequestState,ErrorType> completeAction,
                        Action2<String, String> printLogAction,
                        String apiRequestKey,
                        HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -99,7 +97,7 @@ public class OkRxManager {
                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                     String apiUnique,
                     Action2<String, HashMap<String, String>> headersAction,
-                    Action1<RequestState> completeAction,
+                    Action2<RequestState,ErrorType> completeAction,
                     Action2<String, String> printLogAction,
                     String apiRequestKey,
                     HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -115,7 +113,7 @@ public class OkRxManager {
                       Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                       String apiUnique,
                       Action2<String, HashMap<String, String>> headersAction,
-                      Action1<RequestState> completeAction,
+                      Action2<RequestState,ErrorType> completeAction,
                       Action2<String, String> printLogAction,
                       String apiRequestKey,
                       HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -130,7 +128,7 @@ public class OkRxManager {
                      Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      String apiUnique,
                      Action2<String, HashMap<String, String>> headersAction,
-                     Action1<RequestState> completeAction,
+                     Action2<RequestState,ErrorType> completeAction,
                      Action2<String, String> printLogAction,
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -146,7 +144,7 @@ public class OkRxManager {
                         Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                         String apiUnique,
                         Action2<String, HashMap<String, String>> headersAction,
-                        Action1<RequestState> completeAction,
+                        Action2<RequestState,ErrorType> completeAction,
                         Action2<String, String> printLogAction,
                         String apiRequestKey,
                         HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -162,7 +160,7 @@ public class OkRxManager {
                       Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                       String apiUnique,
                       Action2<String, HashMap<String, String>> headersAction,
-                      Action1<RequestState> completeAction,
+                      Action2<RequestState, ErrorType> completeAction,
                       Action2<String, String> printLogAction,
                       String apiRequestKey,
                       final HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -184,37 +182,12 @@ public class OkRxManager {
         request.call(url, headers, params, downFile, progressAction, successAction, completeAction, apiRequestKey, reqQueueItemHashMap);
     }
 
-    public void getBitmap(String url,
-                          HashMap<String, String> headers,
-                          HashMap<String, Object> params,
-                          Action3<Bitmap, String, HashMap<String, ReqQueueItem>> successAction,
-                          Action1<RequestState> completeAction,
-                          String apiRequestKey,
-                          HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
-        OkRxBitmapRequest request = new OkRxBitmapRequest();
-        request.call(url, headers, params, successAction, completeAction, apiRequestKey, reqQueueItemHashMap, "", null);
-    }
-
-    public void uploadFile(String url,
-                           HashMap<String, String> headers,
-                           RetrofitParams retrofitParams,
-                           RequestContentType requestContentType,
-                           Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
-                           Action1<RequestState> completeAction,
-                           Action2<String, String> printLogAction,
-                           String apiRequestKey,
-                           HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
-        OkRxPostRequest request = new OkRxPostRequest(requestContentType);
-        request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, "", null);
-    }
-
     public void uploadBytes(String url,
                             HashMap<String, String> httpHeaders,
                             HashMap<String, Object> httpParams,
                             List<ByteRequestItem> byteRequestItems,
                             Action3<String, String, HashMap<String, ReqQueueItem>> successAction,
-                            Action1<RequestState> completeAction,
+                            Action2<RequestState,ErrorType> completeAction,
                             Action2<String, String> printLogAction,
                             String apiRequestKey,
                             HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -227,7 +200,7 @@ public class OkRxManager {
                            HashMap<String, Object> httpParams,
                            ByteRequestItem byteRequestItem,
                            Action3<String, String, HashMap<String, ReqQueueItem>> successAction,
-                           Action1<RequestState> completeAction,
+                           Action2<RequestState,ErrorType> completeAction,
                            Action2<String, String> printLogAction,
                            String apiRequestKey,
                            HashMap<String, ReqQueueItem> reqQueueItemHashMap) {

@@ -35,4 +35,12 @@ public @interface Param {
      * @return
      */
     boolean isJson() default false;
+
+    /**
+     * 上传后文件后缀
+     * 在网络请求时以此文件后缀上传
+     *
+     * @return 文件后缀
+     */
+    String fileSuffixAfterUpload() default "";
 }

@@ -6,9 +6,10 @@ import com.cloud.cache.greens.DBManager;
 import com.cloud.cache.greens.OnDatabasePathListener;
 import com.cloud.debris.BaseApplication;
 import com.cloud.debrisTest.images.ImageSuffixCombination;
-import com.cloud.images.RxImage;
+import com.cloud.images2.RxImage;
 import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
+import com.cloud.nets.beans.RequestErrorInfo;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnConfigParamsListener;
 import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
@@ -21,11 +22,8 @@ import com.cloud.objects.storage.StorageUtils;
 import com.cloud.objects.utils.JsonUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import okhttp3.Call;
 
 /**
  * Author lijinghuan
@@ -79,9 +77,13 @@ public class TestApplication extends BaseApplication {
                 })
                 .setOnBeanParsingJsonListener(new OnBeanParsingJsonListener() {
                     @Override
-                    public Object onBeanParsingJson(String response, Class dataClass) {
+                    public Object onBeanParsingJson(String response, Class dataClass, boolean isCollectionDataType) {
                         //如果有父类嵌套子类的情况这里可自行处理
-                        return JsonUtils.parseT(response, dataClass);
+                        if (isCollectionDataType) {
+                            return JsonUtils.parseArray(response, dataClass);
+                        } else {
+                            return JsonUtils.parseT(response, dataClass);
+                        }
                     }
                 })
                 .setOnGlobalReuqestHeaderListener(new OnGlobalReuqestHeaderListener() {
@@ -92,7 +94,7 @@ public class TestApplication extends BaseApplication {
                 })
                 .setOnRequestErrorListener(new OnRequestErrorListener() {
                     @Override
-                    public void onFailure(Call call, IOException e) {
+                    public void onFailure(RequestErrorInfo errorInfo) {
                         //网络请求失败回调
                     }
                 })

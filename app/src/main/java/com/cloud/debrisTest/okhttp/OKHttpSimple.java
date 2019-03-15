@@ -10,6 +10,7 @@ import com.cloud.debrisTest.models.NetModel;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
 import com.cloud.debrisTest.okhttp.services.GetService;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.JsonUtils;
@@ -24,7 +25,14 @@ public class OKHttpSimple extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.okhttp_view);
         binding.setModel(new NetModel());
 
-        getService.requestRecommandInfo(42, recommandListener);
+        //getService.requestRecommandInfo(42, recommandListener);
+
+        getService.requestUserList(new OnSuccessfulListener<String>() {
+            @Override
+            public void onSuccessful(String userItems, DataType dataType, Object... extras) {
+
+            }
+        });
     }
 
     private OnSuccessfulListener<RecommandInfo> recommandListener = new OnSuccessfulListener<RecommandInfo>() {
@@ -39,7 +47,7 @@ public class OKHttpSimple extends AppCompatActivity {
         }
 
         @Override
-        public void onError(RecommandInfo recommandInfo, Object... extras) {
+        public void onError(RecommandInfo recommandInfo, ErrorType errorType, Object... extras) {
             //【可选】具体接口请求失败回调
         }
 

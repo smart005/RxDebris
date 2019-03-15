@@ -11,11 +11,12 @@ import com.cloud.nets.OkRxManager;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
 import com.cloud.objects.enums.RequestState;
-import com.cloud.objects.events.Action1;
+import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action4;
 import com.cloud.objects.events.Func2;
 import com.cloud.objects.logs.Logger;
@@ -122,9 +123,9 @@ public class H5InteractionAPIUtils {
                 },
                 "",
                 null,
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (callback != null && requestState == RequestState.Completed) {
                             callback.call(APIRequestState.Complate, null);
                         }
@@ -160,9 +161,9 @@ public class H5InteractionAPIUtils {
                         }
                     }
                 }, "", null,
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (callback != null && requestState == RequestState.Completed) {
                             callback.call(APIRequestState.Complate, null);
                         }
@@ -200,9 +201,9 @@ public class H5InteractionAPIUtils {
                 },
                 "",
                 null,
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (callback != null && requestState == RequestState.Completed) {
                             callback.call(APIRequestState.Complate, null);
                         }
@@ -241,9 +242,9 @@ public class H5InteractionAPIUtils {
                 },
                 "",
                 null,
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (callback != null && requestState == RequestState.Completed) {
                             callback.call(APIRequestState.Complate, null);
                         }
@@ -280,9 +281,9 @@ public class H5InteractionAPIUtils {
                 },
                 "",
                 null,
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (callback != null && requestState == RequestState.Completed) {
                             callback.call(APIRequestState.Complate, null);
                         }

@@ -3,8 +3,9 @@ package com.cloud.dialogs.options;
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
 
-import com.cloud.dialogs.daos.DbDialogDao;
-import com.cloud.dialogs.daos.OptionsItemDao;
+import com.cloud.cache.DbCacheDao;
+import com.cloud.cache.daos.OptionsItemDao;
+import com.cloud.cache.greens.DBManager;
 import com.cloud.dialogs.options.beans.OptionsItem;
 import com.cloud.dialogs.options.enums.AddressLevel;
 import com.cloud.dialogs.options.events.OnImportCompleteListener;
@@ -111,22 +112,24 @@ public class AddressUtils extends OptionsUtils implements OnOptionsListener {
         if (ObjectJudge.isNullOrEmpty(optionsItems)) {
             return;
         }
-        DbDialogDao dbCacheDao = new DbDialogDao();
-        OptionsItemDao optionsItemDao = dbCacheDao.getOptionsItemDao(false);
+        DbCacheDao dbCacheDao = new DbCacheDao();
+        OptionsItemDao optionsItemDao = dbCacheDao.getOptionsItemDao();
         if (optionsItemDao != null) {
             optionsItemDao.insertOrReplaceInTx(optionsItems);
+            DBManager.getInstance().close();
         }
     }
 
     @Override
     public List<OptionsItem> getOptionsItems(String targetId, final String parentId) {
         final List<OptionsItem> list = new ArrayList<OptionsItem>();
-        DbDialogDao dbCacheDao = new DbDialogDao();
-        OptionsItemDao optionsItemDao = dbCacheDao.getOptionsItemDao(true);
+        DbCacheDao dbCacheDao = new DbCacheDao();
+        OptionsItemDao optionsItemDao = dbCacheDao.getOptionsItemDao();
         if (optionsItemDao != null) {
             QueryBuilder<OptionsItem> builder = optionsItemDao.queryBuilder();
             builder.where(OptionsItemDao.Properties.ParentId.eq(parentId));
             list.addAll(builder.build().list());
+            DBManager.getInstance().close();
         }
         return list;
     }

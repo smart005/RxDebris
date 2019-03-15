@@ -3,13 +3,13 @@ apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 28
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "com.cloud.debrisTest"
         minSdkVersion 15
-        targetSdkVersion 28
+        targetSdkVersion 18
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //选择要添加的对应cpu类型的.so库。
             abiFilters 'armeabi', 'x86'
@@ -33,9 +33,7 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation project(':debris')
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
 //    implementation 'com.cloud:debris:1.0.10'
 }

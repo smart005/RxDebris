@@ -10,6 +10,7 @@ import com.cloud.nets.annotations.ReturnCodeFilter;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnApiRetCodesFilterListener;
 import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
@@ -135,14 +136,14 @@ public class BaseService {
         successfulListener.onError(null, baseSubscriber.getExtra());
     }
 
-    protected <T> void baseConfig(final BaseService baseService,
-                                  final RetrofitParams retrofitParams,
-                                  OkRxValidParam validParam,
-                                  final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                                  Action0 errorAction,
-                                  Action0 completedAction,
-                                  String apiRequestKey) {
-        final Class<T> dataClass = retrofitParams.getDataClass();
+    protected void baseConfig(final BaseService baseService,
+                              final RetrofitParams retrofitParams,
+                              OkRxValidParam validParam,
+                              final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                              Action1<ErrorType> errorAction,
+                              Action0 completedAction,
+                              String apiRequestKey) {
+        final Class dataClass = retrofitParams.getDataClass();
         try {
             if (!TextUtils.isEmpty(retrofitParams.getRequestUrl())) {
                 String requestUrl = retrofitParams.getRequestUrl();
@@ -169,7 +170,7 @@ public class BaseService {
                 if (retrofitParams.getRequestType() == RequestType.BYTES) {
                     HashMap<String, Object> updateByteParams = getUploadByteParams(retrofitParams);
                     List<ByteRequestItem> uploadByteItems = getUploadByteItems(retrofitParams);
-                    subBytes(requestUrl, mHeaders, updateByteParams, uploadByteItems, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
+                    subBytes(requestUrl, mHeaders, updateByteParams, retrofitParams, uploadByteItems, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                 } else {
                     //请求参数
                     if (retrofitParams.getRequestType() == RequestType.POST) {
@@ -182,7 +183,7 @@ public class BaseService {
                         patch(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.HEAD) {
                         head(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
-                    } else if (retrofitParams.getRequestType() == RequestType.POST) {
+                    } else if (retrofitParams.getRequestType() == RequestType.OPTIONS) {
                         options(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
                     } else if (retrofitParams.getRequestType() == RequestType.TRACE) {
                         trace(requestUrl, mHeaders, retrofitParams, baseService, dataClass, successAction, errorAction, completedAction, apiRequestKey);
@@ -242,42 +243,68 @@ public class BaseService {
         }
     }
 
-    private <T> void successDealWith(Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                                     final Action0 errorAction,
-                                     Class<T> dataClass,
-                                     BaseService baseService,
-                                     String response,
-                                     String apiRequestKey,
-                                     HashMap<String, ReqQueueItem> reqQueueItemHashMap,
-                                     DataType dataType,
-                                     long requestStartTime,
-                                     long requestTotalTime,
-                                     final Action0 completedAction) {
+    private void successDealWith(Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                                 final Action1<ErrorType> errorAction,
+                                 Class dataClass,
+                                 boolean isCollectionDataType,
+                                 BaseService baseService,
+                                 String response,
+                                 String apiRequestKey,
+                                 HashMap<String, ReqQueueItem> reqQueueItemHashMap,
+                                 DataType dataType,
+                                 long requestStartTime,
+                                 long requestTotalTime,
+                                 final Action0 completedAction) {
         if (successAction == null) {
             finishedRequest(baseService, completedAction);
         } else {
-            T data = null;
-            OnBeanParsingJsonListener<T> jsonListener = OkRx.getInstance().getOnBeanParsingJsonListener();
-            if (jsonListener == null) {
-                data = JsonUtils.parseT(response, dataClass);
+            boolean isBasicData = false;
+            Object data = null;
+            //如果dataClass为基础数据类型则不进行解决
+            if (dataClass == String.class ||
+                    dataClass == Integer.class ||
+                    dataClass == Double.class ||
+                    dataClass == Float.class ||
+                    dataClass == Long.class) {
+                isBasicData = true;
+                data = response;
             } else {
-                data = jsonListener.onBeanParsingJson(response, dataClass);
+                OnBeanParsingJsonListener jsonListener = OkRx.getInstance().getOnBeanParsingJsonListener();
+                if (jsonListener == null) {
+                    if (isCollectionDataType) {
+                        data = JsonUtils.parseArray(response, dataClass);
+                    } else {
+                        data = JsonUtils.parseT(response, dataClass);
+                    }
+                } else {
+                    data = jsonListener.onBeanParsingJson(response, dataClass, isCollectionDataType);
+                }
             }
             //如果空则回调错误
+            //如果从缓存过来的且对象为空则不处理
             if (data == null) {
-                sendErrorAction(errorAction, baseService);
+                if (dataType == DataType.CacheData) {
+                    return;
+                }
+                sendErrorAction(errorAction, baseService, ErrorType.businessProcess);
                 return;
             }
-            //开启拦截且拦截符合的返回码
-            OkRxConfigParams okRxConfigParams = OkRx.getInstance().getOkRxConfigParams();
-            if (okRxConfigParams.isNetStatusCodeIntercept()) {
-                if (!filterMatchRetCodes(data)) {
+            //如果是集合则取消拦截
+            if (isCollectionDataType || isBasicData) {
+                //成功回调
+                successAction.call(data, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
+            } else {
+                //开启拦截且拦截符合的返回码
+                OkRxConfigParams okRxConfigParams = OkRx.getInstance().getOkRxConfigParams();
+                if (okRxConfigParams.isNetStatusCodeIntercept()) {
+                    if (!filterMatchRetCodes(data)) {
+                        //成功回调
+                        successAction.call(data, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
+                    }
+                } else {
                     //成功回调
                     successAction.call(data, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
                 }
-            } else {
-                //成功回调
-                successAction.call(data, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
             }
         }
     }
@@ -314,16 +341,17 @@ public class BaseService {
         return (OnHttpRequestHeadersListener) callObject;
     }
 
-    private <T> void subBytes(String requestUrl,
-                              HashMap<String, String> httpHeaders,
-                              HashMap<String, Object> httpParams,
-                              List<ByteRequestItem> byteRequestItems,
-                              final BaseService baseService,
-                              final Class<T> dataClass,
-                              final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                              final Action0 errorAction,
-                              final Action0 completedAction,
-                              final String apiRequestKey) {
+    private void subBytes(String requestUrl,
+                          HashMap<String, String> httpHeaders,
+                          HashMap<String, Object> httpParams,
+                          final RetrofitParams retrofitParams,
+                          List<ByteRequestItem> byteRequestItems,
+                          final BaseService baseService,
+                          final Class dataClass,
+                          final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                          final Action1<ErrorType> errorAction,
+                          final Action0 completedAction,
+                          final String apiRequestKey) {
         OkRxManager.getInstance().uploadBytes(
                 requestUrl,
                 httpHeaders,
@@ -332,14 +360,14 @@ public class BaseService {
                 new Action3<String, String, HashMap<String, ReqQueueItem>>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, DataType.NetData, 0, 0, completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, DataType.NetData, 0, 0, completedAction);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -358,10 +386,10 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private void sendErrorAction(final Action0 errorAction, final BaseService baseService) {
+    private void sendErrorAction(final Action1<ErrorType> errorAction, final BaseService baseService, final ErrorType errorType) {
         if (ObjectJudge.isMainThread()) {
             if (errorAction != null) {
-                errorAction.call();
+                errorAction.call(errorType);
             }
             baseService.onRequestError();
         } else {
@@ -369,7 +397,7 @@ public class BaseService {
                 @Override
                 public void run() {
                     if (errorAction != null) {
-                        errorAction.call();
+                        errorAction.call(errorType);
                     }
                     baseService.onRequestError();
                 }
@@ -377,15 +405,15 @@ public class BaseService {
         }
     }
 
-    private <T> void trace(String requestUrl,
-                           HashMap<String, String> headers,
-                           final RetrofitParams retrofitParams,
-                           final BaseService baseService,
-                           final Class<T> dataClass,
-                           final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                           final Action0 errorAction,
-                           final Action0 completedAction,
-                           final String apiRequestKey) {
+    private void trace(String requestUrl,
+                       HashMap<String, String> headers,
+                       final RetrofitParams retrofitParams,
+                       final BaseService baseService,
+                       final Class dataClass,
+                       final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                       final Action1<ErrorType> errorAction,
+                       final Action0 completedAction,
+                       final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().trace(
                 requestUrl,
@@ -395,7 +423,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -409,11 +437,11 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -435,15 +463,15 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private <T> void options(String requestUrl,
-                             HashMap<String, String> headers,
-                             final RetrofitParams retrofitParams,
-                             final BaseService baseService,
-                             final Class<T> dataClass,
-                             final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                             final Action0 errorAction,
-                             final Action0 completedAction,
-                             final String apiRequestKey) {
+    private void options(String requestUrl,
+                         HashMap<String, String> headers,
+                         final RetrofitParams retrofitParams,
+                         final BaseService baseService,
+                         final Class dataClass,
+                         final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                         final Action1<ErrorType> errorAction,
+                         final Action0 completedAction,
+                         final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().options(
                 requestUrl,
@@ -453,7 +481,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -467,11 +495,11 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -493,15 +521,15 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private <T> void head(String requestUrl,
-                          HashMap<String, String> headers,
-                          final RetrofitParams retrofitParams,
-                          final BaseService baseService,
-                          final Class<T> dataClass,
-                          final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                          final Action0 errorAction,
-                          final Action0 completedAction,
-                          final String apiRequestKey) {
+    private void head(String requestUrl,
+                      HashMap<String, String> headers,
+                      final RetrofitParams retrofitParams,
+                      final BaseService baseService,
+                      final Class dataClass,
+                      final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                      final Action1<ErrorType> errorAction,
+                      final Action0 completedAction,
+                      final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().head(
                 requestUrl,
@@ -510,7 +538,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -524,11 +552,11 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -550,15 +578,15 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private <T> void patch(String requestUrl,
-                           HashMap<String, String> headers,
-                           final RetrofitParams retrofitParams,
-                           final BaseService baseService,
-                           final Class<T> dataClass,
-                           final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                           final Action0 errorAction,
-                           final Action0 completedAction,
-                           final String apiRequestKey) {
+    private void patch(String requestUrl,
+                       HashMap<String, String> headers,
+                       final RetrofitParams retrofitParams,
+                       final BaseService baseService,
+                       final Class dataClass,
+                       final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                       final Action1<ErrorType> errorAction,
+                       final Action0 completedAction,
+                       final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().patch(
                 requestUrl,
@@ -568,7 +596,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -582,11 +610,11 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -608,15 +636,15 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private <T> void put(String requestUrl,
-                         HashMap<String, String> headers,
-                         final RetrofitParams retrofitParams,
-                         final BaseService baseService,
-                         final Class<T> dataClass,
-                         final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                         final Action0 errorAction,
-                         final Action0 completedAction,
-                         final String apiRequestKey) {
+    private void put(String requestUrl,
+                     HashMap<String, String> headers,
+                     final RetrofitParams retrofitParams,
+                     final BaseService baseService,
+                     final Class dataClass,
+                     final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                     final Action1<ErrorType> errorAction,
+                     final Action0 completedAction,
+                     final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().put(
                 requestUrl,
@@ -626,7 +654,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -640,11 +668,11 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -666,15 +694,15 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private <T> void delete(String requestUrl,
-                            HashMap<String, String> headers,
-                            final RetrofitParams retrofitParams,
-                            final BaseService baseService,
-                            final Class<T> dataClass,
-                            final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                            final Action0 errorAction,
-                            final Action0 completedAction,
-                            final String apiRequestKey) {
+    private void delete(String requestUrl,
+                        HashMap<String, String> headers,
+                        final RetrofitParams retrofitParams,
+                        final BaseService baseService,
+                        final Class dataClass,
+                        final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                        final Action1<ErrorType> errorAction,
+                        final Action0 completedAction,
+                        final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().delete(
                 requestUrl,
@@ -684,7 +712,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -698,11 +726,11 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -724,15 +752,15 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private <T> void post(String requestUrl,
-                          HashMap<String, String> headers,
-                          final RetrofitParams retrofitParams,
-                          final BaseService baseService,
-                          final Class<T> dataClass,
-                          final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                          final Action0 errorAction,
-                          final Action0 completedAction,
-                          final String apiRequestKey) {
+    private void post(String requestUrl,
+                      HashMap<String, String> headers,
+                      final RetrofitParams retrofitParams,
+                      final BaseService baseService,
+                      final Class dataClass,
+                      final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                      final Action1 errorAction,
+                      final Action0 completedAction,
+                      final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().post(
                 requestUrl,
@@ -742,7 +770,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -756,15 +784,15 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
+                            if (queueItem != null && queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
                                 reqQueueItemHashMap.remove(apiRequestKey);
                                 finishedRequest(baseService, completedAction);
                             }
@@ -782,15 +810,15 @@ public class BaseService {
                 }, apiRequestKey, reqQueueItemHashMap);
     }
 
-    private <T> void get(String requestUrl,
-                         HashMap<String, String> headers,
-                         final RetrofitParams retrofitParams,
-                         final BaseService baseService,
-                         final Class<T> dataClass,
-                         final Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
-                         final Action0 errorAction,
-                         final Action0 completedAction,
-                         final String apiRequestKey) {
+    private void get(String requestUrl,
+                     HashMap<String, String> headers,
+                     final RetrofitParams retrofitParams,
+                     final BaseService baseService,
+                     final Class dataClass,
+                     final Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long> successAction,
+                     final Action1<ErrorType> errorAction,
+                     final Action0 completedAction,
+                     final String apiRequestKey) {
         final ApiHeadersCall apiHeadersCall = retrofitParams.getApiHeadersCall();
         OkRxManager.getInstance().get(
                 requestUrl,
@@ -799,7 +827,7 @@ public class BaseService {
                 new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, response, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -813,11 +841,11 @@ public class BaseService {
                         call.onRequestHeaders(apiUnique, headers);
                     }
                 },
-                new Action1<RequestState>() {
+                new Action2<RequestState, ErrorType>() {
                     @Override
-                    public void call(RequestState requestState) {
+                    public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
-                            sendErrorAction(errorAction, baseService);
+                            sendErrorAction(errorAction, baseService, errorType);
                         }
                         if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
@@ -947,13 +975,13 @@ public class BaseService {
         }
     }
 
-    protected <T, I, S extends BaseService> void requestObject(Class<I> apiClass,
-                                                               S server,
-                                                               final BaseSubscriber<T, S> baseSubscriber,
-                                                               OkRxValidParam validParam,
-                                                               Func2<String, S, String> urlAction,
-                                                               Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction,
-                                                               HashMap<String, Object> params) {
+    protected <I, S extends BaseService> void requestObject(Class<I> apiClass,
+                                                            S server,
+                                                            final BaseSubscriber<Object, S> baseSubscriber,
+                                                            OkRxValidParam validParam,
+                                                            Func2<String, S, Integer> urlAction,
+                                                            Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction,
+                                                            HashMap<String, Object> params) {
         try {
             //若需要登录验证则打开登录页面
             if (validParam.isNeedLogin()) {
@@ -981,7 +1009,7 @@ public class BaseService {
             }
             RetrofitParams retrofitParams = decApiAction.call(decApi, params);
             retrofitParams.setCurrentRequestTime(validParam.getCurrentRequestTime());
-            if (retrofitParams == null || !retrofitParams.getFlag()) {
+            if (!retrofitParams.getFlag()) {
                 finishedRequest(baseSubscriber);
                 return;
             }
@@ -990,31 +1018,31 @@ public class BaseService {
                 finishedRequest(baseSubscriber);
                 return;
             }
-            if (retrofitParams.getIsJoinUrl() && TextUtils.isEmpty(retrofitParams.getUrlTypeName().value())) {
+            if (retrofitParams.getIsJoinUrl() && retrofitParams.getUrlTypeName().value() == 0) {
                 finishedRequest(baseSubscriber);
                 return;
             }
-            ThreadPoolUtils.getInstance().singleTaskExecute(new ApiRequestRunnable<T, I, S>(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction));
+            ThreadPoolUtils.getInstance().singleTaskExecute(new ApiRequestRunnable<I, S>(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction));
         } catch (Exception e) {
             finishedRequest(baseSubscriber);
         }
     }
 
-    private class ApiRequestRunnable<T, I, S extends BaseService> implements Runnable {
+    private class ApiRequestRunnable<I, S extends BaseService> implements Runnable {
 
         private Class<I> apiClass;
         private S server;
-        private BaseSubscriber<T, S> baseSubscriber;
+        private BaseSubscriber<Object, S> baseSubscriber;
         private OkRxValidParam validParam;
         private RetrofitParams retrofitParams;
-        private Func2<String, S, String> urlAction;
+        private Func2<String, S, Integer> urlAction;
 
         public ApiRequestRunnable(Class<I> apiClass,
                                   S server,
-                                  final BaseSubscriber<T, S> baseSubscriber,
+                                  final BaseSubscriber<Object, S> baseSubscriber,
                                   OkRxValidParam validParam,
                                   RetrofitParams retrofitParams,
-                                  Func2<String, S, String> urlAction) {
+                                  Func2<String, S, Integer> urlAction) {
             this.apiClass = apiClass;
             this.server = server;
             this.baseSubscriber = baseSubscriber;
@@ -1029,12 +1057,12 @@ public class BaseService {
         }
     }
 
-    private <T, I, S extends BaseService> void apiRequest(Class<I> apiClass,
-                                                          S server,
-                                                          final BaseSubscriber<T, S> baseSubscriber,
-                                                          OkRxValidParam validParam,
-                                                          RetrofitParams retrofitParams,
-                                                          Func2<String, S, String> urlAction) {
+    private <I, S extends BaseService> void apiRequest(Class<I> apiClass,
+                                                       S server,
+                                                       final BaseSubscriber<Object, S> baseSubscriber,
+                                                       OkRxValidParam validParam,
+                                                       RetrofitParams retrofitParams,
+                                                       Func2<String, S, Integer> urlAction) {
         //设置回调是否作验证
         baseSubscriber.setValidCallResult(retrofitParams.isValidCallResult());
         //设置此接口允许返回码
@@ -1079,7 +1107,7 @@ public class BaseService {
                 querysb.append(MessageFormat.format("{0}={1},", entry.getKey(), entry.getValue()));
             }
             if (querysb.length() > 0) {
-                if (retrofitParams.getRequestUrl().indexOf("?") < 0) {
+                if (!retrofitParams.getRequestUrl().contains("?")) {
                     retrofitParams.setRequestUrl(String.format("%s?%s",
                             retrofitParams.getRequestUrl(),
                             querysb.substring(0, querysb.length() - 1)));
@@ -1091,22 +1119,22 @@ public class BaseService {
             }
         }
         String apiRequestKey = GlobalUtils.getNewGuid();
-        server.<T>baseConfig(server, retrofitParams, validParam,
-                new Action6<T, String, HashMap<String, ReqQueueItem>, DataType, Long, Long>() {
+        server.baseConfig(server, retrofitParams, validParam,
+                new Action6<Object, String, HashMap<String, ReqQueueItem>, DataType, Long, Long>() {
                     @Override
-                    public void call(T t, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType, Long requestStartTime, Long requestTotalTime) {
+                    public void call(Object t, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType, Long requestStartTime, Long requestTotalTime) {
                         //成功回调
                         baseSubscriber.onNext(t, reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
                     }
                 },
-                new Action0() {
+                new Action1<ErrorType>() {
                     @Override
-                    public void call() {
+                    public void call(ErrorType errorType) {
                         //失败回调
                         OnSuccessfulListener successfulListener = baseSubscriber.getOnSuccessfulListener();
                         if (successfulListener != null) {
-                            successfulListener.onError(null, baseSubscriber.getExtra());
-                            successfulListener.onError(baseSubscriber.getExtra());
+                            successfulListener.onError(null, errorType, baseSubscriber.getExtra());
+                            successfulListener.onError(errorType, baseSubscriber.getExtra());
                         }
                     }
                 },

@@ -15,5 +15,5 @@ public interface OnRequestApiUrl {
      * @param apiUrlTypeName 获取base url类型名称(根据此名称判断返回对应的base url)
      * @return
      */
-    public String onBaseUrl(String apiUrlTypeName);
+    public String onBaseUrl(Integer apiUrlTypeName);
 }

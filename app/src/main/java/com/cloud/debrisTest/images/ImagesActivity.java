@@ -10,13 +10,13 @@ import com.bumptech.glide.Priority;
 import com.cloud.debris.BaseFragmentActivity;
 import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.ImagesViewBinding;
-import com.cloud.images.RxImage;
-import com.cloud.images.beans.SelectImageProperties;
-import com.cloud.images.figureset.ImageSelectDialog;
-import com.cloud.images.glide.GlideOptimize;
-import com.cloud.images.glide.ScaleType;
+import com.cloud.images2.RxImage;
+import com.cloud.images2.beans.SelectImageProperties;
+import com.cloud.images2.figureset.ImageSelectDialog;
+import com.cloud.images2.glide.GlideOptimize;
+import com.cloud.images2.glide.ScaleType;
+import com.cloud.objects.ObjectManager;
 import com.cloud.objects.events.Action1;
-import com.cloud.objects.utils.GlobalUtils;
 
 import java.io.File;
 import java.util.List;
@@ -101,7 +101,7 @@ public class ImagesActivity extends BaseFragmentActivity {
         //选择图片后是否进行裁剪处理
         imageSelectDialog.setTailoring(true);
         //设置裁剪最大宽高
-        int screenWidth = GlobalUtils.getScreenWidth(this) * 2;
+        int screenWidth = ObjectManager.getScreenWidth(this) * 2;
         int height = screenWidth * 83 / 345;
         imageSelectDialog.withMaxSize(screenWidth, height);
         //设置裁剪宽高比
@@ -121,7 +121,7 @@ public class ImagesActivity extends BaseFragmentActivity {
         //选择图片后是否进行裁剪处理
         imageSelectDialog.setTailoring(true);
         //设置裁剪最大宽高
-        int screenWidth = GlobalUtils.getScreenWidth(this) * 2;
+        int screenWidth = ObjectManager.getScreenWidth(this) * 2;
         int height = screenWidth * 83 / 345;
         imageSelectDialog.withMaxSize(screenWidth, height);
         //设置裁剪宽高比
@@ -145,7 +145,7 @@ public class ImagesActivity extends BaseFragmentActivity {
         //选择图片后是否进行裁剪处理
         imageSelectDialog.setTailoring(true);
         //设置裁剪最大宽高
-        int screenWidth = GlobalUtils.getScreenWidth(this) * 2;
+        int screenWidth = ObjectManager.getScreenWidth(this) * 2;
         int height = screenWidth * 83 / 345;
         imageSelectDialog.withMaxSize(screenWidth, height);
         //设置裁剪宽高比

@@ -20,6 +20,7 @@ import com.cloud.dialogs.plugs.DialogPlus;
 import com.cloud.dialogs.plugs.DialogPlusBuilder;
 import com.cloud.dialogs.plugs.OnClickListener;
 import com.cloud.dialogs.plugs.ViewHolder;
+import com.cloud.objects.ObjectManager;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.PixelUtils;
@@ -131,7 +132,7 @@ public class BaseDialogPlus {
     }
 
     public void show(Context context) {
-        int contentWidth = GlobalUtils.getScreenWidth(context) * 4 / 5;
+        int contentWidth = ObjectManager.getScreenWidth(context) * 4 / 5;
         ViewHolder holder = new ViewHolder(R.layout.dialog_plugs_content_view);
         DialogPlusBuilder builder = DialogPlus.newDialog(context)
                 //内容布局

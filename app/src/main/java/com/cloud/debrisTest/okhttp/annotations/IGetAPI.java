@@ -31,4 +31,9 @@ public interface IGetAPI {
             @Param("SiteID") int siteID,
             @RequestTimePart("requestTime") long requestTime
     );
+
+    @GET(value = "http://app.108sq.org:920/Api/UserPrestigeInfos?UserIDs=6070%7C438484%7C438484", isFullUrl = true)
+//    @DataParam(value = UserItem.class, isCollection = true)
+    @DataParam(String.class)
+    RetrofitParams requestUserList();
 }

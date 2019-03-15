@@ -1,6 +1,7 @@
 package com.cloud.nets.events;
 
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 
 /**
  * @Author lijinghuan
@@ -24,19 +25,21 @@ public abstract class OnSuccessfulListener<T> {
     /**
      * 请求失败回调
      *
-     * @param t      数据
-     * @param extras 扩展参数
+     * @param t         数据
+     * @param errorType 错误类型
+     * @param extras    扩展参数
      */
-    public void onError(T t, Object... extras) {
+    public void onError(T t, ErrorType errorType, Object... extras) {
         //失败回调
     }
 
     /**
      * 请求失败回调
      *
-     * @param extras 扩展参数
+     * @param errorType 错误类型
+     * @param extras    扩展参数
      */
-    public void onError(Object... extras) {
+    public void onError(ErrorType errorType, Object... extras) {
         //失败回调
     }
 

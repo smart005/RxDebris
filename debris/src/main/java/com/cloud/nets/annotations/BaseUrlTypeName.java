@@ -26,7 +26,7 @@ public @interface BaseUrlTypeName {
      *
      * @return
      */
-    String value() default "";
+    int value() default 0;
 
     /**
      * 接口请求时获取本地登录信息token名称

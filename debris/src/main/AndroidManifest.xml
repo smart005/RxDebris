@@ -36,16 +36,16 @@
         </service>
 
         <activity
-            android:name="com.cloud.images.MultiImageSelectorActivity"
+            android:name="com.cloud.images2.MultiImageSelectorActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.cloud.images.cropimage.CropImageActivity"
+            android:name="com.cloud.images2.cropimage.CropImageActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <meta-data
-            android:name="com.cloud.images.glide.GlideConfiguration"
+            android:name="com.cloud.images2.glide.GlideConfiguration"
             android:value="GlideModule" />
     </application>
 </manifest>

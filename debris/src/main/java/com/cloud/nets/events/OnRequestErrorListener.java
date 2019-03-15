@@ -1,8 +1,6 @@
 package com.cloud.nets.events;
 
-import java.io.IOException;
-
-import okhttp3.Call;
+import com.cloud.nets.beans.RequestErrorInfo;
 
 /**
  * Author lijinghuan
@@ -17,8 +15,7 @@ public interface OnRequestErrorListener {
     /**
      * 网络请求失败
      *
-     * @param call 请求回调
-     * @param e    网络异常
+     * @param errorInfo 网络请求错误信息
      */
-    public void onFailure(Call call, IOException e);
+    public void onFailure(RequestErrorInfo errorInfo);
 }

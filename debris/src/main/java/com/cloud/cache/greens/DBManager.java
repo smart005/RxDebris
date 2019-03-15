@@ -1,11 +1,13 @@
 package com.cloud.cache.greens;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.cloud.cache.MemoryCache;
 import com.cloud.cache.daos.CacheDataItemDao;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
+import com.cloud.objects.logs.Logger;
 
 import org.greenrobot.greendao.AbstractDao;
 
@@ -103,5 +105,39 @@ public class DBManager {
             return null;
         }
         return helperHashMap.get(databaseName);
+    }
+
+    /**
+     * 移除database helper
+     *
+     * @param databaseName 数据库名称
+     */
+    public void removeHelper(String databaseName) {
+        if (TextUtils.isEmpty(databaseName)) {
+            return;
+        }
+        if (!helperHashMap.containsKey(databaseName)) {
+            return;
+        }
+        helperHashMap.remove(databaseName);
+    }
+
+    /**
+     * 关闭数据库(在读取或写入完成后调用)
+     */
+    public void close() {
+        try {
+            RxSqliteOpenHelper helper = DbHelper.getHelper();
+            if (helper == null) {
+                return;
+            }
+            helper.close();
+            //移除缓存
+            RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+            String databaseName = builder.getDatabaseName();
+            DBManager.getInstance().removeHelper(databaseName);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 }

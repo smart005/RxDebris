@@ -9,10 +9,10 @@ import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.callback.StringCallback;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.enums.RequestType;
-import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action4;
 
@@ -35,13 +35,13 @@ public class OkRxHeadRequest extends BaseRequest {
     private String responseString = "";
 
     @Override
-    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action1<RequestState> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique, Action2<String, HashMap<String, String>> headersAction) {
+    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action2<RequestState, ErrorType> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique, Action2<String, HashMap<String, String>> headersAction) {
         if (TextUtils.isEmpty(url)) {
             if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                 reqQueueItemHashMap.remove(apiRequestKey);
             }
             if (completeAction != null) {
-                completeAction.call(RequestState.Completed);
+                completeAction.call(RequestState.Completed,ErrorType.businessProcess);
             }
             return;
         }
@@ -89,7 +89,7 @@ public class OkRxHeadRequest extends BaseRequest {
             }
         }
         setRequestType(RequestType.HEAD);
-        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams());
+        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(), retrofitParams.getFileSuffixParams());
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
         StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
@@ -104,6 +104,8 @@ public class OkRxHeadRequest extends BaseRequest {
             }
         };
         callback.setCancelIntervalCacheCall(isCancelIntervalCacheCall());
+        //数据类型
+        callback.setDataClass(retrofitParams.getDataClass());
         callback.setCallStatus(callStatus);
         //绑定cookies
         bindCookies(client, request.url());

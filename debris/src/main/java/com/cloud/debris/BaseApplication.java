@@ -28,8 +28,6 @@ public abstract class BaseApplication extends Application implements OnApplicati
     private int countActivity = 0;
     //最近创建的activity
     private Activity recentlyCreateActivity = null;
-    // private String accessToken;
-    private final String COMPONENT_INFO = "ComponentInfo{com.changshuo.ui/com.changshuo.ui.activity";
     //应用是否处于后台
     private boolean isAppOnBackground = false;
     //应用堆栈前一状态,1-前台;2-后台;
@@ -128,9 +126,6 @@ public abstract class BaseApplication extends Application implements OnApplicati
                     return;
                 }
                 OnActivityCycleStatusCall cycleStatusCall = (OnActivityCycleStatusCall) activity;
-                if (cycleStatusCall == null) {
-                    return;
-                }
                 //1-前台;2-退至后台;3-已稍毁;
                 cycleStatusCall.onCurrCycleStatus(status);
             }
@@ -180,7 +175,6 @@ public abstract class BaseApplication extends Application implements OnApplicati
 
             @Override
             public void onActivityPaused(Activity activity) {
-                recentlyCreateActivity = null;
                 if (onApplicationLifecycle != null) {
                     onApplicationLifecycle.onActivityPaused(activity);
                 }
@@ -221,7 +215,7 @@ public abstract class BaseApplication extends Application implements OnApplicati
                 //设置当前页面切换至后台状态
                 //1-前台;2-退至后台;3-已稍毁;
                 activitySwitchStatueRunnable.call(activity, 3);
-                if (null != recentlyCreateActivity && activity == recentlyCreateActivity) {
+                if (recentlyCreateActivity != null && activity == recentlyCreateActivity) {
                     recentlyCreateActivity = null;
                 }
                 if (onApplicationLifecycle != null) {
@@ -231,7 +225,9 @@ public abstract class BaseApplication extends Application implements OnApplicati
         });
     }
 
-    //true在后台运行,false在前台
+    /**
+     * @return true在后台运行, false在前台
+     */
     public boolean isAppOnBackground() {
         return isAppOnBackground;
     }
@@ -247,6 +243,8 @@ public abstract class BaseApplication extends Application implements OnApplicati
         List<ActivityManager.RunningTaskInfo> activitys = activityManager.getRunningTasks(Integer.MAX_VALUE);
         for (int i = 0; i < activitys.size(); i++) {
             String baseAcivityName = activitys.get(i).baseActivity.toString();
+            // private String accessToken;
+            String COMPONENT_INFO = "ComponentInfo{com.changshuo.ui/com.changshuo.ui.activity";
             if (baseAcivityName.startsWith(COMPONENT_INFO)) {
                 return true;
             }

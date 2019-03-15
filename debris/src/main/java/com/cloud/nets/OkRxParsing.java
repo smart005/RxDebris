@@ -133,6 +133,7 @@ public class OkRxParsing {
                         } else if (declaredAnnotation.annotationType() == DataParam.class) {
                             DataParam annotation = method.getAnnotation(DataParam.class);
                             retrofitParams.setDataClass(annotation.value());
+                            retrofitParams.setCollectionDataType(annotation.isCollection());
                         } else if (declaredAnnotation.annotationType() == RetCodes.class) {
                             RetCodes annotation = method.getAnnotation(RetCodes.class);
                             if (!ObjectJudge.isNullOrEmpty(annotation.value())) {
@@ -258,20 +259,20 @@ public class OkRxParsing {
                         !(arg instanceof byte[])) {
                     addParams("", key, arg, params, isRemoveEmptyValueField);
                 } else {
-                    putParamValue(key, arg, params, isRemoveEmptyValueField);
+                    putParamValue(key, arg, params, null, isRemoveEmptyValueField);
                 }
             }
         }
         return false;
     }
 
-    private boolean bindSingleParam(Param key, int position, int paramPosition, HashMap<String, Object> params, Object[] args, boolean isRemoveEmptyValueField) {
+    private boolean bindSingleParam(Param key, int position, int paramPosition, HashMap<String, Object> params, HashMap<String, String> suffixParams, Object[] args, boolean isRemoveEmptyValueField) {
         if (key.isJson()) {
             return bindJsonParams(position, key, paramPosition, params, args, isRemoveEmptyValueField);
         } else {
             if (!params.containsKey(key.value())) {
                 Object arg = args[paramPosition];
-                putParamValue(key, arg, params, isRemoveEmptyValueField);
+                putParamValue(key, arg, params, suffixParams, isRemoveEmptyValueField);
             }
         }
         return false;
@@ -283,9 +284,10 @@ public class OkRxParsing {
         }
         int position = 0;
         HashMap<String, Object> params = retrofitParams.getParams();
+        HashMap<String, String> suffixParams = retrofitParams.getFileSuffixParams();
         for (Map.Entry<Param, Integer> paramIntegerEntry : paramAnnotationObject.entrySet()) {
             Param key = paramIntegerEntry.getKey();
-            if (bindSingleParam(key, position, paramIntegerEntry.getValue(), params, args, isRemoveEmptyValueField)) {
+            if (bindSingleParam(key, position, paramIntegerEntry.getValue(), params, suffixParams, args, isRemoveEmptyValueField)) {
                 break;
             }
             position++;
@@ -373,19 +375,52 @@ public class OkRxParsing {
         bindDeletes(method, retrofitParams, args, isRemoveEmptyValueField, annotationType);
     }
 
-    private void putParamValue(Param key, Object arg, HashMap<String, Object> params, boolean isRemoveEmptyValueField) {
-        if (key.isRemoveEmptyValueField()) {
-            if (arg != null && !TextUtils.isEmpty(String.valueOf(arg))) {
-                params.put(key.value(), arg);
+    private void putValueByIsRemoveEmpty(Param key, Object arg, HashMap<String, Object> params, HashMap<String, String> suffixParams) {
+        if (arg == null) {
+            return;
+        }
+        //文件
+        if (arg instanceof File) {
+            File file = (File) arg;
+            if (!file.exists()) {
+                //文件不存在
+                return;
             }
-        } else {
-            if (isRemoveEmptyValueField) {
-                if (arg != null && !TextUtils.isEmpty(String.valueOf(arg))) {
-                    params.put(key.value(), arg);
-                }
-            } else {
-                params.put(key.value(), arg);
+            params.put(key.value(), arg);
+            if (suffixParams != null) {
+                suffixParams.put(key.value(), key.fileSuffixAfterUpload());
             }
+            return;
+        }
+        //字节流
+        if ((arg instanceof byte[]) || (arg instanceof Byte[])) {
+            params.put(key.value(), arg);
+            if (suffixParams != null) {
+                suffixParams.put(key.value(), key.fileSuffixAfterUpload());
+            }
+            return;
+        }
+        if (arg instanceof String) {
+            params.put(key.value(), arg);
+            if (suffixParams != null) {
+                suffixParams.put(key.value(), key.fileSuffixAfterUpload());
+            }
+            return;
+        }
+        params.put(key.value(), arg);
+        if (suffixParams != null) {
+            suffixParams.put(key.value(), key.fileSuffixAfterUpload());
+        }
+    }
+
+    private void putParamValue(Param key, Object arg, HashMap<String, Object> params, HashMap<String, String> suffixParams, boolean isRemoveEmptyValueField) {
+        if (key.isRemoveEmptyValueField() || isRemoveEmptyValueField) {
+            putValueByIsRemoveEmpty(key, arg, params, suffixParams);
+            return;
+        }
+        params.put(key.value(), arg);
+        if (suffixParams != null) {
+            suffixParams.put(key.value(), key.fileSuffixAfterUpload());
         }
     }
 

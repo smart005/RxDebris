@@ -3,12 +3,11 @@ package com.cloud.nets.requests;
 import android.text.TextUtils;
 
 import com.cloud.nets.OkRx;
-import com.cloud.nets.events.OnRequestErrorListener;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ByteRequestItem;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestState;
-import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action3;
 import com.cloud.objects.logs.Logger;
@@ -47,7 +46,7 @@ public class OkRxUploadByteRequest {
                      HashMap<String, Object> params,
                      List<ByteRequestItem> byteRequestItems,
                      final Action3<String, String, HashMap<String, ReqQueueItem>> successAction,
-                     final Action1<RequestState> completeAction,
+                     final Action2<RequestState, ErrorType> completeAction,
                      final Action2<String, String> printLogAction,
                      final String apiRequestKey,
                      final HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -57,7 +56,7 @@ public class OkRxUploadByteRequest {
                     reqQueueItemHashMap.remove(apiRequestKey);
                 }
                 if (completeAction != null) {
-                    completeAction.call(RequestState.Completed);
+                    completeAction.call(RequestState.Completed, ErrorType.none);
                 }
                 return;
             }
@@ -96,16 +95,14 @@ public class OkRxUploadByteRequest {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     if (completeAction != null) {
-                        completeAction.call(RequestState.Error);
+                        completeAction.call(RequestState.Error, ErrorType.netRequest);
                     }
                     if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                         reqQueueItemHashMap.remove(apiRequestKey);
                     }
                     //抛出失败回调到全局监听
-                    OnRequestErrorListener errorListener = OkRx.getInstance().getOnRequestErrorListener();
-                    if (errorListener != null) {
-                        errorListener.onFailure(call, e);
-                    }
+                    ErrorWith errorWith = new ErrorWith();
+                    errorWith.call(call, e);
                 }
 
                 @Override
@@ -117,18 +114,19 @@ public class OkRxUploadByteRequest {
                             successAction.call(responseString, apiRequestKey, reqQueueItemHashMap);
                         }
                     } catch (Exception e) {
+                        Logger.error(e);
+                    } finally {
                         if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                             reqQueueItemHashMap.remove(apiRequestKey);
                         }
                         if (completeAction != null) {
-                            completeAction.call(RequestState.Completed);
+                            completeAction.call(RequestState.Completed, ErrorType.none);
                         }
-                        Logger.error(e);
                     }
                 }
             });
         } catch (Exception e) {
-            completeAction.call(RequestState.Completed);
+            completeAction.call(RequestState.Completed, ErrorType.none);
             if (printLogAction != null) {
                 printLogAction.call(apiRequestKey, "");
             }

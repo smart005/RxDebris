@@ -37,6 +37,10 @@ public class RetrofitParams {
      */
     private HashMap<String, Object> params = null;
     /**
+     * 文件后缀参数
+     */
+    private HashMap<String, String> fileSuffixParams = null;
+    /**
      * del query请求参数
      */
     private HashMap<String, String> delQueryParams = null;
@@ -58,6 +62,10 @@ public class RetrofitParams {
      * 数据类
      */
     private Class dataClass = null;
+    /**
+     * 是否集合数据类型
+     */
+    private boolean isCollectionDataType = false;
     /**
      * 请求验证是否通过(默认为true)
      */
@@ -145,6 +153,13 @@ public class RetrofitParams {
         return params;
     }
 
+    public HashMap<String, String> getFileSuffixParams() {
+        if (fileSuffixParams == null) {
+            fileSuffixParams = new HashMap<String, String>();
+        }
+        return fileSuffixParams;
+    }
+
     public String getCacheKey() {
         return cacheKey;
     }
@@ -186,6 +201,14 @@ public class RetrofitParams {
 
     public void setDataClass(Class dataClass) {
         this.dataClass = dataClass;
+    }
+
+    public boolean isCollectionDataType() {
+        return isCollectionDataType;
+    }
+
+    public void setCollectionDataType(boolean collectionDataType) {
+        isCollectionDataType = collectionDataType;
     }
 
     /**

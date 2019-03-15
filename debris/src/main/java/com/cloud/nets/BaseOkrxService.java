@@ -26,9 +26,9 @@ import java.util.HashMap;
  */
 public class BaseOkrxService extends BaseService {
 
-    private HashMap<String, String> keyUrls = new HashMap<String, String>();
+    private HashMap<Integer, String> keyUrls = new HashMap<Integer, String>();
 
-    private <S extends BaseService> String getBaseUrls(S server, String apiUrlTypeName) {
+    private <S extends BaseService> String getBaseUrls(S server, Integer apiUrlTypeName) {
         if (keyUrls.containsKey(apiUrlTypeName)) {
             String url = keyUrls.get(apiUrlTypeName);
             if (TextUtils.isEmpty(url)) {
@@ -64,7 +64,7 @@ public class BaseOkrxService extends BaseService {
         }
     }
 
-    private <S extends BaseService> String getAnnonBaseUrl(S server, String apiUrlTypeName) {
+    private <S extends BaseService> String getAnnonBaseUrl(S server, Integer apiUrlTypeName) {
         Class<? extends BaseService> cls = server.getClass();
         APIUrlInterfaceClass[] apiUrlInterfaceClasss = new APIUrlInterfaceClass[1];
         getServerAPIUrlAnnon(cls, apiUrlInterfaceClasss);
@@ -153,9 +153,9 @@ public class BaseOkrxService extends BaseService {
                                                        Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction,
                                                        HashMap<String, Object> params) {
         baseSubscriber.setInvokeMethodName(validParam.getInvokeMethodName());
-        requestObject(apiClass, server, baseSubscriber, validParam, new Func2<String, S, String>() {
+        requestObject(apiClass, server, baseSubscriber, validParam, new Func2<String, S, Integer>() {
                     @Override
-                    public String call(S server, String apiUrlTypeName) {
+                    public String call(S server, Integer apiUrlTypeName) {
                         return getBaseUrls(server, apiUrlTypeName);
                     }
                 },

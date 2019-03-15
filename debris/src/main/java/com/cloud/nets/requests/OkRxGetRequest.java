@@ -9,10 +9,10 @@ import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.callback.StringCallback;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.enums.RequestType;
-import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action4;
 
@@ -49,7 +49,7 @@ public class OkRxGetRequest extends BaseRequest {
     public void call(String url,
                      final HashMap<String, String> headers,
                      final Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
-                     final Action1<RequestState> completeAction,
+                     final Action2<RequestState, ErrorType> completeAction,
                      final Action2<String, String> printLogAction,
                      final String apiRequestKey,
                      final HashMap<String, ReqQueueItem> reqQueueItemHashMap,
@@ -60,7 +60,7 @@ public class OkRxGetRequest extends BaseRequest {
                 reqQueueItemHashMap.remove(apiRequestKey);
             }
             if (completeAction != null) {
-                completeAction.call(RequestState.Completed);
+                completeAction.call(RequestState.Completed, ErrorType.none);
             }
             return;
         }
@@ -108,7 +108,7 @@ public class OkRxGetRequest extends BaseRequest {
             }
         }
         setRequestType(RequestType.GET);
-        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams()).get();
+        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(), retrofitParams.getFileSuffixParams()).get();
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
         StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
@@ -123,6 +123,8 @@ public class OkRxGetRequest extends BaseRequest {
             }
         };
         callback.setCancelIntervalCacheCall(isCancelIntervalCacheCall());
+        //数据类型
+        callback.setDataClass(retrofitParams.getDataClass());
         callback.setCallStatus(callStatus);
         //绑定cookies
         bindCookies(client, request.url());

@@ -53,4 +53,16 @@ public class GetService extends BaseOkrxService {
             }
         });
     }
+
+    @ApiCheckAnnotation
+    public void requestUserList(OnSuccessfulListener<String> successfulListener) {
+        BaseSubscriber baseSubscriber = new BaseSubscriber<String, GetService>(this);
+        baseSubscriber.setOnSuccessfulListener(successfulListener);
+        requestObject(IGetAPI.class, this, baseSubscriber, new Func2<RetrofitParams, IGetAPI, HashMap<String, Object>>() {
+            @Override
+            public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
+                return getAPI.requestUserList();
+            }
+        });
+    }
 }

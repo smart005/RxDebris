@@ -1,6 +1,5 @@
 package com.cloud.objects.logs;
 
-import android.os.Build;
 import android.text.TextUtils;
 
 import com.cloud.objects.enums.DateFormatEnum;
@@ -10,10 +9,6 @@ import com.cloud.objects.utils.DateUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Field;
 import java.util.Properties;
 
 /**
@@ -37,60 +32,16 @@ class CrashFileTask {
             if (throwable == null) {
                 return;
             }
-            String crashInfo = getCrashInfo(throwable);
+            String crashInfo = CrashUtils.getCrashInfo(throwable);
             if (TextUtils.isEmpty(crashInfo)) {
                 return;
             }
-            Properties mDeviceCrashInfo = collectCrashDeviceInfo();
+            Properties mDeviceCrashInfo = new Properties();
+            mDeviceCrashInfo.putAll(CrashUtils.getProgramDeviceInfo());
             saveToFile(crashInfo, mDeviceCrashInfo);
         } catch (Exception e) {
             // write log error
         }
-    }
-
-    /**
-     * 收集程序崩溃的设备信息
-     * <p>
-     * param ctx
-     */
-    private Properties collectCrashDeviceInfo() {
-        Properties mDeviceCrashInfo = new Properties();
-        Field[] fields = Build.class.getDeclaredFields();
-        for (Field field : fields) {
-            try {
-                // setAccessible(boolean flag)
-                // 将此对象的 accessible 标志设置为指示的布尔值。
-                // 通过设置Accessible属性为true,才能对私有变量进行访问，不然会得到一个IllegalAccessException的异常
-                field.setAccessible(true);
-                mDeviceCrashInfo.put(field.getName(), field.get(null) + "");
-            } catch (Exception e) {
-                // collectCrashDeviceInfo
-            }
-        }
-        return mDeviceCrashInfo;
-    }
-
-    /**
-     * 获取错误信息
-     * <p>
-     * param ex
-     * return
-     */
-    private String getCrashInfo(Throwable ex) {
-        Writer info = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(info);
-        // printStackTrace(PrintWriter s)
-        // 将此 throwable 及其追踪输出到指定的 PrintWriter
-        ex.printStackTrace(printWriter);
-        // getCause() 返回此 throwable 的 cause；如果 cause 不存在或未知，则返回 null。
-        Throwable cause = ex.getCause();
-        while (cause != null) {
-            cause.printStackTrace(printWriter);
-            cause = cause.getCause();
-        }
-        String result = info.toString();
-        printWriter.close();
-        return result;
     }
 
     /**

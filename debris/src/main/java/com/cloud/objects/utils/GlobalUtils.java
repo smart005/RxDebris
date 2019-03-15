@@ -331,38 +331,6 @@ public class GlobalUtils {
         return domainresult;
     }
 
-    /**
-     * 获得屏幕宽度
-     * <p>
-     * param context
-     * return
-     */
-    public static int getScreenWidth(Context context) {
-        WindowManager wm = ObjectManager.getWindowManager(context);
-        if (wm == null) {
-            return 720;
-        }
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(outMetrics);
-        return outMetrics.widthPixels;
-    }
-
-    /**
-     * 获得屏幕高度
-     * <p>
-     * param context
-     * return
-     */
-    public static int getScreenHeight(Context context) {
-        WindowManager wm = ObjectManager.getWindowManager(context);
-        if (wm == null) {
-            return 1440;
-        }
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(outMetrics);
-        return outMetrics.heightPixels;
-    }
-
     public static void postOnAnimation(View view, Runnable runnable) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             postOnAnimationJellyBean(view, runnable);

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class ConvertUtils {
@@ -297,6 +298,12 @@ public class ConvertUtils {
         return time;
     }
 
+    /**
+     * 将字符串转成全角字符
+     *
+     * @param input 要转换的内容
+     * @return 全角字符
+     */
     public static String toDBC(String input) {
         char c[] = input.toCharArray();
         for (int i = 0; i < c.length; i++) {
@@ -306,8 +313,8 @@ public class ConvertUtils {
                 c[i] = (char) (c[i] - 65248);
             }
         }
-        String returnString = new String(c);
-        return returnString;
+        String s = new String(c);
+        return s;
     }
 
     public static String toAmount(String format, double amount) {
@@ -319,12 +326,20 @@ public class ConvertUtils {
         HashMap<String, V> map = new HashMap<String, V>();
         if (jsonObject != null && !jsonObject.isEmpty()) {
             for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                map.put(entry.getKey(), (V) entry.getValue());
+                V value = (V) entry.getValue();
+                map.put(entry.getKey(), value);
             }
         }
         return map;
     }
 
+    /**
+     * 将内容通过特定的字符分隔成列表
+     *
+     * @param content 要处理的内容
+     * @param split   分隔符
+     * @return 处理后列表
+     */
     public static List<String> toList(String content, String split) {
         List<String> lst = new ArrayList<String>();
         if (!TextUtils.isEmpty(content)) {
@@ -350,20 +365,99 @@ public class ConvertUtils {
      *
      * @param lst   要连接的集合
      * @param split 连接分隔符
-     * @return
+     * @return 已拼接字符串
      */
-    public static String toJoin(List<String> lst, String split) {
+    public static <T> String toJoin(List<T> lst, String split) {
         if (ObjectJudge.isNullOrEmpty(lst)) {
             return "";
         }
-        StringBuffer buffer = new StringBuffer();
-        for (String item : lst) {
-            buffer.append(item + split);
+        StringBuilder builder = new StringBuilder();
+        for (T t : lst) {
+            if (t == null) {
+                continue;
+            }
+            builder.append(t).append(split);
         }
-        if (buffer.length() > 0) {
-            buffer.delete(buffer.length() - split.length(), buffer.length());
+        if (builder.length() > 0) {
+            builder.delete(builder.length() - split.length(), builder.length());
         }
-        return buffer.toString();
+        return builder.toString();
+    }
+
+    /**
+     * 将列表根据split作为分隔符进行连接
+     * key-value中间用=号连接
+     *
+     * @param lst   要连接的集合
+     * @param split 连接分隔符
+     * @return 已拼接字符串
+     */
+    public static <K, V> String toJoin(Map<K, V> lst, String split) {
+        if (ObjectJudge.isNullOrEmpty(lst)) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<K, V> entry : lst.entrySet()) {
+            if (entry == null) {
+                continue;
+            }
+            builder.append(entry.getKey())
+                    .append("=")
+                    .append(entry.getValue())
+                    .append(split);
+        }
+        if (builder.length() > 0) {
+            builder.delete(builder.length() - split.length(), builder.length());
+        }
+        return builder.toString();
+    }
+
+    /**
+     * 将列表根据split作为分隔符进行连接
+     *
+     * @param lst   要连接的集合
+     * @param split 连接分隔符
+     * @return 已拼接字符串
+     */
+    public static <T> String toJoin(T[] lst, String split) {
+        if (ObjectJudge.isNullOrEmpty(lst)) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (T t : lst) {
+            if (t == null) {
+                continue;
+            }
+            builder.append(t).append(split);
+        }
+        if (builder.length() > 0) {
+            builder.delete(builder.length() - split.length(), builder.length());
+        }
+        return builder.toString();
+    }
+
+    /**
+     * 将列表根据split作为分隔符进行连接
+     *
+     * @param lst   要连接的集合
+     * @param split 连接分隔符
+     * @return 拼接后的字符串
+     */
+    public static <T> String toJoin(Set<T> lst, String split) {
+        if (ObjectJudge.isNullOrEmpty(lst)) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (T t : lst) {
+            if (t == null) {
+                continue;
+            }
+            builder.append(t).append(split);
+        }
+        if (builder.length() > 0) {
+            builder.delete(builder.length() - split.length(), builder.length());
+        }
+        return builder.toString();
     }
 
     /**
@@ -371,22 +465,23 @@ public class ConvertUtils {
      *
      * @param split  连接分隔符
      * @param params 要连接的内容
-     * @return
+     * @return 拼接后内容
      */
-    public static String toJoin(String split, String... params) {
+    public static <T> String toJoin(String split, T... params) {
         if (ObjectJudge.isNullOrEmpty(params)) {
             return "";
         }
-        StringBuffer buffer = new StringBuffer();
-        for (String param : params) {
-            if (!TextUtils.isEmpty(param)) {
-                buffer.append(param.trim() + split);
+        StringBuilder builder = new StringBuilder();
+        for (T t : params) {
+            if (t == null) {
+                continue;
             }
+            builder.append(t).append(split);
         }
-        if (buffer.length() > 0) {
-            buffer.delete(buffer.length() - split.length(), buffer.length());
+        if (builder.length() > 0) {
+            builder.delete(builder.length() - split.length(), builder.length());
         }
-        return buffer.toString();
+        return builder.toString();
     }
 
     /**
@@ -395,7 +490,7 @@ public class ConvertUtils {
      * @param lst        要连接的集合
      * @param startSplit 每一项开始连接符
      * @param endSplit   每一项开始连接符
-     * @return
+     * @return 拼接后的内容
      */
     public static String toJoin(List<String> lst, String startSplit, String endSplit) {
         if (ObjectJudge.isNullOrEmpty(lst)) {
@@ -403,7 +498,7 @@ public class ConvertUtils {
         }
         StringBuilder builder = new StringBuilder();
         for (String param : lst) {
-            builder.append(String.format("%s%s%s", startSplit, param, endSplit));
+            builder.append(startSplit).append(param).append(endSplit);
         }
         return builder.toString().trim();
     }
@@ -427,7 +522,7 @@ public class ConvertUtils {
      *
      * @param object 字符串对象
      * @param params 参数集合
-     * @return
+     * @return 已合并的参数集
      */
     public static String[] toJoinArray(String object, String... params) {
         if (object == null || ObjectJudge.isNullOrEmpty(params)) {

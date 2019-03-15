@@ -13,8 +13,8 @@ import android.widget.RelativeLayout;
 
 import com.cloud.debris.R;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.ObjectManager;
 import com.cloud.objects.events.Action1;
-import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.PixelUtils;
 import com.cloud.objects.utils.ValidUtils;
 import com.cloud.objects.utils.ViewUtils;
@@ -71,7 +71,7 @@ public class NCombinedView extends LinearLayout {
             return;
         }
         if (entity.getTotalWidth() <= 0) {
-            entity.setTotalWidth(GlobalUtils.getScreenWidth(getContext()));
+            entity.setTotalWidth(ObjectManager.getScreenWidth(getContext()));
         }
         List<NCombinedItem> combinedItems = entity.getConfig();
         for (NCombinedItem combinedItem : combinedItems) {

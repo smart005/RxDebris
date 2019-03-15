@@ -8,7 +8,6 @@ import android.view.View;
 
 import com.cloud.components.themes.OnThemeViewKeyListener;
 import com.cloud.debris.BaseFragmentActivity;
-import com.cloud.debris.utils.RedirectUtils;
 import com.cloud.debrisTest.databinding.H5ViewBinding;
 import com.cloud.mixed.RxMixed;
 import com.cloud.mixed.h5.JavascriptInterface;
@@ -35,7 +34,9 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         RxMixed.getInstance().registerH5Listener(calls);
+
         binding = DataBindingUtil.setContentView(this, R.layout.h5_view);
+
         RxMixed.getInstance().setOnH5ImageSelectedListener(this);
         binding.headTtv.setOnThemeViewKeyListener(this);
 
@@ -53,21 +54,8 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
 
     public OnH5WebViewListener calls = new OnH5WebViewListener() {
         @Override
-        public void addUserAgent(List<String> userAgents) {
-            //追加自定义代理
-        }
-
-        @Override
         public void onTitle(String title) {
-            //获取到网页的标题
             binding.headTtv.setTitle(title);
-        }
-
-        @Override
-        public boolean onUrlListener(String url) {
-            //如果要做url拦截可在这里处理
-            //返回true此链接不作渲染处理,false继续渲染;
-            return false;
         }
 
         @android.webkit.JavascriptInterface
@@ -78,43 +66,55 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
         }
 
         @Override
-        public void onLoaded(WebView view, boolean success, int errorCode, String description, String url) {
-            //h5加载完成后回调
+        public void addUserAgent(List<String> userAgents) {
+            super.addUserAgent(userAgents);
         }
 
         @Override
-        public void nativeSchemeCall(String scheme) {
-            //h5通过scheme调用native回调
-            //调用方式:
-            //1.url?scheme=[url encode编码后的scheme]或以第二种方式;
-            //2.android调用cl_cloud_group_jsm.nativeSchemeCall(encodeURIComponent(schemeUrl));
-            //ios调用window.webkit.messageHandlers.nativeSchemeCall.postMessage(encodeURIComponent(schemeUrl));
+        public boolean onUrlListener(String url) {
+            return super.onUrlListener(url);
+        }
+
+        @Override
+        public void onLoaded(WebView view, boolean success, int errorCode, String description, String url) {
+            super.onLoaded(view, success, errorCode, description, url);
+        }
+
+        @Override
+        public void getAPIMethod(String extras) {
+            super.getAPIMethod(extras);
         }
 
         @Override
         public void getSelectText(String selectText) {
-            //h5文本选择后回调
-            //需要调用binding.h5Test.getSelectText();方法才能回调
+            super.getSelectText(selectText);
         }
 
         @Override
-        public void onCallTel(String tel) {
-            //拨打电话功能需要在头部加上<meta name="format-detection" content="telephone=yes"/>
-            RedirectUtils.startTel(getActivity(), tel);
-        }
-
-        @Override
-        public void onCallSms(String sms) {
-            //拨打电话功能需要在头部加上<meta name="format-detection" content="telephone=yes"/>
-            RedirectUtils.startSms(getActivity(), sms);
+        public void nativeSchemeCall(String scheme) {
+            super.nativeSchemeCall(scheme);
         }
 
         @Override
         public void download(String url, String name) {
-            //打开的链接若是apk、rar则会回调此方法
+            super.download(url, name);
+        }
+
+        @Override
+        public void onCallTel(String tel) {
+            super.onCallTel(tel);
+        }
+
+        @Override
+        public void onCallSms(String sms) {
+            super.onCallSms(sms);
+        }
+
+        @Override
+        public boolean onJsConfirm(WebView view, String url, String message) {
+            return super.onJsConfirm(view, url, message);
         }
     };
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

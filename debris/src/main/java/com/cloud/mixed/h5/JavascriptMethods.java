@@ -48,6 +48,8 @@ public class JavascriptMethods {
     @JavascriptInterface
     public void getSelectText(String selectText) {
         //在web选择文本后回调
+        //h5文本选择后回调
+        //需要调用binding.h5Test.getSelectText();方法才能回调
         if (methods != null) {
             methods.getSelectText(selectText);
         }
@@ -61,6 +63,11 @@ public class JavascriptMethods {
     @android.webkit.JavascriptInterface
     @JavascriptInterface
     public void nativeSchemeCall(String scheme) {
+        //h5通过scheme调用native回调
+        //调用方式:
+        //1.url?scheme=[url encode编码后的scheme]或以第二种方式;
+        //2.android调用cl_cloud_group_jsm.nativeSchemeCall(encodeURIComponent(schemeUrl));
+        //ios调用window.webkit.messageHandlers.nativeSchemeCall.postMessage(encodeURIComponent(schemeUrl));
         if (methods != null) {
             methods.nativeSchemeCall(scheme);
         }
@@ -75,6 +82,7 @@ public class JavascriptMethods {
     @android.webkit.JavascriptInterface
     @JavascriptInterface
     public void download(String url, String name) {
+        //打开的链接若是apk、rar则会回调此方法
         if (methods != null) {
             methods.download(url, name);
         }
@@ -86,7 +94,7 @@ public class JavascriptMethods {
      * @param tel web format (tel:xxxxxxxx)
      */
     public void onCallTel(String tel) {
-
+        //拨打电话功能需要在头部加上<meta name="format-detection" content="telephone=yes"/>
     }
 
     /**
@@ -95,7 +103,7 @@ public class JavascriptMethods {
      * @param sms web format (sms:xxxxxxxx)
      */
     public void onCallSms(String sms) {
-
+        //拨打电话功能需要在头部加上<meta name="format-detection" content="telephone=yes"/>
     }
 
     /**

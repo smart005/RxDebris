@@ -1,7 +1,7 @@
 package com.cloud.debrisTest.images;
 
-import com.cloud.images.glide.ImageRuleProperties;
-import com.cloud.images.glide.OnImageUrlCombinationListener;
+import com.cloud.images2.glide.ImageRuleProperties;
+import com.cloud.images2.glide.OnImageUrlCombinationListener;
 
 /**
  * Author lijinghuan

@@ -1,21 +1,19 @@
 package com.cloud.nets.requests;
 
-import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 import com.cloud.nets.OkRx;
 import com.cloud.nets.OkRxKeys;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.DataType;
+import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnHeaderCookiesListener;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.enums.RequestType;
-import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
-import com.cloud.objects.events.Action3;
 import com.cloud.objects.events.Action4;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.GlobalUtils;
@@ -85,7 +83,7 @@ public class BaseRequest {
     public void call(String url,
                      HashMap<String, String> headers,
                      Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
-                     Action1<RequestState> completeAction,
+                     Action2<RequestState, ErrorType> completeAction,
                      Action2<String, String> printLogAction,
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap,
@@ -94,17 +92,17 @@ public class BaseRequest {
         //子类重载方法
     }
 
-    public void call(String url,
-                     HashMap<String, String> headers,
-                     HashMap<String, Object> params,
-                     Action3<Bitmap, String, HashMap<String, ReqQueueItem>> successAction,
-                     Action1<RequestState> completeAction,
-                     String apiRequestKey,
-                     HashMap<String, ReqQueueItem> reqQueueItemHashMap,
-                     String apiUnique,
-                     Action2<String, HashMap<String, String>> headersAction) {
-        //子类重载方法
-    }
+//    public void call(String url,
+//                     HashMap<String, String> headers,
+//                     HashMap<String, Object> params,
+//                     Action3<Bitmap, String, HashMap<String, ReqQueueItem>> successAction,
+//                     Action1<RequestState> completeAction,
+//                     String apiRequestKey,
+//                     HashMap<String, ReqQueueItem> reqQueueItemHashMap,
+//                     String apiUnique,
+//                     Action2<String, HashMap<String, String>> headersAction) {
+//        //子类重载方法
+//    }
 
     public void setRequestContentType(RequestContentType requestContentType) {
         this.requestContentType = requestContentType;
@@ -112,7 +110,8 @@ public class BaseRequest {
 
     protected Request.Builder getBuilder(String url,
                                          HashMap<String, String> headers,
-                                         HashMap<String, Object> params) {
+                                         HashMap<String, Object> params,
+                                         HashMap<String, String> suffixParams) {
         Request.Builder builder = new Request.Builder();
         if (requestType == RequestType.GET) {
             url = addGetRequestParams(url, params);
@@ -128,7 +127,7 @@ public class BaseRequest {
             if (requestType == RequestType.HEAD) {
                 builder.head();
             } else {
-                addRequestParams(builder, params);
+                addRequestParams(builder, params, suffixParams);
             }
         }
         return builder;
@@ -167,23 +166,44 @@ public class BaseRequest {
     }
 
     //如果参数集合包含file或byte[]则无论requestContentType是否为json均以Form方式提交
-    private void addRequestParams(Request.Builder builder, HashMap<String, Object> params) {
+    private void addRequestParams(Request.Builder builder, HashMap<String, Object> params, HashMap<String, String> suffixParams) {
         ValidResult validResult = validParams(params);
         if (!ObjectJudge.isNullOrEmpty(validResult.streamParamKeys) ||
                 !ObjectJudge.isNullOrEmpty(validResult.fileParamKeys)) {
             MultipartBody.Builder requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
+            //文件后缀(若File类型默认取原后缀,若Byte默认以rxtiny为后缀)
+            String suffix = "rxtiny";
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 if (validResult.streamParamKeys.contains(entry.getKey())) {
                     //以字节流的形式上传文件
                     MediaType mediaType = MediaType.parse("application/octet-stream");
                     RequestBody body = RequestBody.create(mediaType, (byte[]) entry.getValue());
-                    String filename = String.format("%s.rxtiny", GlobalUtils.getGuidNoConnect());
+                    if (suffixParams != null && suffixParams.containsKey(entry.getKey())) {
+                        String mfx = suffixParams.get(entry.getKey());
+                        if (!TextUtils.isEmpty(mfx)) {
+                            suffix = mfx;
+                        }
+                    }
+                    String filename = String.format("%s.%s", GlobalUtils.getGuidNoConnect(), suffix);
+                    //添加参数
                     requestBody.addFormDataPart(entry.getKey(), filename, body);
                 } else if (validResult.fileParamKeys.contains(entry.getKey())) {
                     //以文件的形式上传文件
                     MediaType mediaType = MediaType.parse("multipart/form-data");
-                    RequestBody body = RequestBody.create(mediaType, (File) entry.getValue());
-                    String filename = String.format("%s.rxtiny", GlobalUtils.getGuidNoConnect());
+                    File file = (File) entry.getValue();
+                    RequestBody body = RequestBody.create(mediaType, file);
+                    //后缀若参数中有指定则优先取参数后缀，反之默认从文件中取
+                    if (suffixParams != null && suffixParams.containsKey(entry.getKey())) {
+                        String mfx = suffixParams.get(entry.getKey());
+                        if (!TextUtils.isEmpty(mfx)) {
+                            suffix = mfx;
+                        } else {
+                            suffix = GlobalUtils.getSuffixName(file.getName());
+                        }
+                    } else {
+                        suffix = GlobalUtils.getSuffixName(file.getName());
+                    }
+                    String filename = String.format("%s.%s", GlobalUtils.getGuidNoConnect(), suffix);
                     requestBody.addFormDataPart(entry.getKey(), filename, body);
                 } else if ((entry.getValue() instanceof List) || (entry.getValue() instanceof Map)) {
                     requestBody.addFormDataPart(entry.getKey(), JsonUtils.toStr(entry.getValue()));
@@ -281,9 +301,9 @@ public class BaseRequest {
         }
         //判断原url中是否包含?
         if (StringUtils.isContains(url, "?")) {
-            return String.format("%s&time=%s&%s", url, System.currentTimeMillis(), builder.toString());
+            return String.format("%s&%s&time=%s", url, builder.toString(), System.currentTimeMillis());
         } else {
-            return String.format("%s?time=%s&%s", url, System.currentTimeMillis(), builder.toString());
+            return String.format("%s?%s&time=%s", url, builder.toString(), System.currentTimeMillis());
         }
     }
 
@@ -298,6 +318,14 @@ public class BaseRequest {
         //拼接headers
         if (!ObjectJudge.isNullOrEmpty(headers)) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
+                builder.append(String.format("_%s_%s", entry.getKey(), entry.getValue()));
+            }
+        }
+        //拼接cookies参数
+        OnHeaderCookiesListener cookiesListener = OkRx.getInstance().getOnHeaderCookiesListener();
+        Map<String, String> map = cookiesListener.onCookiesCall();
+        if (!ObjectJudge.isNullOrEmpty(map)) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
                 builder.append(String.format("_%s_%s", entry.getKey(), entry.getValue()));
             }
         }

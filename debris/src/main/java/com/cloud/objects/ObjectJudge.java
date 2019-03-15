@@ -22,6 +22,8 @@ import com.cloud.objects.events.Action1;
 import com.cloud.objects.storage.FilenameUtils;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
+import com.cloud.objects.utils.JsonUtils;
+import com.cloud.objects.utils.ValidUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -543,5 +545,66 @@ public class ObjectJudge {
         List<String> lst = Arrays.asList(collections);
         boolean contains = lst.contains(condition);
         return contains;
+    }
+
+    /**
+     * 检测json字符串是否符合
+     *
+     * @param json json字符串
+     * @return true-json;false-非json;
+     */
+    public static boolean isJson(String json) {
+        if (ObjectJudge.isEmptyString(json)) {
+            return false;
+        }
+        //判断是否为json格式{...}或[...]
+        String regex = "^(\\{(.+)\\})$|^(\\[(.+)\\])$";
+        if (ValidUtils.valid(regex, json)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 检测json字符串是否为空
+     *
+     * @param json json字符串
+     * @return true-空;false-非空;
+     */
+    public static boolean isEmptyJson(String json) {
+        if (ObjectJudge.isEmptyString(json)) {
+            return true;
+        }
+        //判断是否为json格式{...}或[...]
+        String regex = "^(\\{(.+)\\})$|^(\\[(.+)\\])$";
+        if (ValidUtils.valid(regex, json)) {
+            //如果对象直接包含数组如{["id",3,"name":"名称"]}
+            regex = "^(\\{\\[)(.+)(\\]\\})$";
+            if (ValidUtils.valid(regex, json)) {
+                return false;
+            } else {
+                //如果数组中包含对象
+                regex = "^(\\[\\{)(.+)(\\}\\])$";
+                if (ValidUtils.valid(regex, json)) {
+                    return false;
+                } else {
+                    //如果只对象
+                    HashMap map = JsonUtils.parseT(json, HashMap.class);
+                    if (map != null && map.size() > 0) {
+                        return false;
+                    } else {
+                        int length = json.replace(" ", "").trim().length();
+                        if (length > 2) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } else {
+            return true;
+        }
     }
 }

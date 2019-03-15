@@ -8,14 +8,15 @@ package com.cloud.nets.events;
  * Modifier:
  * ModifyContent:
  */
-public interface OnBeanParsingJsonListener<T> {
+public interface OnBeanParsingJsonListener {
 
     /**
      * json解析处理
      *
-     * @param response  数据
-     * @param dataClass 解析数据类型
+     * @param response             数据
+     * @param dataClass            解析数据类型
+     * @param isCollectionDataType true-集合;false-对象;
      * @return 返回bean对象
      */
-    public T onBeanParsingJson(String response, Class<T> dataClass);
+    public Object onBeanParsingJson(String response, Class dataClass, boolean isCollectionDataType);
 }

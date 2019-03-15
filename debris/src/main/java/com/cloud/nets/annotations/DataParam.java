@@ -38,4 +38,11 @@ public @interface DataParam {
      * @return
      */
     DataPropertyItem[] properties() default {};
+
+    /**
+     * true-集合(示例List<?>);false-对象;
+     *
+     * @return 默认false
+     */
+    boolean isCollection() default false;
 }
