@@ -122,6 +122,10 @@ public class RetrofitParams {
      * 间隔缓存时间
      */
     private long intervalCacheTime = 0;
+    /**
+     * 请求方法名
+     */
+    private String invokeMethodName = "";
 
     public RequestType getRequestType() {
         return requestType;
@@ -351,5 +355,13 @@ public class RetrofitParams {
 
     public void setIntervalCacheTime(long intervalCacheTime) {
         this.intervalCacheTime = intervalCacheTime;
+    }
+
+    public String getInvokeMethodName() {
+        return invokeMethodName;
+    }
+
+    public void setInvokeMethodName(String invokeMethodName) {
+        this.invokeMethodName = invokeMethodName;
     }
 }

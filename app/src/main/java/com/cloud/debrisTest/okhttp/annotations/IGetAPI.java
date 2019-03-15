@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Modifier:
  * ModifyContent:
  */
-@BaseUrlTypeName(value = ServiceAPI.mtalksvc, contentType = RequestContentType.Json)
+@BaseUrlTypeName(value = ServiceAPI.sq, contentType = RequestContentType.Json)
 public interface IGetAPI {
 
     @GET(value = "/AHome/GetRecommendInfor")

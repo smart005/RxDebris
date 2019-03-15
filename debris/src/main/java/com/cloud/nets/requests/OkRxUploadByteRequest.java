@@ -100,9 +100,6 @@ public class OkRxUploadByteRequest {
                     if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                         reqQueueItemHashMap.remove(apiRequestKey);
                     }
-                    //抛出失败回调到全局监听
-                    ErrorWith errorWith = new ErrorWith();
-                    errorWith.call(call, e);
                 }
 
                 @Override

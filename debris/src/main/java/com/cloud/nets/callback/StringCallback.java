@@ -2,12 +2,13 @@ package com.cloud.nets.callback;
 
 import android.text.TextUtils;
 
+import com.cloud.cache.RxStacks;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
-import com.cloud.nets.requests.ErrorWith;
+import com.cloud.nets.requests.NetErrorWith;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestState;
@@ -17,6 +18,7 @@ import com.cloud.objects.logs.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import okhttp3.Call;
@@ -60,6 +62,12 @@ public abstract class StringCallback implements Callback {
     private boolean isCancelIntervalCacheCall = false;
     //返回数据类型
     private Class dataClass = null;
+    //请求方法名
+    private String requestMethodName = "";
+    //headers
+    private Map<String, String> headers = null;
+    //请求参数
+    private Map<String, Object> params = null;
 
     public boolean isCancelIntervalCacheCall() {
         return isCancelIntervalCacheCall;
@@ -78,6 +86,18 @@ public abstract class StringCallback implements Callback {
     }
 
     protected abstract void onSuccessCall(String responseString);
+
+    public void setRequestMethodName(String requestMethodName) {
+        this.requestMethodName = requestMethodName;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
+    }
 
     public StringCallback(Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                           Action2<RequestState, ErrorType> completeAction,
@@ -116,25 +136,27 @@ public abstract class StringCallback implements Callback {
             if (completeAction != null) {
                 completeAction.call(RequestState.Error, ErrorType.netRequest);
             }
+            NetErrorWith netErrorWith = new NetErrorWith();
+            netErrorWith.call(requestMethodName, call, e, headers, params);
             return;
         }
         if (!call.isExecuted()) {
             if (!failReConnect(call)) {
                 //抛出失败回调到全局监听
-                ErrorWith errorWith = new ErrorWith();
-                errorWith.call(call, e);
                 if (completeAction != null) {
                     completeAction.call(RequestState.Error, ErrorType.netRequest);
                 }
+                NetErrorWith netErrorWith = new NetErrorWith();
+                netErrorWith.call(requestMethodName, call, e, headers, params);
             }
             return;
         }
         //抛出失败回调到全局监听
-        ErrorWith errorWith = new ErrorWith();
-        errorWith.call(call, e);
         if (completeAction != null) {
             completeAction.call(RequestState.Error, ErrorType.netRequest);
         }
+        NetErrorWith netErrorWith = new NetErrorWith();
+        netErrorWith.call(requestMethodName, call, e, headers, params);
     }
 
     private boolean failReConnect(Call call) {
@@ -240,6 +262,8 @@ public abstract class StringCallback implements Callback {
             if (completeAction != null) {
                 completeAction.call(RequestState.Completed, ErrorType.none);
             }
+            //清除本次请求堆栈信息
+            RxStacks.clearBusStacks(requestMethodName);
         }
     }
 }

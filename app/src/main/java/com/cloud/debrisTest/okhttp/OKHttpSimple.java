@@ -25,14 +25,14 @@ public class OKHttpSimple extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.okhttp_view);
         binding.setModel(new NetModel());
 
-        //getService.requestRecommandInfo(42, recommandListener);
+        getService.requestRecommandInfo(42, recommandListener);
 
-        getService.requestUserList(new OnSuccessfulListener<String>() {
-            @Override
-            public void onSuccessful(String userItems, DataType dataType, Object... extras) {
-
-            }
-        });
+//        getService.requestUserList(new OnSuccessfulListener<String>() {
+//            @Override
+//            public void onSuccessful(String userItems, DataType dataType, Object... extras) {
+//
+//            }
+//        });
     }
 
     private OnSuccessfulListener<RecommandInfo> recommandListener = new OnSuccessfulListener<RecommandInfo>() {

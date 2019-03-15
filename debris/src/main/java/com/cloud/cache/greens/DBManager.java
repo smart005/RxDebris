@@ -1,7 +1,6 @@
 package com.cloud.cache.greens;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.cloud.cache.MemoryCache;
 import com.cloud.cache.daos.CacheDataItemDao;
@@ -10,8 +9,6 @@ import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.logs.Logger;
 
 import org.greenrobot.greendao.AbstractDao;
-
-import java.util.HashMap;
 
 /**
  * Author lijinghuan
@@ -24,7 +21,6 @@ import java.util.HashMap;
 public class DBManager {
 
     private static DBManager dbManager = null;
-    private HashMap<String, RxSqliteOpenHelper> helperHashMap = new HashMap<String, RxSqliteOpenHelper>();
     private static Context applicationContext = null;
 
     public static DBManager getInstance() {
@@ -51,26 +47,8 @@ public class DBManager {
         RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
         String databaseName = builder.getDatabaseName();
         Class<? extends AbstractDao<?, ?>>[] array = toJoinArray(CacheDataItemDao.class, daoClasses);
-        RxSqliteOpenHelper mhelper = new RxSqliteOpenHelper(context, databaseName, listener, array);
-        helperHashMap.put(databaseName, mhelper);
+        new RxSqliteOpenHelper(context, databaseName, listener, array);
         MemoryCache.getInstance().setSoftCache("CacheDatabasePathListener", listener);
-        return this;
-    }
-
-    /**
-     * 绑定所有greendao生成的dao实体(数据字段升级时会自动迁移)
-     *
-     * @param daoClasses 表对应的dao类
-     * @return DBManager
-     */
-    public DBManager bindDaos(Class<? extends AbstractDao<?, ?>>... daoClasses) {
-        Object listener = MemoryCache.getInstance().getSoftCache("CacheDatabasePathListener");
-        if (listener instanceof OnDatabasePathListener) {
-            OnDatabasePathListener pathListener = (OnDatabasePathListener) listener;
-            if (applicationContext != null) {
-                return initialize(applicationContext, pathListener, daoClasses);
-            }
-        }
         return this;
     }
 
@@ -94,32 +72,15 @@ public class DBManager {
      * @return
      */
     public RxSqliteOpenHelper getHelper(String databaseName) {
-        if (!helperHashMap.containsKey(databaseName)) {
-            if (applicationContext != null) {
-                Object listener = MemoryCache.getInstance().getSoftCache("CacheDatabasePathListener");
-                if (listener instanceof OnDatabasePathListener) {
-                    OnDatabasePathListener databasePathListener = (OnDatabasePathListener) listener;
-                    initialize(applicationContext, databasePathListener);
-                }
+        if (applicationContext != null) {
+            Object listener = MemoryCache.getInstance().getSoftCache("CacheDatabasePathListener");
+            if (listener instanceof OnDatabasePathListener) {
+                OnDatabasePathListener databasePathListener = (OnDatabasePathListener) listener;
+                RxSqliteOpenHelper helper = new RxSqliteOpenHelper(applicationContext, databaseName, databasePathListener);
+                return helper;
             }
-            return null;
         }
-        return helperHashMap.get(databaseName);
-    }
-
-    /**
-     * 移除database helper
-     *
-     * @param databaseName 数据库名称
-     */
-    public void removeHelper(String databaseName) {
-        if (TextUtils.isEmpty(databaseName)) {
-            return;
-        }
-        if (!helperHashMap.containsKey(databaseName)) {
-            return;
-        }
-        helperHashMap.remove(databaseName);
+        return null;
     }
 
     /**
@@ -132,10 +93,6 @@ public class DBManager {
                 return;
             }
             helper.close();
-            //移除缓存
-            RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
-            String databaseName = builder.getDatabaseName();
-            DBManager.getInstance().removeHelper(databaseName);
         } catch (Exception e) {
             Logger.error(e);
         }

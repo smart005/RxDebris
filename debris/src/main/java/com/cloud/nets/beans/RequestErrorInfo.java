@@ -1,7 +1,6 @@
 package com.cloud.nets.beans;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Author lijinghuan
@@ -17,9 +16,17 @@ public class RequestErrorInfo {
      */
     private String url = "";
     /**
+     * 公共头
+     */
+    private String commonHeaders = "";
+    /**
+     * params headers
+     */
+    private String headers = "";
+    /**
      * 请求参数
      */
-    private Map<String, Object> params = null;
+    private String params = "";
     /**
      * 请求状态码
      */
@@ -32,7 +39,15 @@ public class RequestErrorInfo {
      * 请求堆栈集合信息
      * (请求请求过程中所有线程不同堆栈信息)
      */
-    private Map<String, String> stacks = null;
+    private TreeSet<String> stacks = null;
+    /**
+     * 本次请求类型
+     */
+    private String requestType = "";
+    /**
+     * 本次请求协议
+     */
+    private String requestProtocol = "";
 
     public String getUrl() {
         return url;
@@ -42,14 +57,27 @@ public class RequestErrorInfo {
         this.url = url;
     }
 
-    public Map<String, Object> getParams() {
-        if (params == null) {
-            params = new HashMap<String, Object>();
-        }
+    public String getCommonHeaders() {
+        return commonHeaders;
+    }
+
+    public void setCommonHeaders(String commonHeaders) {
+        this.commonHeaders = commonHeaders;
+    }
+
+    public String getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(String headers) {
+        this.headers = headers;
+    }
+
+    public String getParams() {
         return params;
     }
 
-    public void setParams(Map<String, Object> params) {
+    public void setParams(String params) {
         this.params = params;
     }
 
@@ -69,14 +97,30 @@ public class RequestErrorInfo {
         this.message = message;
     }
 
-    public Map<String, String> getStacks() {
+    public TreeSet<String> getStacks() {
         if (stacks == null) {
-            stacks = new HashMap<String, String>();
+            stacks = new TreeSet<String>();
         }
         return stacks;
     }
 
-    public void setStacks(Map<String, String> stacks) {
+    public void setStacks(TreeSet<String> stacks) {
         this.stacks = stacks;
+    }
+
+    public String getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
+    }
+
+    public String getRequestProtocol() {
+        return requestProtocol;
+    }
+
+    public void setRequestProtocol(String requestProtocol) {
+        this.requestProtocol = requestProtocol;
     }
 }

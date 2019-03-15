@@ -2,6 +2,9 @@ package com.cloud.objects.config;
 
 import android.text.TextUtils;
 
+import com.cloud.cache.MemoryCache;
+import com.cloud.objects.events.OnNetworkConnectListener;
+
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 
@@ -20,6 +23,8 @@ public class RxAndroid {
     //保存部分基本信息
     private HashMap<String, Object> softConfigMap = new HashMap<String, Object>();
     private SoftReference<HashMap<String, Object>> softConfig = new SoftReference<HashMap<String, Object>>(softConfigMap);
+    //网络状态事件监听
+    private OnNetworkConnectListener onNetworkConnectListener = null;
 
     private RxAndroid() {
         //外部不能直接实例
@@ -268,5 +273,32 @@ public class RxAndroid {
             builder = new RxAndroidBuilder();
         }
         return builder;
+    }
+
+    /**
+     * 获取网络连接监听
+     *
+     * @return 网络连接监听
+     */
+    public OnNetworkConnectListener getOnNetworkConnectListener() {
+        if (onNetworkConnectListener == null) {
+            Object connectListener = MemoryCache.getInstance().getSoftCache("$_NetworkConnectListener");
+            if (connectListener instanceof OnNetworkConnectListener) {
+                onNetworkConnectListener = (OnNetworkConnectListener) connectListener;
+            }
+        }
+        return onNetworkConnectListener;
+    }
+
+    /**
+     * 设置网络连接监听
+     *
+     * @param listener 网络连接监听
+     * @return RxAndroid
+     */
+    public RxAndroid setOnNetworkConnectListener(OnNetworkConnectListener listener) {
+        this.onNetworkConnectListener = listener;
+        MemoryCache.getInstance().setSoftCache("$_NetworkConnectListener", listener);
+        return this;
     }
 }

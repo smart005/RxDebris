@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.cloud.cache.CacheDataItem;
 import com.cloud.cache.RxCache;
+import com.cloud.cache.RxStacks;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.callback.StringCallback;
@@ -11,11 +12,13 @@ import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
+import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestContentType;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.enums.RequestType;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action4;
+import com.cloud.objects.events.OnNetworkConnectListener;
 
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +49,7 @@ public class OkRxDeleteRequest extends BaseRequest {
                 reqQueueItemHashMap.remove(apiRequestKey);
             }
             if (completeAction != null) {
-                completeAction.call(RequestState.Completed,ErrorType.none);
+                completeAction.call(RequestState.Completed, ErrorType.none);
             }
             return;
         }
@@ -93,8 +96,19 @@ public class OkRxDeleteRequest extends BaseRequest {
                 }
             }
         }
+
+        //如果网络未连接则不作请求
+        OnNetworkConnectListener networkConnectListener = RxAndroid.getInstance().getOnNetworkConnectListener();
+        if (networkConnectListener != null && !networkConnectListener.isConnected()) {
+            if (completeAction != null) {
+                completeAction.call(RequestState.Error, ErrorType.businessProcess);
+                completeAction.call(RequestState.Completed, ErrorType.none);
+            }
+            return;
+        }
+
         setRequestType(RequestType.DELETE);
-        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(),retrofitParams.getFileSuffixParams());
+        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(), retrofitParams.getFileSuffixParams());
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
         StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
@@ -108,6 +122,9 @@ public class OkRxDeleteRequest extends BaseRequest {
                 }
             }
         };
+        callback.setHeaders(retrofitParams.getHeadParams());
+        callback.setParams(retrofitParams.getParams());
+        callback.setRequestMethodName(retrofitParams.getInvokeMethodName());
         callback.setCancelIntervalCacheCall(isCancelIntervalCacheCall());
         //数据类型
         callback.setDataClass(retrofitParams.getDataClass());
@@ -116,5 +133,7 @@ public class OkRxDeleteRequest extends BaseRequest {
         bindCookies(client, request.url());
         //请求网络
         client.newCall(request).enqueue(callback);
+        //记录请求时的堆栈信息
+        RxStacks.setStack(retrofitParams.getInvokeMethodName(), new Exception());
     }
 }

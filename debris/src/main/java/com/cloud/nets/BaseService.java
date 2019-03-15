@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import com.cloud.cache.RxStacks;
 import com.cloud.nets.annotations.ApiCheckAnnotation;
 import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.ReturnCodeFilter;
@@ -45,6 +46,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -118,22 +121,12 @@ public class BaseService {
         this.baseSubscriber = baseSubscriber;
     }
 
-    /**
-     * API请求完成(结束)
-     */
     protected void onRequestCompleted() {
-
+        //请求完成(结束)
     }
 
     protected void onRequestError() {
-        if (baseSubscriber == null) {
-            return;
-        }
-        OnSuccessfulListener successfulListener = baseSubscriber.getOnSuccessfulListener();
-        if (successfulListener == null) {
-            return;
-        }
-        successfulListener.onError(null, baseSubscriber.getExtra());
+        //请求错误
     }
 
     protected void baseConfig(final BaseService baseService,
@@ -165,6 +158,9 @@ public class BaseService {
                 if (returnCodeFilter == null) {
                     returnCodeFilter = validParam.getReturnCodeFilter();
                 }
+                //记录当前线程调用的堆栈信息
+                RxStacks.setStack(validParam.getInvokeMethodName(), new Exception());
+                retrofitParams.setInvokeMethodName(validParam.getInvokeMethodName());
                 //请求api
                 reqQueueItemHashMap.put(apiRequestKey, new ReqQueueItem());
                 if (retrofitParams.getRequestType() == RequestType.BYTES) {
@@ -1022,7 +1018,9 @@ public class BaseService {
                 finishedRequest(baseSubscriber);
                 return;
             }
-            ThreadPoolUtils.getInstance().singleTaskExecute(new ApiRequestRunnable<I, S>(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction));
+            ScheduledThreadPoolExecutor executor = ThreadPoolUtils.getInstance().getMultiTaskExecutor();
+            ApiRequestRunnable<I, S> runnable = new ApiRequestRunnable<>(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction, new Exception());
+            executor.schedule(runnable, 0, TimeUnit.SECONDS);
         } catch (Exception e) {
             finishedRequest(baseSubscriber);
         }
@@ -1036,23 +1034,28 @@ public class BaseService {
         private OkRxValidParam validParam;
         private RetrofitParams retrofitParams;
         private Func2<String, S, Integer> urlAction;
+        private Exception exception = null;
 
         public ApiRequestRunnable(Class<I> apiClass,
                                   S server,
                                   final BaseSubscriber<Object, S> baseSubscriber,
                                   OkRxValidParam validParam,
                                   RetrofitParams retrofitParams,
-                                  Func2<String, S, Integer> urlAction) {
+                                  Func2<String, S, Integer> urlAction,
+                                  Exception exception) {
             this.apiClass = apiClass;
             this.server = server;
             this.baseSubscriber = baseSubscriber;
             this.validParam = validParam;
             this.retrofitParams = retrofitParams;
             this.urlAction = urlAction;
+            this.exception = exception;
         }
 
         @Override
         public void run() {
+            //记录之前main线程堆栈信息
+            RxStacks.setStack(validParam.getInvokeMethodName(), exception);
             apiRequest(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction);
         }
     }
@@ -1147,7 +1150,8 @@ public class BaseService {
                         }
                         successfulListener.onCompleted(baseSubscriber.getExtra());
                     }
-                }, apiRequestKey);
+                },
+                apiRequestKey);
 
         RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
         if (builder.isDebug()) {

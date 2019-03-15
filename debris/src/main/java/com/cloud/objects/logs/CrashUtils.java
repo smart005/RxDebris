@@ -82,7 +82,7 @@ public class CrashUtils {
         }
         if (Build.VERSION.SDK_INT >= 23) {
             //操作系统
-            map.put("BASE_OS", Build.VERSION.BASE_OS);
+            map.put("BASE_OS_2", Build.VERSION.BASE_OS);
         }
         if (Build.VERSION.SDK_INT >= 26) {
             //设备序列号

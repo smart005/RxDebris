@@ -2,6 +2,7 @@ package com.cloud.debrisTest;
 
 import com.cloud.cache.daos.CacheDataItemDao;
 import com.cloud.cache.daos.OptionsItemDao;
+import com.cloud.cache.daos.StackInfoItemDao;
 import com.cloud.cache.greens.DBManager;
 import com.cloud.cache.greens.OnDatabasePathListener;
 import com.cloud.debris.BaseApplication;
@@ -60,7 +61,8 @@ public class TestApplication extends BaseApplication {
                     }
                 },
                 CacheDataItemDao.class,
-                OptionsItemDao.class);
+                OptionsItemDao.class,
+                StackInfoItemDao.class);
         //dao对象也可以通过以下方式绑定
         //.bindDaos();
         //网络框架初始化

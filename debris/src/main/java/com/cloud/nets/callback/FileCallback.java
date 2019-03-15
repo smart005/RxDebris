@@ -2,7 +2,6 @@ package com.cloud.nets.callback;
 
 import com.cloud.nets.OkRx;
 import com.cloud.nets.properties.ReqQueueItem;
-import com.cloud.nets.requests.ErrorWith;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.events.Action1;
 import com.cloud.objects.logs.Logger;
@@ -91,9 +90,6 @@ public class FileCallback implements Callback {
             ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
             queueItem.setReqNetCompleted(true);
         }
-        //抛出失败回调到全局监听
-        ErrorWith errorWith = new ErrorWith();
-        errorWith.call(call, e);
     }
 
     @Override
