@@ -70,6 +70,7 @@ public class BaseService {
     private BaseSubscriber baseSubscriber = null;
     private HashMap<String, StringBuffer> logmaps = new HashMap<String, StringBuffer>();
     //请求队列
+    @Deprecated
     private HashMap<String, ReqQueueItem> reqQueueItemHashMap = new HashMap<String, ReqQueueItem>();
     private Handler mhandler = new Handler(Looper.getMainLooper());
     private ReturnCodeFilter returnCodeFilter = null;
@@ -283,6 +284,7 @@ public class BaseService {
                     return;
                 }
                 sendErrorAction(errorAction, baseService, ErrorType.businessProcess);
+                finishedRequest(baseService, completedAction);
                 return;
             }
             //如果是集合则取消拦截
@@ -364,13 +366,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -438,13 +435,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -496,13 +488,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -553,13 +540,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -611,13 +593,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -669,13 +646,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -727,13 +699,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -785,13 +752,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem != null && queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },
@@ -842,13 +804,8 @@ public class BaseService {
                     public void call(RequestState requestState, ErrorType errorType) {
                         if (requestState == RequestState.Error) {
                             sendErrorAction(errorAction, baseService, errorType);
-                        }
-                        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-                            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-                            if (queueItem.isSuccess() && queueItem.isReqNetCompleted()) {
-                                reqQueueItemHashMap.remove(apiRequestKey);
-                                finishedRequest(baseService, completedAction);
-                            }
+                        } else if (requestState == RequestState.Completed) {
+                            finishedRequest(baseService, completedAction);
                         }
                     }
                 },

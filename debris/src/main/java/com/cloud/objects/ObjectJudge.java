@@ -558,7 +558,7 @@ public class ObjectJudge {
             return false;
         }
         //判断是否为json格式{...}或[...]
-        String regex = "^(\\{(.+)\\})$|^(\\[(.+)\\])$";
+        String regex = "^(\\{(.+)*\\})$|^(\\[(.+)*\\])$";
         if (ValidUtils.valid(regex, json)) {
             return true;
         } else {
@@ -577,7 +577,7 @@ public class ObjectJudge {
             return true;
         }
         //判断是否为json格式{...}或[...]
-        String regex = "^(\\{(.+)\\})$|^(\\[(.+)\\])$";
+        String regex = "^(\\{(.+)*\\})$|^(\\[(.+)*\\])$";
         if (ValidUtils.valid(regex, json)) {
             //如果对象直接包含数组如{["id",3,"name":"名称"]}
             regex = "^(\\{\\[)(.+)(\\]\\})$";

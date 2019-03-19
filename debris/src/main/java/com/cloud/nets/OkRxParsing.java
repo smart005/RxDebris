@@ -414,7 +414,8 @@ public class OkRxParsing {
     }
 
     private void putParamValue(Param key, Object arg, HashMap<String, Object> params, HashMap<String, String> suffixParams, boolean isRemoveEmptyValueField) {
-        if (key.isRemoveEmptyValueField() || isRemoveEmptyValueField) {
+        boolean isRemove = key.isRemoveEmptyValueField() || isRemoveEmptyValueField;
+        if (isRemove) {
             putValueByIsRemoveEmpty(key, arg, params, suffixParams);
             return;
         }

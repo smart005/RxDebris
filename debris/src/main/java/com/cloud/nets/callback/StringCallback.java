@@ -126,6 +126,7 @@ public abstract class StringCallback implements Callback {
         if (call.isCanceled()) {
             if (completeAction != null) {
                 completeAction.call(RequestState.Error, ErrorType.netRequest);
+                completeAction.call(RequestState.Completed, ErrorType.none);
             }
             return;
         }
@@ -135,6 +136,8 @@ public abstract class StringCallback implements Callback {
             //这里做dns处理
             if (completeAction != null) {
                 completeAction.call(RequestState.Error, ErrorType.netRequest);
+
+                completeAction.call(RequestState.Completed, ErrorType.none);
             }
             NetErrorWith netErrorWith = new NetErrorWith();
             netErrorWith.call(requestMethodName, call, e, headers, params);
@@ -154,6 +157,7 @@ public abstract class StringCallback implements Callback {
         //抛出失败回调到全局监听
         if (completeAction != null) {
             completeAction.call(RequestState.Error, ErrorType.netRequest);
+            completeAction.call(RequestState.Completed, ErrorType.none);
         }
         NetErrorWith netErrorWith = new NetErrorWith();
         netErrorWith.call(requestMethodName, call, e, headers, params);

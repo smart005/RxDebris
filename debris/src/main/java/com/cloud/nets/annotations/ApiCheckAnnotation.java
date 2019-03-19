@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiCheckAnnotation {
     /**
-     * token验证,默认为false;
-     * <p>
-     * return true:自动取token值并传入;false:不传;
+     * token验证,默认为false[有token则带,空值则不带];
+     *
+     * @return true:自动取token值并传入;false:不传;
      */
     boolean isTokenValid() default false;
 

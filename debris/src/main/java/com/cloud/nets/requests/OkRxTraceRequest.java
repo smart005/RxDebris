@@ -99,7 +99,7 @@ public class OkRxTraceRequest extends BaseRequest {
         OnNetworkConnectListener networkConnectListener = RxAndroid.getInstance().getOnNetworkConnectListener();
         if (networkConnectListener != null && !networkConnectListener.isConnected()) {
             if (completeAction != null) {
-                completeAction.call(RequestState.Error, ErrorType.businessProcess);
+                completeAction.call(RequestState.Error, ErrorType.netRequest);
                 completeAction.call(RequestState.Completed, ErrorType.none);
             }
             return;

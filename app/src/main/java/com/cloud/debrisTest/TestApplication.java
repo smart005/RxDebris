@@ -18,9 +18,11 @@ import com.cloud.nets.events.OnHeaderCookiesListener;
 import com.cloud.nets.events.OnRequestErrorListener;
 import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.objects.config.RxAndroid;
+import com.cloud.objects.events.OnNetworkConnectListener;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.storage.StorageUtils;
 import com.cloud.objects.utils.JsonUtils;
+import com.cloud.objects.utils.NetworkUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -38,7 +40,14 @@ public class TestApplication extends BaseApplication {
 
     @Override
     public void onApplicationCreated() {
-        RxAndroid.getInstance().getBuilder()
+        RxAndroid.getInstance()
+                .setOnNetworkConnectListener(new OnNetworkConnectListener() {
+                    @Override
+                    public boolean isConnected() {
+                        return NetworkUtils.isConnected(getApplicationContext());
+                    }
+                })
+                .getBuilder()
                 .setDebug(true)
                 //日志打印时统一标识
                 .setLoggeruTag("gscloud")
