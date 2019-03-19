@@ -351,10 +351,10 @@ public class OkRx {
     }
 
     /**
-     * 清除cookies
+     * 清除token信息
      * 在用户退出登录时调用
      */
-    public void clearCookies() {
+    public void clearToken() {
         OkHttpClient client = getOkHttpClient();
         if (client == null) {
             return;
@@ -369,6 +369,7 @@ public class OkRx {
             return;
         }
         cookieStore.removeAllCookie();
+
     }
 
     /**

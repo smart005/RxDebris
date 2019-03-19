@@ -1,7 +1,5 @@
 package com.cloud.nets.beans;
 
-import android.text.TextUtils;
-
 import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.BaseUrlTypeName;
 import com.cloud.nets.enums.CallStatus;
@@ -76,10 +74,6 @@ public class RetrofitParams {
     private boolean isJoinUrl = false;
 
     private BaseUrlTypeName urlTypeName = null;
-    /**
-     * token名称默认为token
-     */
-    private String tokenName = "token";
     /**
      * 数据提交方式
      */
@@ -264,17 +258,6 @@ public class RetrofitParams {
 
     public void setUrlTypeName(BaseUrlTypeName urlTypeName) {
         this.urlTypeName = urlTypeName;
-    }
-
-    public String getTokenName() {
-        if (TextUtils.isEmpty(tokenName)) {
-            tokenName = "token";
-        }
-        return tokenName;
-    }
-
-    public void setTokenName(String tokenName) {
-        this.tokenName = tokenName;
     }
 
     public RequestContentType getRequestContentType() {

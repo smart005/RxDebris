@@ -1,5 +1,7 @@
 package com.cloud.nets.properties;
 
+import com.cloud.nets.beans.TokenProperties;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,6 +43,10 @@ public class OkRxConfigParams {
      * 是否进行网络状态码拦截(默认为false)
      */
     private boolean isNetStatusCodeIntercept = false;
+    /**
+     * token配置(用于接口请求验证)
+     */
+    private TokenProperties tokenConfig = null;
 
     public long getConnectTimeout() {
         return connectTimeout;
@@ -143,5 +149,16 @@ public class OkRxConfigParams {
 
     public void setNetStatusCodeIntercept(boolean netStatusCodeIntercept) {
         isNetStatusCodeIntercept = netStatusCodeIntercept;
+    }
+
+    public TokenProperties getTokenConfig() {
+        if (tokenConfig == null) {
+            tokenConfig = new TokenProperties();
+        }
+        return tokenConfig;
+    }
+
+    public void setTokenConfig(TokenProperties tokenConfig) {
+        this.tokenConfig = tokenConfig;
     }
 }

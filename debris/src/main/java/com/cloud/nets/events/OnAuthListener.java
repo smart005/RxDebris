@@ -11,13 +11,6 @@ package com.cloud.nets.events;
 public interface OnAuthListener {
 
     /**
-     * 获取权限token
-     *
-     * @return token
-     */
-    public String getAuthToken();
-
-    /**
      * 登录回调
      *
      * @param requestMethodName 接口请求对应的方法名

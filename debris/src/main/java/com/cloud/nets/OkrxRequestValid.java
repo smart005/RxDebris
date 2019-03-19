@@ -2,18 +2,21 @@ package com.cloud.nets;
 
 import android.text.TextUtils;
 
-import com.cloud.cache.MemoryCache;
 import com.cloud.nets.annotations.ApiCheckAnnotation;
 import com.cloud.nets.annotations.RequestTimeLimit;
-import com.cloud.nets.events.OnAuthListener;
-import com.cloud.nets.events.OnRequestNetCheckListener;
+import com.cloud.nets.beans.TokenProperties;
+import com.cloud.nets.enums.TokenLocation;
+import com.cloud.nets.events.OnHeaderCookiesListener;
+import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.nets.properties.OkRxValidParam;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.utils.ConvertUtils;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Author lijinghuan
@@ -93,41 +96,62 @@ public class OkrxRequestValid {
         }
         validParam.setApiCheckAnnotation(apiCheckAnnotation);
         //检查网络
-        netValid(validParam, apiCheckAnnotation.isTokenValid());
+        tokenValid(validParam, apiCheckAnnotation.isTokenValid());
     }
 
-    private void netValid(OkRxValidParam validParam, boolean isTokenValid) {
-        //从缓存列表中获取监听对象,如果对象为null或类型不匹配再继续请求
-        Object o = MemoryCache.getInstance().get(Keys.netConnectListenerKey);
-        if (o == null || !(o instanceof OnRequestNetCheckListener)) {
-            validParam.setFlag(true);
-            return;
-        }
-        OnRequestNetCheckListener listener = (OnRequestNetCheckListener) o;
-        if (listener.onNetConnectCheck()) {
-            //token校验
-            if (isTokenValid) {
-                //获取token,如果监听null或不匹配再继续请求由返回结果来校验
-                Object tokenListener = MemoryCache.getInstance().get(Keys.tokenRequestListenerKey);
-                if (tokenListener != null && (tokenListener instanceof OnAuthListener)) {
-                    OnAuthListener authListener = (OnAuthListener) tokenListener;
-                    if (TextUtils.isEmpty(authListener.getAuthToken())) {
-                        validParam.setFlag(false);
-                        validParam.setNeedLogin(true);
-                    } else {
-                        validParam.setNeedLogin(false);
-                        validParam.setFlag(true);
-                    }
-                } else {
-                    validParam.setFlag(true);
+    private String getTokenValue(OkRxValidParam validParam, OkRxConfigParams configParams, TokenProperties tokenConfig, TokenLocation location) {
+        String token = "";
+        if (location == TokenLocation.header) {
+            HashMap<String, String> headerParams = OkRx.getInstance().getHeaderParams();
+            //参数为null或不包含token则从全局头信息取
+            if (headerParams == null || !headerParams.containsKey(tokenConfig.getTokenName())) {
+                HashMap<String, String> headers = configParams.getHeaders();
+                if (headers != null && headers.containsKey(tokenConfig.getTokenName())) {
+                    token = headers.get(tokenConfig.getTokenName());
                 }
             } else {
+                token = headerParams.get(tokenConfig.getTokenName());
+                //如果此时为空也从全局头信息取
+                if (TextUtils.isEmpty(token)) {
+                    HashMap<String, String> headers = configParams.getHeaders();
+                    if (headers != null && headers.containsKey(tokenConfig.getTokenName())) {
+                        token = headers.get(tokenConfig.getTokenName());
+                    }
+                }
+            }
+        } else if (location == TokenLocation.cookie) {
+            //从cookie中获取token信息
+            OnHeaderCookiesListener cookiesListener = OkRx.getInstance().getOnHeaderCookiesListener();
+            if (cookiesListener != null) {
+                Map<String, String> map = cookiesListener.onCookiesCall();
+                if (map != null && map.containsKey(tokenConfig.getTokenName())) {
+                    token = map.get(tokenConfig.getTokenName());
+                }
+            }
+        } else {
+            validParam.setFlag(true);
+        }
+        return token;
+    }
+
+    private void tokenValid(OkRxValidParam validParam, boolean isTokenValid) {
+        //token校验
+        if (isTokenValid) {
+            //获取配置参数
+            OkRxConfigParams configParams = OkRx.getInstance().getOkRxConfigParams();
+            //获取token配置
+            TokenProperties tokenConfig = configParams.getTokenConfig();
+            TokenLocation location = tokenConfig.getLocation();
+            String tokenValue = getTokenValue(validParam, configParams, tokenConfig, location);
+            if (TextUtils.isEmpty(tokenValue)) {
+                validParam.setFlag(false);
+                validParam.setNeedLogin(true);
+            } else {
+                validParam.setNeedLogin(false);
                 validParam.setFlag(true);
             }
         } else {
-            //无网络调用缓存数据;
             validParam.setFlag(true);
-            validParam.setLoadCacheData(true);
         }
     }
 

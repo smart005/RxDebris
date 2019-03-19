@@ -59,10 +59,6 @@ import java.util.concurrent.TimeUnit;
 public class BaseService {
 
     /**
-     * token值
-     */
-    private String token = "";
-    /**
      * 接口名
      */
     private String apiName = "";
@@ -74,26 +70,6 @@ public class BaseService {
     private HashMap<String, ReqQueueItem> reqQueueItemHashMap = new HashMap<String, ReqQueueItem>();
     private Handler mhandler = new Handler(Looper.getMainLooper());
     private ReturnCodeFilter returnCodeFilter = null;
-
-    /**
-     * 获取token值
-     */
-
-    public String getToken() {
-        if (token == null) {
-            token = "";
-        }
-        return token;
-    }
-
-    /**
-     * 设置token值
-     * <p>
-     * param token
-     */
-    public void setToken(String token) {
-        this.token = token;
-    }
 
     /**
      * 获取接口名
@@ -145,15 +121,6 @@ public class BaseService {
                 HashMap<String, String> mHeaders = bindGlobalHeaders();
                 //接口头信息
                 mHeaders.putAll(retrofitParams.getHeadParams());
-                //检查头部是否已添加token，没有则添加
-                if (!TextUtils.isEmpty(token)) {
-                    if (validParam.getApiCheckAnnotation().isTokenValid()) {
-                        String tokenName = retrofitParams.getTokenName();
-                        if (!TextUtils.isEmpty(tokenName)) {
-                            mHeaders.put(tokenName, token);
-                        }
-                    }
-                }
 
                 //设置返回码监听
                 if (returnCodeFilter == null) {
@@ -1039,8 +1006,6 @@ public class BaseService {
                     retrofitParams.setRequestUrl(retrofitParams.getRequestUrl() + "/");
                 }
             }
-            //设置token名字
-            retrofitParams.setTokenName(retrofitParams.getUrlTypeName().tokenName());
         }
         //NO_CACHE: 不使用缓存,该模式下,cacheKey,cacheTime 参数均无效
         //DEFAULT: 按照HTTP协议的默认缓存规则，例如有304响应头时缓存。
@@ -1126,7 +1091,6 @@ public class BaseService {
                 logsb.append("===============================================================\n");
                 logsb.append(String.format("接口名:%s\n", retrofitParams.getApiName()));
                 logsb.append(String.format("请求类型:%s\n", retrofitParams.getRequestType().name()));
-                logsb.append(String.format("请求token:%s=%s\n", retrofitParams.getTokenName(), token));
                 logsb.append(String.format("请求地址:%s\n", retrofitParams.getRequestUrl()));
                 logsb.append(String.format("Header信息:%s\n", JsonUtils.toStr(retrofitParams.getHeadParams())));
                 if (retrofitParams.getRequestType() == RequestType.DELETE) {
