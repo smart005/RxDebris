@@ -36,6 +36,8 @@ import okhttp3.OkHttpClient;
 public class OkRx {
 
     private static OkRx okRx = null;
+    //是否要重新获取配置参数
+    private boolean isUpdateConfig = false;
     private OkRxConfigParams okRxConfigParams = null;
     private OnConfigParamsListener onConfigParamsListener = null;
     //application context 在cookies持久化时使用(为空时cookies使用内存持久化)
@@ -112,6 +114,7 @@ public class OkRx {
      */
     public OkRx initialize(Context context) {
         this.applicationContext = context;
+        this.isUpdateConfig = true;
         if (onConfigParamsListener != null) {
             okRxConfigParams = onConfigParamsListener.onConfigParamsCall(getDefaultConfigParams());
         }
@@ -192,10 +195,11 @@ public class OkRx {
      * @return
      */
     public OkRxConfigParams getOkRxConfigParams() {
-        if (okRxConfigParams == null) {
+        if (okRxConfigParams == null || isUpdateConfig) {
             if (onConfigParamsListener != null) {
                 okRxConfigParams = onConfigParamsListener.onConfigParamsCall(getDefaultConfigParams());
             }
+            isUpdateConfig = false;
         }
         //再次判断若全局参数为空则重新创建参数
         if (okRxConfigParams == null) {

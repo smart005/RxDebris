@@ -1058,21 +1058,16 @@ public class BaseService {
                         //失败回调
                         OnSuccessfulListener successfulListener = baseSubscriber.getOnSuccessfulListener();
                         if (successfulListener != null) {
+                            //错误回调
                             successfulListener.onError(null, errorType, baseSubscriber.getExtra());
                             successfulListener.onError(errorType, baseSubscriber.getExtra());
+                            //完成回调
+                            successfulListener.onCompleted(baseSubscriber.getExtra());
                         }
                     }
                 },
-                new Action0() {
-                    @Override
-                    public void call() {
-                        OnSuccessfulListener successfulListener = baseSubscriber.getOnSuccessfulListener();
-                        if (successfulListener == null) {
-                            return;
-                        }
-                        successfulListener.onCompleted(baseSubscriber.getExtra());
-                    }
-                },
+                //此处完成回调不回调外面完成回调，若有其它业务或判断可在这里处理；
+                null,
                 apiRequestKey);
 
         RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();

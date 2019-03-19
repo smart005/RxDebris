@@ -57,7 +57,6 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
      * 是否对回调结果进行验证
      */
     private boolean isValidCallResult = true;
-    private HashMap<String, ReqQueueItem> reqQueueItemHashMap = null;
     private String apiRequestKey = "";
     private Handler mhandler = new Handler(Looper.getMainLooper());
     private ScheduledThreadPoolExecutor multiTaskExecutor = null;
@@ -171,7 +170,6 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
     }
 
     public void onNext(T t, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiRequestKey, DataType dataType, long requestStartTime, long requestTotalTime) {
-        this.reqQueueItemHashMap = reqQueueItemHashMap;
         this.apiRequestKey = apiRequestKey;
         //如果isProcessNetResults==false则直接返回交由外面处理
         OkRxConfigParams okRxConfigParams = OkRx.getInstance().getOkRxConfigParams();
@@ -247,22 +245,6 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
             if (onSuccessfulListener != null) {
                 onSuccessfulListener.onSuccessful(params.t, params.dataType, extra);
             }
-            requestFinishWith();
-        }
-    }
-
-    private void requestFinishWith() {
-        if (reqQueueItemHashMap == null || TextUtils.isEmpty(apiRequestKey)) {
-            return;
-        }
-        if (reqQueueItemHashMap.containsKey(apiRequestKey)) {
-            ReqQueueItem queueItem = reqQueueItemHashMap.get(apiRequestKey);
-            queueItem.setSuccess(true);//这里只作为临时变量，如果成功先回调那么在onRequestCompleted中有用;
-            if (queueItem.isReqNetCompleted() && queueItem.isSuccess()) {
-                onCompleted();
-                reqQueueItemHashMap.remove(apiRequestKey);
-            }
-        } else {
             onCompleted();
         }
     }
@@ -286,7 +268,7 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
             try {
                 if (t == null) {
                     successWith(t, ResultState.Fail, dataType, requestStartTime, requestTotalTime);
-                    requestFinishWith();
+                    onCompleted();
                     return;
                 }
                 if (TextUtils.isEmpty(apiName)) {
@@ -330,7 +312,7 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
                 }
             } catch (Exception e) {
                 successWith(t, ResultState.Fail, dataType, requestStartTime, requestTotalTime);
-                requestFinishWith();
+                onCompleted();
                 Logger.error(e);
             }
         }
@@ -349,10 +331,6 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
     }
 
     private void unLoginSend(T t) {
-        if (baseT != null) {
-            //请求token api请求中的token清空
-            baseT.setToken("");
-        }
         final OnAuthListener authListener = OkRx.getInstance().getOnAuthListener();
         if (authListener != null) {
             HandlerManager.getInstance().post(new Runnable1<T>(t) {

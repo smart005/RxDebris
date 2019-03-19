@@ -15,7 +15,6 @@ import java.util.Set;
  * ModifyContent:
  */
 public class OkRxConfigParams {
-
     //连接超时时间(毫秒)
     private long connectTimeout = 10000;
     //读取超时时间(毫秒)
