@@ -85,6 +85,7 @@ public class ValidUtils {
         // Android (http://b.android.com/58753) but it forces composition of API declarations which is
         // the recommended pattern.
         if (service.getInterfaces().length > 0) {
+            //继承了其它接口
             return false;
         }
         return true;

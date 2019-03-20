@@ -8,6 +8,7 @@ import com.cloud.objects.enums.RequestType;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Author lijinghuan
@@ -32,8 +33,9 @@ public class RetrofitParams {
     private HashMap<String, String> headParams = null;
     /**
      * 请求参数
+     * (对于当次请求,线程间切换数据都是顺序传递的,因此使用TreeMap[非线程安全结构]不影响)
      */
-    private HashMap<String, Object> params = null;
+    private TreeMap<String, Object> params = null;
     /**
      * 文件后缀参数
      */
@@ -144,9 +146,9 @@ public class RetrofitParams {
         return headParams;
     }
 
-    public HashMap<String, Object> getParams() {
+    public TreeMap<String, Object> getParams() {
         if (params == null) {
-            params = new HashMap<String, Object>();
+            params = new TreeMap<String, Object>();
         }
         return params;
     }

@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -821,7 +822,7 @@ public class BaseService {
 
     private List<ByteRequestItem> getUploadByteItems(RetrofitParams retrofitParams) {
         List<ByteRequestItem> lst = new ArrayList<ByteRequestItem>();
-        HashMap<String, Object> params = retrofitParams.getParams();
+        TreeMap<String, Object> params = retrofitParams.getParams();
         if (ObjectJudge.isNullOrEmpty(params)) {
             return lst;
         }
@@ -851,7 +852,7 @@ public class BaseService {
         if (ObjectJudge.isNullOrEmpty(retrofitParams.getParams())) {
             return params2;
         }
-        HashMap<String, Object> params = retrofitParams.getParams();
+        TreeMap<String, Object> params = retrofitParams.getParams();
         for (HashMap.Entry<String, Object> entry : params.entrySet()) {
             //参数名
             String key = entry.getKey();

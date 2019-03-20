@@ -3,6 +3,7 @@ package com.cloud.debrisTest.okhttp.services;
 import com.cloud.debrisTest.okhttp.UrlsProvider;
 import com.cloud.debrisTest.okhttp.annotations.IGetAPI;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
+import com.cloud.debrisTest.okhttp.beans.UserItem;
 import com.cloud.nets.BaseOkrxService;
 import com.cloud.nets.BaseSubscriber;
 import com.cloud.nets.annotations.APIUrlInterfaceClass;
@@ -49,7 +50,10 @@ public class GetService extends BaseOkrxService {
         requestObject(IGetAPI.class, this, baseSubscriber, new Func2<RetrofitParams, IGetAPI, HashMap<String, Object>>() {
             @Override
             public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
-                return getAPI.requestRecommandInfo(siteId, 3);
+                UserItem userItem = new UserItem("1", "一年级");
+                UserItem userItem1 = new UserItem("2", "二年级");
+                UserItem userItem2 = new UserItem("3", "三年级");
+                return getAPI.requestRecommandInfo(userItem, userItem1);
             }
         });
     }

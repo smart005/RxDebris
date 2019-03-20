@@ -28,9 +28,15 @@ public @interface Param {
     boolean isRemoveEmptyValueField() default true;
 
     /**
-     * true:除了file/int/Interger/double/Double/float/Float
-     * 其它类型直接转成json;若为string则直接传;如果设置true且value()值为空时其它参数将被忽略;
-     * false:按正常字段输入
+     * true
+     * 1.file/int/double/float/long/byte/string类型作为普通参数提交;
+     * --value()为空
+     * ----1.参数个数1个,对象或集合类型转为json作为本次提交的数据;
+     * ----2.参数个数大于1且含有普通参数时,则忽略此类参数;
+     * ----3.所有参数该值均为空则把所有参数转为数组以json形式作为本次提交的数据;
+     * --value()不为空
+     * ----1.作为普通参数方式提交;
+     * false 作为普通参数方式提交;
      *
      * @return
      */

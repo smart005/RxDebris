@@ -24,6 +24,7 @@ import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.PathsUtils;
 
 import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Author lijinghuan
@@ -102,7 +103,7 @@ public class H5InteractionAPIUtils {
                                       RequestContentType requestContentType,
                                       final Func2<Object, APIRequestState, APIReturnResult> callback) {
         RetrofitParams retrofitParams = new RetrofitParams();
-        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
         retrofitParams.setCallStatus(CallStatus.OnlyNet);
         retrofitParams.setRequestContentType(requestContentType);
@@ -143,7 +144,7 @@ public class H5InteractionAPIUtils {
                                      RequestContentType requestContentType,
                                      final Func2<Object, APIRequestState, APIReturnResult> callback) {
         RetrofitParams retrofitParams = new RetrofitParams();
-        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
         retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().patch(url,
@@ -181,7 +182,7 @@ public class H5InteractionAPIUtils {
                                    RequestContentType requestContentType,
                                    final Func2<Object, APIRequestState, APIReturnResult> callback) {
         RetrofitParams retrofitParams = new RetrofitParams();
-        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
         retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().put(url,
@@ -222,7 +223,7 @@ public class H5InteractionAPIUtils {
                                     RequestContentType requestContentType,
                                     final Func2<Object, APIRequestState, APIReturnResult> callback) {
         RetrofitParams retrofitParams = new RetrofitParams();
-        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
         retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().post(url,
@@ -262,7 +263,7 @@ public class H5InteractionAPIUtils {
                                    final String target,
                                    final Func2<Object, APIRequestState, APIReturnResult> callback) {
         RetrofitParams retrofitParams = new RetrofitParams();
-        HashMap<String, Object> requestParams = retrofitParams.getParams();
+        TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
         retrofitParams.setCallStatus(CallStatus.OnlyNet);
         OkRxManager.getInstance().get(url,

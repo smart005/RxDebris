@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Author lijinghuan
@@ -171,7 +172,7 @@ public class OkRxManager {
 
     public void download(String url,
                          HashMap<String, String> headers,
-                         HashMap<String, Object> params,
+                         TreeMap<String, Object> params,
                          File downFile,
                          Action1<Float> progressAction,
                          Action1<File> successAction,

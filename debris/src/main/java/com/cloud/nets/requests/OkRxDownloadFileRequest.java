@@ -11,6 +11,7 @@ import com.cloud.objects.events.Action1;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,7 +28,7 @@ public class OkRxDownloadFileRequest extends BaseRequest {
 
     public void call(String url,
                      HashMap<String, String> headers,
-                     HashMap<String, Object> params,
+                     TreeMap<String, Object> params,
                      File downFile,
                      Action1<Float> progressAction,
                      Action1<File> successAction,

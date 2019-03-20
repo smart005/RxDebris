@@ -2,12 +2,12 @@ package com.cloud.debrisTest.okhttp.annotations;
 
 import com.cloud.debrisTest.okhttp.ServiceAPI;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
+import com.cloud.debrisTest.okhttp.beans.UserItem;
 import com.cloud.nets.annotations.BaseUrlTypeName;
 import com.cloud.nets.annotations.DataParam;
 import com.cloud.nets.annotations.GET;
 import com.cloud.nets.annotations.Param;
 import com.cloud.nets.annotations.RequestTimeLimit;
-import com.cloud.nets.annotations.RequestTimePart;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.objects.enums.RequestContentType;
 
@@ -28,8 +28,11 @@ public interface IGetAPI {
     @RequestTimeLimit(totalTime = "{requestTime}", unit = TimeUnit.SECONDS)
     @DataParam(RecommandInfo.class)
     RetrofitParams requestRecommandInfo(
-            @Param("SiteID") int siteID,
-            @RequestTimePart("requestTime") long requestTime
+//            @Param("SiteID") int siteID,
+//            @RequestTimePart("requestTime") long requestTime,
+            @Param(isJson = true) UserItem userItem,
+            @Param(isJson = true) UserItem userItem1
+//            @Param(value = "key2", isJson = true) UserItem userItem2
     );
 
     @GET(value = "http://app.108sq.org:920/Api/UserPrestigeInfos?UserIDs=6070%7C438484%7C438484", isFullUrl = true)

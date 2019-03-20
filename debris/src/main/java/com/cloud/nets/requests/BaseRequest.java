@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import okhttp3.Cookie;
 import okhttp3.FormBody;
@@ -110,7 +111,7 @@ public class BaseRequest {
 
     protected Request.Builder getBuilder(String url,
                                          HashMap<String, String> headers,
-                                         HashMap<String, Object> params,
+                                         TreeMap<String, Object> params,
                                          HashMap<String, String> suffixParams) {
         Request.Builder builder = new Request.Builder();
         if (requestType == RequestType.GET) {
@@ -166,7 +167,7 @@ public class BaseRequest {
     }
 
     //如果参数集合包含file或byte[]则无论requestContentType是否为json均以Form方式提交
-    private void addRequestParams(Request.Builder builder, HashMap<String, Object> params, HashMap<String, String> suffixParams) {
+    private void addRequestParams(Request.Builder builder, TreeMap<String, Object> params, HashMap<String, String> suffixParams) {
         ValidResult validResult = validParams(params);
         if (!ObjectJudge.isNullOrEmpty(validResult.streamParamKeys) ||
                 !ObjectJudge.isNullOrEmpty(validResult.fileParamKeys)) {
@@ -219,7 +220,7 @@ public class BaseRequest {
         }
     }
 
-    private RequestBody addJsonRequestParams(List<String> ignoreParamKeys, HashMap<String, Object> params) {
+    private RequestBody addJsonRequestParams(List<String> ignoreParamKeys, TreeMap<String, Object> params) {
         if (requestContentType == RequestContentType.Form) {
             FormBody.Builder bodyBuilder = new FormBody.Builder();
             if (!ObjectJudge.isNullOrEmpty(params)) {
@@ -244,8 +245,9 @@ public class BaseRequest {
                 //如果包含有忽略参数将忽略其它参数提交
                 if (ignoreParamKeys.size() == 1) {
                     String key = ignoreParamKeys.get(0);
-                    Object value = params.get(key);
-                    return RequestBody.create(MediaType.parse("application/json; charset=utf-8"), value + "");
+                    String value = String.valueOf(params.get(key));
+                    RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), value);
+                    return requestBody;
                 } else {
                     HashMap<String, Object> map = new HashMap<String, Object>();
                     for (String paramKey : ignoreParamKeys) {
@@ -267,7 +269,7 @@ public class BaseRequest {
         public List<String> fileParamKeys = new ArrayList<String>();
     }
 
-    private ValidResult validParams(HashMap<String, Object> params) {
+    private ValidResult validParams(TreeMap<String, Object> params) {
         ValidResult result = new ValidResult();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             if (entry.getKey().startsWith(OkRxKeys.ignoreParamContainsKey) && entry.getValue() instanceof String) {
@@ -287,7 +289,7 @@ public class BaseRequest {
         return result;
     }
 
-    private String addGetRequestParams(String url, HashMap<String, Object> params) {
+    private String addGetRequestParams(String url, TreeMap<String, Object> params) {
         if (ObjectJudge.isNullOrEmpty(params)) {
             return url;
         }
@@ -307,7 +309,7 @@ public class BaseRequest {
         }
     }
 
-    protected String getAllParamsJoin(HashMap<String, String> headers, HashMap<String, Object> params) {
+    protected String getAllParamsJoin(HashMap<String, String> headers, TreeMap<String, Object> params) {
         StringBuilder builder = new StringBuilder();
         //拼接参数
         if (!ObjectJudge.isNullOrEmpty(params)) {

@@ -14,6 +14,14 @@ public class UserItem {
 
     private String GradeInfo = "";
 
+    public UserItem() {
+    }
+
+    public UserItem(String userId, String gradeInfo) {
+        UserId = userId;
+        GradeInfo = gradeInfo;
+    }
+
     public String getUserId() {
         return UserId;
     }

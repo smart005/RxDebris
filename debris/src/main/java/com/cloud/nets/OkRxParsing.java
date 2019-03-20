@@ -40,8 +40,12 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -88,64 +92,7 @@ public class OkRxParsing {
                         return retrofitParams;
                     }
                     //此isRemoveEmptyValueField为接口请求全局变量,默认为false
-                    boolean isRemoveEmptyValueField = false;
-                    for (Annotation declaredAnnotation : declaredAnnotations) {
-                        if (declaredAnnotation.annotationType() == POST.class) {
-                            POST annotation = method.getAnnotation(POST.class);
-                            isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
-                            retrofitParams.setRequestType(RequestType.POST);
-                            retrofitParams.setValidCallResult(annotation.isValidCallResult());
-                            bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
-                        } else if (declaredAnnotation.annotationType() == BYTES.class) {
-                            BYTES annotation = method.getAnnotation(BYTES.class);
-                            isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
-                            retrofitParams.setRequestType(RequestType.BYTES);
-                            retrofitParams.setValidCallResult(annotation.isValidCallResult());
-                            bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
-                        } else if (declaredAnnotation.annotationType() == GET.class) {
-                            GET annotation = method.getAnnotation(GET.class);
-                            isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
-                            retrofitParams.setRequestType(RequestType.GET);
-                            retrofitParams.setValidCallResult(annotation.isValidCallResult());
-                            bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), RequestContentType.None);
-                        } else if (declaredAnnotation.annotationType() == DELETE.class) {
-                            DELETE annotation = method.getAnnotation(DELETE.class);
-                            isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
-                            retrofitParams.setRequestType(RequestType.DELETE);
-                            retrofitParams.setValidCallResult(annotation.isValidCallResult());
-                            bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
-                        } else if (declaredAnnotation.annotationType() == PUT.class) {
-                            PUT annotation = method.getAnnotation(PUT.class);
-                            isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
-                            retrofitParams.setRequestType(RequestType.PUT);
-                            retrofitParams.setValidCallResult(annotation.isValidCallResult());
-                            bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
-                        } else if (declaredAnnotation.annotationType() == PATCH.class) {
-                            PATCH annotation = method.getAnnotation(PATCH.class);
-                            isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
-                            retrofitParams.setRequestType(RequestType.PATCH);
-                            retrofitParams.setValidCallResult(annotation.isValidCallResult());
-                            bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
-                        } else if (declaredAnnotation.annotationType() == Header.class) {
-                            bindHeaderAnnontation(method, retrofitParams, args, isRemoveEmptyValueField);
-                        } else if (declaredAnnotation.annotationType() == Headers.class) {
-                            bindHeadersAnnontation(method, retrofitParams, args, isRemoveEmptyValueField);
-                        } else if (declaredAnnotation.annotationType() == DataParam.class) {
-                            DataParam annotation = method.getAnnotation(DataParam.class);
-                            retrofitParams.setDataClass(annotation.value());
-                            retrofitParams.setCollectionDataType(annotation.isCollection());
-                        } else if (declaredAnnotation.annotationType() == RetCodes.class) {
-                            RetCodes annotation = method.getAnnotation(RetCodes.class);
-                            if (!ObjectJudge.isNullOrEmpty(annotation.value())) {
-                                retrofitParams.setAllowRetCodes(Arrays.asList(annotation.value()));
-                            }
-                        } else if (declaredAnnotation.annotationType() == ApiHeadersCall.class) {
-                            ApiHeadersCall annotation = method.getAnnotation(ApiHeadersCall.class);
-                            retrofitParams.setApiHeadersCall(annotation);
-                        } else if (declaredAnnotation.annotationType() == RequestTimeLimit.class) {
-                            bindRequestTimeAnnontation(method, retrofitParams, args);
-                        }
-                    }
+                    boolean isRemoveEmptyValueField = bindRequestTypes(declaredAnnotations, method, apiClass, retrofitParams, args);
                     //获取参数集合
                     bindParamAnnontation(method, retrofitParams, args, isRemoveEmptyValueField, requestAnnotation.annotationType());
                     return retrofitParams;
@@ -156,6 +103,69 @@ public class OkRxParsing {
                 return null;
             }
         }
+    }
+
+    //绑定请求方式
+    private <T> boolean bindRequestTypes(Annotation[] declaredAnnotations, Method method, Class<T> apiClass, RetrofitParams retrofitParams, Object[] args) {
+        boolean isRemoveEmptyValueField = false;
+        for (Annotation declaredAnnotation : declaredAnnotations) {
+            if (declaredAnnotation.annotationType() == POST.class) {
+                POST annotation = method.getAnnotation(POST.class);
+                isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
+                retrofitParams.setRequestType(RequestType.POST);
+                retrofitParams.setValidCallResult(annotation.isValidCallResult());
+                bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
+            } else if (declaredAnnotation.annotationType() == BYTES.class) {
+                BYTES annotation = method.getAnnotation(BYTES.class);
+                isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
+                retrofitParams.setRequestType(RequestType.BYTES);
+                retrofitParams.setValidCallResult(annotation.isValidCallResult());
+                bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
+            } else if (declaredAnnotation.annotationType() == GET.class) {
+                GET annotation = method.getAnnotation(GET.class);
+                isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
+                retrofitParams.setRequestType(RequestType.GET);
+                retrofitParams.setValidCallResult(annotation.isValidCallResult());
+                bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), RequestContentType.None);
+            } else if (declaredAnnotation.annotationType() == DELETE.class) {
+                DELETE annotation = method.getAnnotation(DELETE.class);
+                isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
+                retrofitParams.setRequestType(RequestType.DELETE);
+                retrofitParams.setValidCallResult(annotation.isValidCallResult());
+                bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
+            } else if (declaredAnnotation.annotationType() == PUT.class) {
+                PUT annotation = method.getAnnotation(PUT.class);
+                isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
+                retrofitParams.setRequestType(RequestType.PUT);
+                retrofitParams.setValidCallResult(annotation.isValidCallResult());
+                bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
+            } else if (declaredAnnotation.annotationType() == PATCH.class) {
+                PATCH annotation = method.getAnnotation(PATCH.class);
+                isRemoveEmptyValueField = annotation.isRemoveEmptyValueField();
+                retrofitParams.setRequestType(RequestType.PATCH);
+                retrofitParams.setValidCallResult(annotation.isValidCallResult());
+                bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
+            } else if (declaredAnnotation.annotationType() == Header.class) {
+                bindHeaderAnnontation(method, retrofitParams, args, isRemoveEmptyValueField);
+            } else if (declaredAnnotation.annotationType() == Headers.class) {
+                bindHeadersAnnontation(method, retrofitParams, args, isRemoveEmptyValueField);
+            } else if (declaredAnnotation.annotationType() == DataParam.class) {
+                DataParam annotation = method.getAnnotation(DataParam.class);
+                retrofitParams.setDataClass(annotation.value());
+                retrofitParams.setCollectionDataType(annotation.isCollection());
+            } else if (declaredAnnotation.annotationType() == RetCodes.class) {
+                RetCodes annotation = method.getAnnotation(RetCodes.class);
+                if (!ObjectJudge.isNullOrEmpty(annotation.value())) {
+                    retrofitParams.setAllowRetCodes(Arrays.asList(annotation.value()));
+                }
+            } else if (declaredAnnotation.annotationType() == ApiHeadersCall.class) {
+                ApiHeadersCall annotation = method.getAnnotation(ApiHeadersCall.class);
+                retrofitParams.setApiHeadersCall(annotation);
+            } else if (declaredAnnotation.annotationType() == RequestTimeLimit.class) {
+                bindRequestTimeAnnontation(method, retrofitParams, args);
+            }
+        }
+        return isRemoveEmptyValueField;
     }
 
     private void bindRequestTime(String totalTime, TimeUnit unit, RetrofitParams retrofitParams) {
@@ -178,76 +188,65 @@ public class OkRxParsing {
             //没有占位符直接计算
             bindRequestTime(annotation.totalTime(), annotation.unit(), retrofitParams);
         } else {
-            HashMap<RequestTimePart, Integer> paramAnnotationObject = getParamAnnotationObject(method, RequestTimePart.class);
+            TreeMap<Integer, RequestTimePart> paramAnnotationObject = getParamAnnotationObject(method, RequestTimePart.class);
             if (ObjectJudge.isNullOrEmpty(paramAnnotationObject)) {
                 return;
             }
-            for (Map.Entry<RequestTimePart, Integer> entry : paramAnnotationObject.entrySet()) {
-                RequestTimePart part = entry.getKey();
+            for (Map.Entry<Integer, RequestTimePart> entry : paramAnnotationObject.entrySet()) {
+                RequestTimePart part = entry.getValue();
                 if (!TextUtils.equals(part.value(), matche)) {
                     continue;
                 }
-                String dataValue = String.valueOf(args[entry.getValue()]);
+                String dataValue = String.valueOf(args[entry.getKey()]);
                 bindRequestTime(dataValue, annotation.unit(), retrofitParams);
                 break;
             }
         }
     }
 
-    private void addParams(String paramKey, Param key, Object arg, HashMap<String, Object> params, boolean isRemoveEmptyValueField) {
-        paramKey = TextUtils.isEmpty(paramKey) ? key.value() : paramKey;
+    private void addJsonParams(String paramKey, Param key, Object arg, TreeMap<String, Object> params, boolean isRemoveEmptyValueField) {
+        //若参数为null则忽略
+        if (key.isRemoveEmptyValueField() || isRemoveEmptyValueField) {
+            if (arg == null) {
+                return;
+            }
+        }
         if (arg instanceof String) {
             //string类型
-            if (key.isRemoveEmptyValueField()) {
+            if (key.isRemoveEmptyValueField() || isRemoveEmptyValueField) {
+                //记为""移除
                 if (!TextUtils.isEmpty(String.valueOf(arg))) {
                     params.put(paramKey, arg);
                 }
             } else {
-                String json = JsonUtils.toStr(arg);
-                if (isRemoveEmptyValueField) {
-                    if (!TextUtils.isEmpty(json)) {
-                        params.put(paramKey, json);
-                    }
-                } else {
-                    params.put(paramKey, json);
-                }
+                params.put(paramKey, arg);
             }
         } else {
-            //集合类型
+            //对象或集合类型,此时除了开始判断null之外不可能为空字符串;
             String json = JsonUtils.toStr(arg);
-            if (key.isRemoveEmptyValueField()) {
-                if (!TextUtils.isEmpty(json)) {
-                    params.put(paramKey, json);
-                }
-            } else {
-                if (isRemoveEmptyValueField) {
-                    if (!TextUtils.isEmpty(json)) {
-                        params.put(paramKey, json);
-                    }
-                } else {
-                    params.put(paramKey, json);
-                }
-            }
+            params.put(paramKey, json);
         }
     }
 
-    private boolean bindJsonParams(int position, Param key, int paramPosition, HashMap<String, Object> params, Object[] args, boolean isRemoveEmptyValueField) {
+    private void bindJsonParams(int position, Param key, int paramPosition, TreeMap<String, Object> params, Object[] args, boolean isRemoveEmptyValueField) {
         if (TextUtils.isEmpty(key.value())) {
-            params.clear();
+            //若参数key为空且value类型为int double float long file byte[] Byte[]那么最终在提交时将被忽略
             Object arg = args[paramPosition];
-            //如果参数key为空且value类型不为int double float long file byte[]那么最终在提交时忽略此参数对应的key
             if (arg != null &&
                     !(arg instanceof Integer) &&
                     !(arg instanceof Double) &&
                     !(arg instanceof Float) &&
                     !(arg instanceof Long) &&
                     !(arg instanceof File) &&
-                    !(arg instanceof byte[])) {
+                    !(arg instanceof byte[]) &&
+                    !(arg instanceof Byte[])) {
+                //忽略参数key,在提交之前将作为验证判断依据;
                 String paramKey = OkRxKeys.ignoreParamContainsKey + position;
-                addParams(paramKey, key, arg, params, isRemoveEmptyValueField);
+                //添加json参数
+                addJsonParams(paramKey, key, arg, params, isRemoveEmptyValueField);
             }
-            return true;
         } else {
+            //排除设置的相同参数key
             if (!params.containsKey(key.value())) {
                 Object arg = args[paramPosition];
                 if (arg != null &&
@@ -256,54 +255,104 @@ public class OkRxParsing {
                         !(arg instanceof Float) &&
                         !(arg instanceof Long) &&
                         !(arg instanceof File) &&
-                        !(arg instanceof byte[])) {
-                    addParams("", key, arg, params, isRemoveEmptyValueField);
+                        !(arg instanceof byte[]) &&
+                        !(arg instanceof Byte[])) {
+                    //添加json参数
+                    addJsonParams(key.value(), key, arg, params, isRemoveEmptyValueField);
                 } else {
+                    //作为普通参数提交
                     putParamValue(key, arg, params, null, isRemoveEmptyValueField);
                 }
             }
         }
-        return false;
     }
 
-    private boolean bindSingleParam(Param key, int position, int paramPosition, HashMap<String, Object> params, HashMap<String, String> suffixParams, Object[] args, boolean isRemoveEmptyValueField) {
+    private void bindSingleParam(Param key, int position, int paramPosition, TreeMap<String, Object> params, HashMap<String, String> suffixParams, Object[] args, boolean isRemoveEmptyValueField) {
         if (key.isJson()) {
-            return bindJsonParams(position, key, paramPosition, params, args, isRemoveEmptyValueField);
+            bindJsonParams(position, key, paramPosition, params, args, isRemoveEmptyValueField);
         } else {
             if (!params.containsKey(key.value())) {
                 Object arg = args[paramPosition];
                 putParamValue(key, arg, params, suffixParams, isRemoveEmptyValueField);
             }
         }
-        return false;
     }
 
-    private void bindParams(HashMap<Param, Integer> paramAnnotationObject, RetrofitParams retrofitParams, Object[] args, boolean isRemoveEmptyValueField) {
+    private void bindParams(TreeMap<Integer, Param> paramAnnotationObject, RetrofitParams retrofitParams, Object[] args, boolean isRemoveEmptyValueField) {
         if (ObjectJudge.isNullOrEmpty(paramAnnotationObject)) {
             return;
         }
         int position = 0;
-        HashMap<String, Object> params = retrofitParams.getParams();
+        //提交参数
+        TreeMap<String, Object> params = retrofitParams.getParams();
+        //文件上传时可自定义
         HashMap<String, String> suffixParams = retrofitParams.getFileSuffixParams();
-        for (Map.Entry<Param, Integer> paramIntegerEntry : paramAnnotationObject.entrySet()) {
-            Param key = paramIntegerEntry.getKey();
-            if (bindSingleParam(key, position, paramIntegerEntry.getValue(), params, suffixParams, args, isRemoveEmptyValueField)) {
-                break;
-            }
+        for (Map.Entry<Integer, Param> paramIntegerEntry : paramAnnotationObject.entrySet()) {
+            Param key = paramIntegerEntry.getValue();
+            //绑定参数
+            bindSingleParam(key, position, paramIntegerEntry.getKey(), params, suffixParams, args, isRemoveEmptyValueField);
             position++;
+        }
+        //参数校验
+        checkParams(params);
+    }
+
+    //参数校验
+    private void checkParams(TreeMap<String, Object> params) {
+        if (ObjectJudge.isNullOrEmpty(params) || params.size() == 1) {
+            //如果参数为空或参数个数为1,则不做校验处理
+            /**
+             * params.size() == 1几种情况如下:
+             * 1.普通key-value正常提交即可;
+             * 2.json且用户有指定key,则key-value正常提交即可;
+             * 3.json且用户未指定key,则在真正网络请求前会作处理;
+             */
+            return;
+        }
+//        int notSpecifiedParamKeyCount = 0;//记录未指定参数key对应的参数个数
+        Set<String> notSpecifiedParamKeys = new HashSet<String>();//记录未指定参数key集合与params中的key对应
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            if (entry.getKey().contains(OkRxKeys.ignoreParamContainsKey)) {
+                notSpecifiedParamKeys.add(entry.getKey());
+            }
+        }
+        if (ObjectJudge.isNullOrEmpty(notSpecifiedParamKeys)) {
+            //若均已指定参数则正常提交即可
+            return;
+        }
+        //若未指定参数为1且params.size()>1,则移除对应的未指定参数
+        //此时params.size()必大于1,因此无须加条件限制;
+        if (notSpecifiedParamKeys.size() == 1) {
+            Iterator<String> iterator = notSpecifiedParamKeys.iterator();
+            String next = iterator.next();
+            params.remove(next);
+            return;
+        }
+        //若未指定参数个数>1且不等于params.size(),则移除所有未指定参数;
+        if (notSpecifiedParamKeys.size() > 1 && notSpecifiedParamKeys.size() != params.size()) {
+            for (String next : notSpecifiedParamKeys) {
+                params.remove(next);
+            }
+            return;
+        }
+        //若未指定参数个数与params相同,则将所有参数以[{}|[],{}]的json形式作为本次提交的数据
+        if (notSpecifiedParamKeys.size() == params.size()) {
+            String json = JsonUtils.toStr(params.values());
+            params.clear();
+            params.put(OkRxKeys.ignoreParamContainsKey + 1, json);
         }
     }
 
     private void bindDeletes(Method method, RetrofitParams retrofitParams, Object[] args, boolean isRemoveEmptyValueField, Class<? extends Annotation> annotationType) {
         if (annotationType == DELETE.class) {
             //delete 请求时加query注解时将参数拼接到url后面
-            HashMap<DelQuery, Integer> delQueryIntegerHashMap = getParamAnnotationObject(method, DelQuery.class);
+            TreeMap<Integer, DelQuery> delQueryIntegerHashMap = getParamAnnotationObject(method, DelQuery.class);
             if (!ObjectJudge.isNullOrEmpty(delQueryIntegerHashMap)) {
                 HashMap<String, String> params = retrofitParams.getDelQueryParams();
-                for (Map.Entry<DelQuery, Integer> delQueryIntegerEntry : delQueryIntegerHashMap.entrySet()) {
-                    DelQuery key = delQueryIntegerEntry.getKey();
+                for (Map.Entry<Integer, DelQuery> delQueryIntegerEntry : delQueryIntegerHashMap.entrySet()) {
+                    DelQuery key = delQueryIntegerEntry.getValue();
                     if (!params.containsKey(key.value())) {
-                        Object arg = args[delQueryIntegerEntry.getValue()];
+                        Object arg = args[delQueryIntegerEntry.getKey()];
                         if (key.isRemoveEmptyValueField()) {
                             if (arg != null && !TextUtils.isEmpty(String.valueOf(arg))) {
                                 params.put(key.value(), String.valueOf(arg));
@@ -325,7 +374,7 @@ public class OkRxParsing {
 
     private void bindSingleParamList(ParamList key, HashMap<String, Object> argmap, RetrofitParams retrofitParams, boolean isRemoveEmptyValueField) {
         isRemoveEmptyValueField = key.isRemoveEmptyValueField() ? key.isRemoveEmptyValueField() : isRemoveEmptyValueField;
-        HashMap<String, Object> params = retrofitParams.getParams();
+        TreeMap<String, Object> params = retrofitParams.getParams();
         for (Map.Entry<String, Object> entry : argmap.entrySet()) {
             if (isRemoveEmptyValueField && (entry.getValue() == null || TextUtils.isEmpty(String.valueOf(entry.getValue())))) {
                 //如果isRemoveEmptyValueField==true且参数值为空则跳过
@@ -339,12 +388,12 @@ public class OkRxParsing {
         }
     }
 
-    private void bindParamList(HashMap<ParamList, Integer> paramAnnotations, RetrofitParams retrofitParams, Object[] args, boolean isRemoveEmptyValueField) {
+    private void bindParamList(TreeMap<Integer, ParamList> paramAnnotations, RetrofitParams retrofitParams, Object[] args, boolean isRemoveEmptyValueField) {
         if (ObjectJudge.isNullOrEmpty(paramAnnotations)) {
             return;
         }
-        for (Map.Entry<ParamList, Integer> entry : paramAnnotations.entrySet()) {
-            Object arg = args[entry.getValue()];
+        for (Map.Entry<Integer, ParamList> entry : paramAnnotations.entrySet()) {
+            Object arg = args[entry.getKey()];
             if (!(arg instanceof HashMap)) {
                 //非hash map类型则跳过
                 continue;
@@ -354,7 +403,7 @@ public class OkRxParsing {
                 //参数值为空则跳过
                 continue;
             }
-            ParamList key = entry.getKey();
+            ParamList key = entry.getValue();
             bindSingleParamList(key, argmap, retrofitParams, isRemoveEmptyValueField);
         }
     }
@@ -365,18 +414,20 @@ public class OkRxParsing {
                                       boolean isRemoveEmptyValueField,
                                       Class<? extends Annotation> annotationType) {
         //获取请求方法中所有包含有Param的请求参数字段
-        HashMap<Param, Integer> paramAnnotationObject = getParamAnnotationObject(method, Param.class);
+        TreeMap<Integer, Param> paramAnnotationObject = getParamAnnotationObject(method, Param.class);
         //绑定Param参数
         bindParams(paramAnnotationObject, retrofitParams, args, isRemoveEmptyValueField);
         //绑定ParamList参数
-        HashMap<ParamList, Integer> paramAnnotations = getParamAnnotationObject(method, ParamList.class);
+        TreeMap<Integer, ParamList> paramAnnotations = getParamAnnotationObject(method, ParamList.class);
         bindParamList(paramAnnotations, retrofitParams, args, isRemoveEmptyValueField);
         //绑定DelQuery参数
         bindDeletes(method, retrofitParams, args, isRemoveEmptyValueField, annotationType);
     }
 
-    private void putValueByIsRemoveEmpty(Param key, Object arg, HashMap<String, Object> params, HashMap<String, String> suffixParams) {
+    private void putValueByIsRemoveEmpty(Param key, Object arg, TreeMap<String, Object> params) {
         if (arg == null) {
+            //值为空则此参数提交
+            //Integer\Double\Long\Float\String\File\Byte\Byte[]\byte[]\自定义对象\Map\List\Set
             return;
         }
         //文件
@@ -387,41 +438,30 @@ public class OkRxParsing {
                 return;
             }
             params.put(key.value(), arg);
-            if (suffixParams != null) {
-                suffixParams.put(key.value(), key.fileSuffixAfterUpload());
-            }
             return;
         }
         //字节流
         if ((arg instanceof byte[]) || (arg instanceof Byte[])) {
             params.put(key.value(), arg);
-            if (suffixParams != null) {
-                suffixParams.put(key.value(), key.fileSuffixAfterUpload());
-            }
             return;
         }
         if (arg instanceof String) {
             params.put(key.value(), arg);
-            if (suffixParams != null) {
-                suffixParams.put(key.value(), key.fileSuffixAfterUpload());
-            }
             return;
         }
         params.put(key.value(), arg);
-        if (suffixParams != null) {
-            suffixParams.put(key.value(), key.fileSuffixAfterUpload());
-        }
     }
 
-    private void putParamValue(Param key, Object arg, HashMap<String, Object> params, HashMap<String, String> suffixParams, boolean isRemoveEmptyValueField) {
-        boolean isRemove = key.isRemoveEmptyValueField() || isRemoveEmptyValueField;
-        if (isRemove) {
-            putValueByIsRemoveEmpty(key, arg, params, suffixParams);
-            return;
-        }
-        params.put(key.value(), arg);
-        if (suffixParams != null) {
+    private void putParamValue(Param key, Object arg, TreeMap<String, Object> params, HashMap<String, String> suffixParams, boolean isRemoveEmptyValueField) {
+        if (suffixParams != null && !TextUtils.isEmpty(key.fileSuffixAfterUpload())) {
+            //若设置了file类型的后缀参数则提交时以此后缀为次，未设置默认取文件本身后缀；
             suffixParams.put(key.value(), key.fileSuffixAfterUpload());
+        }
+        if (key.isRemoveEmptyValueField() || isRemoveEmptyValueField) {
+            //若参数值无效则key-value不作为本次请求的参数序列中
+            putValueByIsRemoveEmpty(key, arg, params);
+        } else {
+            params.put(key.value(), arg);
         }
     }
 
@@ -453,7 +493,7 @@ public class OkRxParsing {
                 retrofitParams.setFlag(false);
                 return;
             }
-            HashMap<UrlItemKey, Integer> urlItemKeys = getParamAnnotationObject(method, UrlItemKey.class);
+            TreeMap<Integer, UrlItemKey> urlItemKeys = getParamAnnotationObject(method, UrlItemKey.class);
             if (ObjectJudge.isNullOrEmpty(urlItemKeys)) {
                 UrlItem urlItem = urlItems[0];
                 if (TextUtils.isEmpty(urlItem.value())) {
@@ -465,8 +505,8 @@ public class OkRxParsing {
                     retrofitParams.setLastContainsPath(true);
                 }
             } else {
-                for (Map.Entry<UrlItemKey, Integer> entry : urlItemKeys.entrySet()) {
-                    UrlItem urlItem = getMatchUrlItem(urlItems, String.valueOf(args[entry.getValue()]));
+                for (Map.Entry<Integer, UrlItemKey> entry : urlItemKeys.entrySet()) {
+                    UrlItem urlItem = getMatchUrlItem(urlItems, String.valueOf(args[entry.getKey()]));
                     if (urlItem == null) {
                         retrofitParams.setFlag(false);
                         return;
@@ -518,14 +558,14 @@ public class OkRxParsing {
                     methodRequestContentType);
         } else {
             String rativeUrl = formatUrl;
-            HashMap<Path, Integer> paramAnnotationObject = getParamAnnotationObject(method, Path.class);
+            TreeMap<Integer, Path> paramAnnotationObject = getParamAnnotationObject(method, Path.class);
             if (!ObjectJudge.isNullOrEmpty(paramAnnotationObject)) {
                 //如果未匹配到则按原地址请求
-                for (Map.Entry<Path, Integer> pathIntegerEntry : paramAnnotationObject.entrySet()) {
-                    Path path = pathIntegerEntry.getKey();
+                for (Map.Entry<Integer, Path> pathIntegerEntry : paramAnnotationObject.entrySet()) {
+                    Path path = pathIntegerEntry.getValue();
                     if (matches.contains(path.value())) {
                         rativeUrl = rativeUrl.replace(String.format("{%s}", path.value()), "%s");
-                        rativeUrl = String.format(rativeUrl, String.valueOf(args[pathIntegerEntry.getValue()]));
+                        rativeUrl = String.format(rativeUrl, String.valueOf(args[pathIntegerEntry.getKey()]));
                     }
                 }
 
@@ -625,12 +665,12 @@ public class OkRxParsing {
                     }
                 }
             } else {
-                HashMap<HeaderPart, Integer> paramAnnotationObject = getParamAnnotationObject(method, HeaderPart.class);
+                TreeMap<Integer, HeaderPart> paramAnnotationObject = getParamAnnotationObject(method, HeaderPart.class);
                 if (!ObjectJudge.isNullOrEmpty(paramAnnotationObject)) {
-                    for (Map.Entry<HeaderPart, Integer> headerPartIntegerEntry : paramAnnotationObject.entrySet()) {
-                        HeaderPart headerPart = headerPartIntegerEntry.getKey();
+                    for (Map.Entry<Integer, HeaderPart> headerPartIntegerEntry : paramAnnotationObject.entrySet()) {
+                        HeaderPart headerPart = headerPartIntegerEntry.getValue();
                         if (TextUtils.equals(headerPart.value(), matche)) {
-                            String dataValue = String.valueOf(args[headerPartIntegerEntry.getValue()]);
+                            String dataValue = String.valueOf(args[headerPartIntegerEntry.getKey()]);
                             if (headerPart.isRemoveEmptyValueField()) {
                                 if (!TextUtils.isEmpty(dataValue)) {
                                     headParams.put(annotation.name(), dataValue);
@@ -680,12 +720,12 @@ public class OkRxParsing {
                             }
                         } else {
                             //取HeaderPart中的内容
-                            HashMap<HeaderPart, Integer> paramAnnotationObject = getParamAnnotationObject(method, HeaderPart.class);
+                            TreeMap<Integer, HeaderPart> paramAnnotationObject = getParamAnnotationObject(method, HeaderPart.class);
                             if (!ObjectJudge.isNullOrEmpty(paramAnnotationObject)) {
-                                for (Map.Entry<HeaderPart, Integer> headerPartIntegerEntry : paramAnnotationObject.entrySet()) {
-                                    HeaderPart headerPart = headerPartIntegerEntry.getKey();
+                                for (Map.Entry<Integer, HeaderPart> headerPartIntegerEntry : paramAnnotationObject.entrySet()) {
+                                    HeaderPart headerPart = headerPartIntegerEntry.getValue();
                                     if (TextUtils.equals(headerPart.value(), matche)) {
-                                        String dataValue = String.valueOf(args[headerPartIntegerEntry.getValue()]);
+                                        String dataValue = String.valueOf(args[headerPartIntegerEntry.getKey()]);
                                         if (annotation.isRemoveEmptyValueField()) {
                                             if (!TextUtils.isEmpty(dataValue)) {
                                                 headParams.put(lst[0], dataValue);
@@ -726,8 +766,8 @@ public class OkRxParsing {
     }
 
     //获取指定参数的注解对象
-    private <T> HashMap<T, Integer> getParamAnnotationObject(Method method, Class<T> annotationClass) {
-        HashMap<T, Integer> lst = new HashMap<T, Integer>();
+    private <T> TreeMap<Integer, T> getParamAnnotationObject(Method method, Class<T> annotationClass) {
+        TreeMap<Integer, T> lst = new TreeMap<Integer, T>();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         if (!ObjectJudge.isNullOrEmpty(parameterAnnotations)) {
             for (int i = 0; i < parameterAnnotations.length; i++) {
@@ -736,9 +776,7 @@ public class OkRxParsing {
                     continue;
                 }
                 if (parameterAnnotation[0].annotationType() == annotationClass) {
-                    if (!lst.containsKey(parameterAnnotation[0])) {
-                        lst.put((T) parameterAnnotation[0], i);
-                    }
+                    lst.put(i, (T) parameterAnnotation[0]);
                 }
             }
         }
