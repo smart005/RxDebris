@@ -1,6 +1,5 @@
 package com.cloud.objects.config;
 
-import com.cloud.objects.HandlerManager;
 import com.cloud.objects.events.OnRecyclingListener;
 import com.cloud.objects.utils.ThreadPoolUtils;
 
@@ -29,8 +28,6 @@ public class Recycling {
     public void referenceRecycling() {
         //清除线程池工具类引用
         ThreadPoolUtils.clearReference();
-        //handler manager
-        HandlerManager.getInstance().clearReference();
         clearRecyclings();
         recycling = null;
     }

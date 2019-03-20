@@ -48,7 +48,7 @@ public class TestApplication extends BaseApplication {
                     }
                 })
                 .getBuilder()
-                .setDebug(true)
+                .setDebug(BuildConfig.DEBUG)
                 //日志打印时统一标识
                 .setLoggeruTag("gscloud")
                 //内部缓存根目录

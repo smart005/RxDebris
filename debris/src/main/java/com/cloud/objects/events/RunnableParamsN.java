@@ -8,11 +8,12 @@ package com.cloud.objects.events;
  * @Modifier:
  * @ModifyContent:
  */
-public abstract class RunnableParamsN<Params> implements Runnable {
+public abstract class RunnableParamsN<Params> {
 
-    protected Params[] params;
-
-    public RunnableParamsN(Params... params) {
-        this.params = params;
-    }
+    /**
+     * 回调
+     *
+     * @param params 参数
+     */
+    public abstract void run(Params... params);
 }

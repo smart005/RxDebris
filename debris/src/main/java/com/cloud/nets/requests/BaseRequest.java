@@ -88,22 +88,9 @@ public class BaseRequest {
                      Action2<String, String> printLogAction,
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap,
-                     String apiUnique,
-                     Action2<String, HashMap<String, String>> headersAction) {
+                     String apiUnique) {
         //子类重载方法
     }
-
-//    public void call(String url,
-//                     HashMap<String, String> headers,
-//                     HashMap<String, Object> params,
-//                     Action3<Bitmap, String, HashMap<String, ReqQueueItem>> successAction,
-//                     Action1<RequestState> completeAction,
-//                     String apiRequestKey,
-//                     HashMap<String, ReqQueueItem> reqQueueItemHashMap,
-//                     String apiUnique,
-//                     Action2<String, HashMap<String, String>> headersAction) {
-//        //子类重载方法
-//    }
 
     public void setRequestContentType(RequestContentType requestContentType) {
         this.requestContentType = requestContentType;

@@ -34,6 +34,7 @@ import com.cloud.mixed.RxMixed;
 import com.cloud.objects.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RuleParams;
+import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.PixelUtils;
@@ -769,9 +770,9 @@ public abstract class BaseWebLoad extends WebView {
      * @param activity FragmentActivity
      */
     public void selectLocalImages(final FragmentActivity activity) {
-        HandlerManager.getInstance().post(new Runnable() {
+        HandlerManager.getInstance().post(new RunnableParamsN<Object>() {
             @Override
-            public void run() {
+            public void run(Object... objects) {
                 //选择后图片最大压缩大小
                 imageSelectDialog.setMaxFileSize(1024);
                 //最多选择图片数量

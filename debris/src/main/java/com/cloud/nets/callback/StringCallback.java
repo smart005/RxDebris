@@ -9,12 +9,15 @@ import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.nets.requests.NetErrorWith;
+import com.cloud.objects.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action4;
+import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.utils.JsonUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,7 +26,6 @@ import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -54,8 +56,6 @@ public abstract class StringCallback implements Callback {
     private String responseString = "";
     //api唯一标识
     private String apiUnique = "";
-    //header回调
-    private Action2<String, HashMap<String, String>> headersAction = null;
     //请求回调状态
     private CallStatus callStatus = CallStatus.OnlyNet;
     //是否取消间隔缓存回调
@@ -104,15 +104,13 @@ public abstract class StringCallback implements Callback {
                           Action2<String, String> printLogAction,
                           HashMap<String, ReqQueueItem> reqQueueItemHashMap,
                           String apiRequestKey,
-                          String apiUnique,
-                          Action2<String, HashMap<String, String>> headersAction) {
+                          String apiUnique) {
         this.successAction = successAction;
         this.completeAction = completeAction;
         this.printLogAction = printLogAction;
         this.reqQueueItemHashMap = reqQueueItemHashMap;
         this.apiRequestKey = apiRequestKey;
         this.apiUnique = apiUnique;
-        this.headersAction = headersAction;
     }
 
     @Override
@@ -123,6 +121,8 @@ public abstract class StringCallback implements Callback {
                 queueItem.setReqNetCompleted(true);
             }
         }
+        //输出debug模式下日志
+        outputLogForDebug(call, e.getMessage());
         if (call.isCanceled()) {
             if (completeAction != null) {
                 completeAction.call(RequestState.Error, ErrorType.netRequest);
@@ -182,29 +182,6 @@ public abstract class StringCallback implements Callback {
         return true;
     }
 
-    private void headerDealWith(Response response) {
-        if (TextUtils.isEmpty(apiUnique)) {
-            return;
-        }
-        Headers headers = response.headers();
-        if (headers == null) {
-            return;
-        }
-        if (headersAction == null) {
-            return;
-        }
-        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
-        String[] headerParamNames = builder.getHttpHeaderParamNames();
-        if (ObjectJudge.isNullOrEmpty(headerParamNames)) {
-            return;
-        }
-        HashMap<String, String> map = new HashMap<String, String>();
-        for (String paramName : headerParamNames) {
-            map.put(paramName, headers.get(paramName));
-        }
-        headersAction.call(apiUnique, map);
-    }
-
     @Override
     public void onResponse(Call call, Response response) {
         try {
@@ -220,16 +197,21 @@ public abstract class StringCallback implements Callback {
                 if (completeAction != null) {
                     completeAction.call(RequestState.Error, ErrorType.businessProcess);
                 }
+                //输出debug模式下日志
+                outputLogForDebug(call, String.format("protocol=%s;code=%s;message=%s;", response.protocol().toString(), response.code(), response.message()));
             } else {
-                headerDealWith(response);
                 ResponseBody body = response.body();
                 if (body == null) {
                     if (completeAction != null) {
                         completeAction.call(RequestState.Error, ErrorType.businessProcess);
                     }
+                    //输出debug模式下日志
+                    outputLogForDebug(call, String.format("protocol=%s;code=%s;message=%s;", response.protocol().toString(), response.code(), response.message()));
                 } else {
+                    responseString = body.string();
+                    //输出debug模式下日志
+                    outputLogForDebug(call, "");
                     if (successAction != null) {
-                        responseString = body.string();
                         //如果不是json且请求的数据类型不是基础数据类型则回调error
                         if (dataClass == String.class ||
                                 dataClass == Integer.class ||
@@ -268,6 +250,39 @@ public abstract class StringCallback implements Callback {
             }
             //清除本次请求堆栈信息
             RxStacks.clearBusStacks(requestMethodName);
+        }
+    }
+
+    //输出debug模式下日志
+    private void outputLogForDebug(Call call, String message) {
+        if (call == null) {
+            return;
+        }
+        //如果debug模式下打印日志
+        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+        if (builder.isDebug()) {
+            //获取url
+            Request request = call.request();
+            HttpUrl httpUrl = request.url();
+            String url = httpUrl.toString();
+            StringBuilder logbuilder = new StringBuilder();
+            logbuilder.append(String.format("url:%s\n", url));
+            logbuilder.append(String.format("header:%s\n", JsonUtils.toStr(headers)));
+            logbuilder.append(String.format("params:%s\n", JsonUtils.toStr(params)));
+            if (TextUtils.isEmpty(responseString)) {
+                logbuilder.append(String.format("message:%s", message));
+            } else {
+                logbuilder.append(String.format("result:%s", responseString));
+            }
+            HandlerManager.getInstance().post(new RunnableParamsN<StringBuilder>() {
+                @Override
+                public void run(StringBuilder... builders) {
+                    if (ObjectJudge.isNullOrEmpty(builders)) {
+                        return;
+                    }
+                    Logger.info("net", builders[0].toString(), null);
+                }
+            }, logbuilder);
         }
     }
 }

@@ -15,7 +15,7 @@ import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.ResultState;
-import com.cloud.objects.events.Runnable1;
+import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.ThreadPoolUtils;
@@ -229,7 +229,7 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
                 });
     }
 
-    private class ApiHandlerRun implements Runnable {
+    private class ApiHandlerRun extends RunnableParamsN {
 
         private ResultParams params = null;
 
@@ -238,7 +238,7 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
         }
 
         @Override
-        public void run() {
+        public void run(Object... objects) {
             if (params == null) {
                 return;
             }
@@ -333,9 +333,9 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
     private void unLoginSend(T t) {
         final OnAuthListener authListener = OkRx.getInstance().getOnAuthListener();
         if (authListener != null) {
-            HandlerManager.getInstance().post(new Runnable1<T>(t) {
+            HandlerManager.getInstance().post(new RunnableParamsN<Object>() {
                 @Override
-                public void run() {
+                public void run(Object... objects) {
                     authListener.onLoginCall(invokeMethodName);
                 }
             });

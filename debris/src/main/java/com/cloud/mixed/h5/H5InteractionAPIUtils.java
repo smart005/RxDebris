@@ -123,7 +123,6 @@ public class H5InteractionAPIUtils {
                     }
                 },
                 "",
-                null,
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -161,7 +160,7 @@ public class H5InteractionAPIUtils {
                             callback.call(APIRequestState.Success, apiReturnResult);
                         }
                     }
-                }, "", null,
+                }, "",
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -201,7 +200,6 @@ public class H5InteractionAPIUtils {
                     }
                 },
                 "",
-                null,
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -242,7 +240,6 @@ public class H5InteractionAPIUtils {
                     }
                 },
                 "",
-                null,
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -281,7 +278,6 @@ public class H5InteractionAPIUtils {
                     }
                 },
                 "",
-                null,
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {

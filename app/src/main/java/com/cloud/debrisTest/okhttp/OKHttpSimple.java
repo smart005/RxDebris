@@ -12,7 +12,6 @@ import com.cloud.debrisTest.okhttp.services.GetService;
 import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnSuccessfulListener;
-import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.JsonUtils;
 
 public class OKHttpSimple extends AppCompatActivity {
@@ -41,7 +40,6 @@ public class OKHttpSimple extends AppCompatActivity {
             //具体接口请求成功回调;
             //如果有缓存且存在缓存和网络均会回调时则isLastCall==true表示最后一次回调
             String json = JsonUtils.toStr(recommandInfo);
-            Logger.info(json);
             NetModel model = binding.getModel();
             model.setNetdata(json);
         }

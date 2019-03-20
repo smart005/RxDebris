@@ -2,6 +2,10 @@ package com.cloud.objects;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
+
+import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.logs.Logger;
 
 /**
  * Author lijinghuan
@@ -13,47 +17,32 @@ import android.os.Looper;
  */
 public class HandlerManager {
 
-    private static HandlerManager handlerManager = null;
-    private Handler mainHandler = null;
+    private ThreadLocal<Handler> handlerThreadLocal = new ThreadLocal<Handler>();
+    private Object[] params;
 
-    public static HandlerManager getInstance() {
-        return handlerManager == null ? handlerManager = new HandlerManager() : handlerManager;
-    }
-
-    /**
-     * 清空引用
-     */
-    public void clearReference() {
-        mainHandler = null;
-        handlerManager = null;
-    }
-
-    private Handler getMainHandler() {
-        if (mainHandler == null) {
-            mainHandler = new Handler(Looper.getMainLooper());
-        }
-        return mainHandler;
-    }
-
-    private class InternalRunable implements Runnable {
-
-        private Runnable runnable = null;
-        private Handler handler = null;
-
-        public InternalRunable(Handler handler, Runnable runnable) {
-            this.handler = handler;
-            this.runnable = runnable;
-        }
-
-        @Override
-        public void run() {
-            if (runnable != null) {
-                runnable.run();
-                if (handler != null) {
-                    handler.removeCallbacks(runnable);
+    private HandlerManager() {
+        Handler mainHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                try {
+                    if (msg.what != 48820 || msg.obj == null || !(msg.obj instanceof RunnableParamsN)) {
+                        params = null;
+                        handlerThreadLocal.remove();
+                        return;
+                    }
+                    RunnableParamsN runnable = (RunnableParamsN) msg.obj;
+                    runnable.run(params);
+                    handlerThreadLocal.remove();
+                } catch (Exception e) {
+                    Logger.debug(e.getMessage());
                 }
             }
-        }
+        };
+        handlerThreadLocal.set(mainHandler);
+    }
+
+    public static HandlerManager getInstance() {
+        return new HandlerManager();
     }
 
     /**
@@ -61,12 +50,27 @@ public class HandlerManager {
      * The runnable will be run on the thread to which this handler is
      * attached.
      *
-     * @param handler
-     * @param runnable
+     * @param runnable call runnable
+     * @param params   参数
      */
-    public void post(Runnable runnable) {
-        Handler handler = getMainHandler();
-        handler.post(new InternalRunable(handler, runnable));
+    public <T> void post(RunnableParamsN<T> runnable, T... params) {
+        if (runnable == null) {
+            return;
+        }
+        try {
+            this.params = params;
+            Handler handler = handlerThreadLocal.get();
+            if (handler == null) {
+                this.params = null;
+                //引用为空则取消发送
+                handlerThreadLocal.remove();
+                return;
+            }
+            Message message = handler.obtainMessage(48820, runnable);
+            handler.sendMessage(message);
+        } catch (Exception e) {
+            Logger.debug(e.getMessage());
+        }
     }
 
     /**
@@ -75,35 +79,32 @@ public class HandlerManager {
      * The runnable will be run on the thread to which this handler
      * is attached.
      *
-     * @param handler
-     * @param runnable
-     * @param delayMillis
+     * @param runnable    call runnable
+     * @param delayMillis 延迟delayMillis毫秒后回调
+     * @param params      参数
      */
-    public void postDelayed(Runnable runnable, long delayMillis) {
-        Handler handler = getMainHandler();
-        handler.postDelayed(new InternalRunable(handler, runnable), delayMillis);
-    }
-
-    /**
-     * 回收runnable
-     *
-     * @param handler
-     * @param runnable
-     */
-    public void recyclingRunnable(Handler handler, Runnable runnable) {
-        if (runnable != null && runnable != null) {
-            handler.removeCallbacks(runnable);
+    public <T> void postDelayed(RunnableParamsN<T> runnable, long delayMillis, T... params) {
+        if (runnable == null) {
+            return;
         }
-    }
-
-    /**
-     * 回收runnable
-     *
-     * @param handler
-     * @param runnable
-     */
-    public void recyclingRunnable(Runnable runnable) {
-        Handler handler = getMainHandler();
-        recyclingRunnable(handler, runnable);
+        try {
+            this.params = params;
+            Handler handler = handlerThreadLocal.get();
+            if (handler == null) {
+                this.params = null;
+                //引用为空则取消发送
+                handlerThreadLocal.remove();
+                return;
+            }
+            Message message = handler.obtainMessage(48820, runnable);
+            message.obj = params;
+            if (delayMillis <= 0) {
+                handler.sendMessage(message);
+            } else {
+                handler.sendMessageDelayed(message, delayMillis);
+            }
+        } catch (Exception e) {
+            Logger.debug(e.getMessage());
+        }
     }
 }

@@ -9,7 +9,10 @@ import com.cloud.debris.utils.RedirectUtils;
 import com.cloud.debrisTest.databinding.MainViewBinding;
 import com.cloud.debrisTest.images.ImagesActivity;
 import com.cloud.debrisTest.okhttp.OKHttpSimple;
+import com.cloud.objects.HandlerManager;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.logs.Logger;
 
 /**
  * Author lijinghuan
@@ -33,6 +36,13 @@ public class MainActivity extends BaseActivity {
 //        List<UserItem> userItems = JsonUtils.parseArray(json, UserItem.class);
         String json = "{\"FanCount\":0,\"FriendsCount\":6,\"InfoCount\":0,\"PrestigeID\":\"Lv4\",\"PrestigeName\":\"秀才\",\"UserID\":439469,\"UserName\":\"lijh\",\"Sex\":0,\"SexName\":\"男\",\"IsUpdateName\":true,\"IntegralCount\":203,\"Mobile\":\"153****5753\",\"IsSuperModerator\":false,\"RegDate\":\"2019-02-18\",\"DisplayCount\":104,\"Introduction\":\"坚持坚持\",\"BlacklistStatus\":false,\"BackgroundImage\":\"\",\"IsHavBackgroundRole\":false,\"IsVerified\":true}";
         boolean status = ObjectJudge.isJson(json);
+
+        HandlerManager.getInstance().post(new RunnableParamsN<Integer>() {
+            @Override
+            public void run(Integer... params) {
+                Logger.info("当前消息" + params[0]);
+            }
+        }, 10);
     }
 
     public void OnNetFrameClick(View view) {

@@ -16,7 +16,6 @@ import com.cloud.nets.events.OnApiRetCodesFilterListener;
 import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
-import com.cloud.nets.events.OnHttpRequestHeadersListener;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.nets.properties.ByteRequestItem;
 import com.cloud.nets.properties.OkRxConfigParams;
@@ -295,18 +294,6 @@ public class BaseService {
         return true;
     }
 
-    private OnHttpRequestHeadersListener getHeaderCall(ApiHeadersCall apiHeadersCall) {
-        if (apiHeadersCall == null) {
-            return null;
-        }
-        Class<?> headersCallClass = apiHeadersCall.requestHeadersCallClass();
-        Object callObject = JsonUtils.newNull(headersCallClass);
-        if (callObject == null || !(callObject instanceof OnHttpRequestHeadersListener)) {
-            return null;
-        }
-        return (OnHttpRequestHeadersListener) callObject;
-    }
-
     private void subBytes(String requestUrl,
                           HashMap<String, String> httpHeaders,
                           HashMap<String, Object> httpParams,
@@ -388,16 +375,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -441,16 +418,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -493,16 +460,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -546,16 +503,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -599,16 +546,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -652,16 +589,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -705,16 +632,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {
@@ -757,16 +674,6 @@ public class BaseService {
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
-                new Action2<String, HashMap<String, String>>() {
-                    @Override
-                    public void call(String apiUnique, HashMap<String, String> headers) {
-                        OnHttpRequestHeadersListener call = getHeaderCall(apiHeadersCall);
-                        if (call == null) {
-                            return;
-                        }
-                        call.onRequestHeaders(apiUnique, headers);
-                    }
-                },
                 new Action2<RequestState, ErrorType>() {
                     @Override
                     public void call(RequestState requestState, ErrorType errorType) {

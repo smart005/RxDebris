@@ -7,15 +7,14 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import com.cloud.objects.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.events.Action3;
+import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.ThreadPoolUtils;
@@ -174,7 +173,7 @@ public class EBus {
             try {
                 if (busItem.getThreadMode() == null || busItem.getThreadMode() == ThreadModeEBus.MAIN) {
                     busItem.setArgs(args);
-                    mhandler.obtainMessage(5000, busItem).sendToTarget();
+                    HandlerManager.getInstance().post(new HandlerRunnable(), busItem);
                 } else {
                     method.invoke(busItem.getSubscriber(), args);
                 }
@@ -405,21 +404,19 @@ public class EBus {
         }
     }
 
-    private Handler mhandler = new Handler(Looper.getMainLooper()) {
+    private class HandlerRunnable extends RunnableParamsN<EBusItem> {
         @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == 5000) {
-                if (msg.obj == null || !(msg.obj instanceof EBusItem)) {
-                    return;
-                }
-                EBusItem busItem = (EBusItem) msg.obj;
-                Method method = busItem.getMethod();
-                try {
-                    method.invoke(busItem.getSubscriber(), busItem.getArgs());
-                } catch (Exception e) {
-                    Logger.error(e);
-                }
+        public void run(EBusItem... eBusItems) {
+            if (ObjectJudge.isNullOrEmpty(eBusItems)) {
+                return;
+            }
+            EBusItem busItem = eBusItems[0];
+            Method method = busItem.getMethod();
+            try {
+                method.invoke(busItem.getSubscriber(), busItem.getArgs());
+            } catch (Exception e) {
+                Logger.error(e);
             }
         }
-    };
+    }
 }

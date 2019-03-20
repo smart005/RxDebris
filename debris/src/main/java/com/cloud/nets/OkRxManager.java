@@ -49,14 +49,13 @@ public class OkRxManager {
                     RetrofitParams retrofitParams,
                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                     String apiUnique,
-                    Action2<String, HashMap<String, String>> headersAction,
-                    Action2<RequestState,ErrorType> completeAction,
+                    Action2<RequestState, ErrorType> completeAction,
                     Action2<String, String> printLogAction,
                     String apiRequestKey,
                     HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxGetRequest request = new OkRxGetRequest();
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void post(String url,
@@ -65,14 +64,13 @@ public class OkRxManager {
                      RequestContentType requestContentType,
                      Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      String apiUnique,
-                     Action2<String, HashMap<String, String>> headersAction,
-                     Action2<RequestState,ErrorType> completeAction,
+                     Action2<RequestState, ErrorType> completeAction,
                      Action2<String, String> printLogAction,
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxPostRequest request = new OkRxPostRequest(requestContentType);
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void delete(String url,
@@ -81,14 +79,13 @@ public class OkRxManager {
                        RequestContentType requestContentType,
                        Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                        String apiUnique,
-                       Action2<String, HashMap<String, String>> headersAction,
-                       Action2<RequestState,ErrorType> completeAction,
+                       Action2<RequestState, ErrorType> completeAction,
                        Action2<String, String> printLogAction,
                        String apiRequestKey,
                        HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxDeleteRequest request = new OkRxDeleteRequest(requestContentType);
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void put(String url,
@@ -97,14 +94,13 @@ public class OkRxManager {
                     RequestContentType requestContentType,
                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                     String apiUnique,
-                    Action2<String, HashMap<String, String>> headersAction,
-                    Action2<RequestState,ErrorType> completeAction,
+                    Action2<RequestState, ErrorType> completeAction,
                     Action2<String, String> printLogAction,
                     String apiRequestKey,
                     HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxPutRequest request = new OkRxPutRequest(requestContentType);
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void patch(String url,
@@ -113,14 +109,13 @@ public class OkRxManager {
                       RequestContentType requestContentType,
                       Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                       String apiUnique,
-                      Action2<String, HashMap<String, String>> headersAction,
-                      Action2<RequestState,ErrorType> completeAction,
+                      Action2<RequestState, ErrorType> completeAction,
                       Action2<String, String> printLogAction,
                       String apiRequestKey,
                       HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxPatchRequest request = new OkRxPatchRequest(requestContentType);
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void head(String url,
@@ -128,14 +123,13 @@ public class OkRxManager {
                      RetrofitParams retrofitParams,
                      Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      String apiUnique,
-                     Action2<String, HashMap<String, String>> headersAction,
-                     Action2<RequestState,ErrorType> completeAction,
+                     Action2<RequestState, ErrorType> completeAction,
                      Action2<String, String> printLogAction,
                      String apiRequestKey,
                      HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxHeadRequest request = new OkRxHeadRequest();
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void options(String url,
@@ -144,14 +138,13 @@ public class OkRxManager {
                         RequestContentType requestContentType,
                         Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                         String apiUnique,
-                        Action2<String, HashMap<String, String>> headersAction,
-                        Action2<RequestState,ErrorType> completeAction,
+                        Action2<RequestState, ErrorType> completeAction,
                         Action2<String, String> printLogAction,
                         String apiRequestKey,
                         HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxOptionsRequest request = new OkRxOptionsRequest(requestContentType);
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void trace(String url,
@@ -160,14 +153,13 @@ public class OkRxManager {
                       RequestContentType requestContentType,
                       Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                       String apiUnique,
-                      Action2<String, HashMap<String, String>> headersAction,
                       Action2<RequestState, ErrorType> completeAction,
                       Action2<String, String> printLogAction,
                       String apiRequestKey,
                       final HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
         OkRxTraceRequest request = new OkRxTraceRequest(requestContentType);
         request.setRetrofitParams(retrofitParams);
-        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique, headersAction);
+        request.call(url, headers, successAction, completeAction, printLogAction, apiRequestKey, reqQueueItemHashMap, apiUnique);
     }
 
     public void download(String url,
@@ -188,7 +180,7 @@ public class OkRxManager {
                             HashMap<String, Object> httpParams,
                             List<ByteRequestItem> byteRequestItems,
                             Action3<String, String, HashMap<String, ReqQueueItem>> successAction,
-                            Action2<RequestState,ErrorType> completeAction,
+                            Action2<RequestState, ErrorType> completeAction,
                             Action2<String, String> printLogAction,
                             String apiRequestKey,
                             HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
@@ -201,7 +193,7 @@ public class OkRxManager {
                            HashMap<String, Object> httpParams,
                            ByteRequestItem byteRequestItem,
                            Action3<String, String, HashMap<String, ReqQueueItem>> successAction,
-                           Action2<RequestState,ErrorType> completeAction,
+                           Action2<RequestState, ErrorType> completeAction,
                            Action2<String, String> printLogAction,
                            String apiRequestKey,
                            HashMap<String, ReqQueueItem> reqQueueItemHashMap) {

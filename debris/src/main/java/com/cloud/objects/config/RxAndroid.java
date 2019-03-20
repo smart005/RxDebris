@@ -35,10 +35,6 @@ public class RxAndroid {
          * 项目构建配置类包名(用于获取基本配置信息)
          */
         private String projectBuildConfigPackgeName = null;
-        /**
-         * http header参数名
-         */
-        private String[] httpHeaderParamNames = null;
         //根目录名
         private String rootDirName = "";
         /**
@@ -81,22 +77,12 @@ public class RxAndroid {
         }
 
         public String getProjectBuildConfigPackgeName() {
-            projectBuildConfigPackgeName = getParamsObject("BuildConfigPackgeName");
+            projectBuildConfigPackgeName = getParamsObject("$_BuildConfigPackgeName");
             return projectBuildConfigPackgeName;
         }
 
         public RxAndroidBuilder setProjectBuildConfigPackgeName(String projectBuildConfigPackgeName) {
             this.projectBuildConfigPackgeName = projectBuildConfigPackgeName;
-            return this;
-        }
-
-        public String[] getHttpHeaderParamNames() {
-            httpHeaderParamNames = getParamsObject("HttpHeaderParamName");
-            return httpHeaderParamNames;
-        }
-
-        public RxAndroidBuilder setHttpHeaderParamNames(String... httpHeaderParamNames) {
-            this.httpHeaderParamNames = httpHeaderParamNames;
             return this;
         }
 
@@ -106,7 +92,7 @@ public class RxAndroid {
          * @return
          */
         public String getRootDirName() {
-            rootDirName = getParamsObject("RootDirName");
+            rootDirName = getParamsObject("$_RootDirName");
             if (TextUtils.isEmpty(rootDirName)) {
                 rootDirName = "cloudRoot";
             }
@@ -120,7 +106,7 @@ public class RxAndroid {
 
         public String getInternalCacheRootDir() {
             if (TextUtils.isEmpty(internalCacheRootDir)) {
-                internalCacheRootDir = getParamsObject("InternalCacheRootDir");
+                internalCacheRootDir = getParamsObject("$_InternalCacheRootDir");
             }
             return internalCacheRootDir;
         }
@@ -132,7 +118,7 @@ public class RxAndroid {
 
         public String getExternalCacheRootDir() {
             if (TextUtils.isEmpty(externalCacheRootDir)) {
-                externalCacheRootDir = getParamsObject("ExternalCacheRootDir");
+                externalCacheRootDir = getParamsObject("$_ExternalCacheRootDir");
             }
             return externalCacheRootDir;
         }
@@ -143,7 +129,7 @@ public class RxAndroid {
         }
 
         public boolean isDebug() {
-            Boolean debug = getParamsObject("Debug");
+            Boolean debug = getParamsObject("$_Debug");
             if (debug == null) {
                 isDebug = false;
             } else {
@@ -159,7 +145,7 @@ public class RxAndroid {
 
         public String getLoggeruTag() {
             if (TextUtils.isEmpty(loggeruTag)) {
-                loggeruTag = getParamsObject("LoggeruTag");
+                loggeruTag = getParamsObject("$_LoggeruTag");
             }
             return loggeruTag;
         }
@@ -176,7 +162,7 @@ public class RxAndroid {
          */
         public String getDatabaseName() {
             if (TextUtils.isEmpty(databaseName)) {
-                databaseName = getParamsObject("CacheDatabaseName");
+                databaseName = getParamsObject("$_CacheDatabaseName");
             }
             return databaseName;
         }
@@ -192,7 +178,7 @@ public class RxAndroid {
         }
 
         public boolean isBetaVersion() {
-            Boolean betaVersion = getParamsObject("BetaVersion");
+            Boolean betaVersion = getParamsObject("$_BetaVersion");
             if (betaVersion == null) {
                 isBetaVersion = false;
             } else {
@@ -222,23 +208,21 @@ public class RxAndroid {
                 }
             }
             //缓存配置类信息
-            map.put("BuildConfigPackgeName", projectBuildConfigPackgeName);
-            //http header参数
-            map.put("HttpHeaderParamName", httpHeaderParamNames);
+            map.put("$_BuildConfigPackgeName", projectBuildConfigPackgeName);
             //根目录名
-            map.put("RootDirName", rootDirName);
+            map.put("$_RootDirName", rootDirName);
             //内部缓存根目录
-            map.put("InternalCacheRootDir", internalCacheRootDir);
+            map.put("$_InternalCacheRootDir", internalCacheRootDir);
             //外部缓存根目录
-            map.put("ExternalCacheRootDir", externalCacheRootDir);
+            map.put("$_ExternalCacheRootDir", externalCacheRootDir);
             //调试状态
-            map.put("Debug", isDebug);
+            map.put("$_Debug", isDebug);
             //日志全局标识
-            map.put("LoggeruTag", loggeruTag);
+            map.put("$_LoggeruTag", loggeruTag);
             //缓存数据库名称
-            map.put("CacheDatabaseName", databaseName);
+            map.put("$_CacheDatabaseName", databaseName);
             //设置beta状态
-            map.put("BetaVersion", isBetaVersion);
+            map.put("$_BetaVersion", isBetaVersion);
         }
     }
 

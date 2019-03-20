@@ -43,7 +43,7 @@ public class OkRxPutRequest extends BaseRequest {
     }
 
     @Override
-    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action2<RequestState, ErrorType> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique, Action2<String, HashMap<String, String>> headersAction) {
+    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action2<RequestState, ErrorType> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique) {
         if (TextUtils.isEmpty(url)) {
             if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                 reqQueueItemHashMap.remove(apiRequestKey);
@@ -116,7 +116,7 @@ public class OkRxPutRequest extends BaseRequest {
         }
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
-        StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
+        StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique) {
             @Override
             protected void onSuccessCall(String responseString) {
                 RetrofitParams retrofitParams = getRetrofitParams();

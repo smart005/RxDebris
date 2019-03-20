@@ -56,8 +56,7 @@ public class OkRxGetRequest extends BaseRequest {
                      final Action2<String, String> printLogAction,
                      final String apiRequestKey,
                      final HashMap<String, ReqQueueItem> reqQueueItemHashMap,
-                     String apiUnique,
-                     Action2<String, HashMap<String, String>> headersAction) {
+                     String apiUnique) {
         if (TextUtils.isEmpty(url)) {
             if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                 reqQueueItemHashMap.remove(apiRequestKey);
@@ -124,7 +123,7 @@ public class OkRxGetRequest extends BaseRequest {
         Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(), retrofitParams.getFileSuffixParams()).get();
         Request request = builder.tag(retrofitParams.getInvokeMethodName()).build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
-        StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
+        StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique) {
             @Override
             protected void onSuccessCall(String responseString) {
                 RetrofitParams retrofitParams = getRetrofitParams();

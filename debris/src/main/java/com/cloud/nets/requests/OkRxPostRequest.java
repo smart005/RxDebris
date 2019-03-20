@@ -37,21 +37,19 @@ import okhttp3.Request;
 public class OkRxPostRequest extends BaseRequest {
 
     private String responseString = "";
-    private Action2<String, HashMap<String, String>> headersAction = null;
 
     public OkRxPostRequest(RequestContentType requestContentType) {
         super.setRequestContentType(requestContentType);
     }
 
     @Override
-    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action2<RequestState, ErrorType> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique, Action2<String, HashMap<String, String>> headersAction) {
-        this.headersAction = headersAction;
+    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action2<RequestState, ErrorType> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique) {
         if (TextUtils.isEmpty(url)) {
             if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                 reqQueueItemHashMap.remove(apiRequestKey);
             }
             if (completeAction != null) {
-                completeAction.call(RequestState.Completed,ErrorType.none);
+                completeAction.call(RequestState.Completed, ErrorType.none);
             }
             return;
         }
@@ -110,10 +108,10 @@ public class OkRxPostRequest extends BaseRequest {
         }
 
         setRequestType(RequestType.POST);
-        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(),retrofitParams.getFileSuffixParams());
+        Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(), retrofitParams.getFileSuffixParams());
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
-        StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique, headersAction) {
+        StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique) {
             @Override
             protected void onSuccessCall(String responseString) {
                 RetrofitParams retrofitParams = getRetrofitParams();
