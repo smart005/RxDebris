@@ -31,7 +31,7 @@ import com.cloud.dialogs.enums.MsgBoxClickButtonEnum;
 import com.cloud.images2.beans.SelectImageProperties;
 import com.cloud.images2.figureset.ImageSelectDialog;
 import com.cloud.mixed.RxMixed;
-import com.cloud.objects.HandlerManager;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RuleParams;
 import com.cloud.objects.events.RunnableParamsN;

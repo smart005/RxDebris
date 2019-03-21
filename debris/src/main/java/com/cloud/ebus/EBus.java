@@ -11,7 +11,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import com.cloud.objects.HandlerManager;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.events.Action3;
 import com.cloud.objects.events.RunnableParamsN;

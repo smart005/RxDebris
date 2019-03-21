@@ -1,4 +1,4 @@
-package com.cloud.objects;
+package com.cloud.objects.handler;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -32,6 +32,7 @@ public class HandlerManager {
                     }
                     RunnableParamsN runnable = (RunnableParamsN) msg.obj;
                     runnable.run(params);
+                    msg.obj = null;
                     handlerThreadLocal.remove();
                 } catch (Exception e) {
                     Logger.debug(e.getMessage());

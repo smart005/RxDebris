@@ -9,7 +9,7 @@ import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.nets.requests.NetErrorWith;
-import com.cloud.objects.HandlerManager;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestState;
