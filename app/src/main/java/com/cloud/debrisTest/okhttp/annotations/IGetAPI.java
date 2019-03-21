@@ -1,7 +1,5 @@
 package com.cloud.debrisTest.okhttp.annotations;
 
-import android.graphics.Bitmap;
-
 import com.cloud.debrisTest.okhttp.ServiceAPI;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
 import com.cloud.nets.annotations.BaseUrlTypeName;
@@ -14,6 +12,7 @@ import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.objects.enums.RequestContentType;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,8 +40,9 @@ public interface IGetAPI {
     RetrofitParams requestUserList();
 
     @GET(value = "http://login.108sq.cn/login/Validate/MobileImage.aspx", isFullUrl = true)
-    @DataParam(value = Bitmap.class, responseDataType = ResponseDataType.byteData)
+    @DataParam(value = File.class, responseDataType = ResponseDataType.byteData)
     RetrofitParams getValidateCode(
-            @Param("username") String username
+            @Param("username") String username,
+            @Param(isFile = true) File file
     );
 }

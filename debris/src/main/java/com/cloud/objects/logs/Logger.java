@@ -160,7 +160,7 @@ public class Logger {
      * @param message 消息
      * @param args    基础数据结构对象
      */
-    public static void info(String tag, @NonNull String message, @Nullable Object... args) {
+    public static void info(String tag, String message, Object... args) {
         RxAndroid.RxAndroidBuilder androidBuilder = RxAndroid.getInstance().getBuilder();
         if (!androidBuilder.isDebug()) {
             //线上消息不需要输入日志信息

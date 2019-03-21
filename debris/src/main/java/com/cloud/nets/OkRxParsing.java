@@ -290,6 +290,16 @@ public class OkRxParsing {
         HashMap<String, String> suffixParams = retrofitParams.getFileSuffixParams();
         for (Map.Entry<Integer, Param> paramIntegerEntry : paramAnnotationObject.entrySet()) {
             Param key = paramIntegerEntry.getValue();
+            if (key.isFile()) {
+                Object arg = args[paramIntegerEntry.getKey()];
+                if (arg instanceof File) {
+                    File file = (File) arg;
+                    retrofitParams.setTargetFilePath(file.getAbsolutePath());
+                } else if (arg instanceof String) {
+                    retrofitParams.setTargetFilePath((String) arg);
+                }
+                continue;
+            }
             //绑定参数
             bindSingleParam(key, position, paramIntegerEntry.getKey(), params, suffixParams, args, isRemoveEmptyValueField);
             position++;

@@ -36,7 +36,7 @@ public @interface Param {
      * ----3.所有参数该值均为空则把所有参数转为数组以json形式作为本次提交的数据;
      * --value()不为空
      * ----1.作为普通参数方式提交;
-     * false 作为普通参数方式提交;
+     * false 文件或普通参数类型;
      *
      * @return
      */
@@ -49,4 +49,12 @@ public @interface Param {
      * @return 文件后缀
      */
     String fileSuffixAfterUpload() default "";
+
+    /**
+     * 是否文件
+     *
+     * @return true-当responseDataType()为byteData或stream类型时,则最终将转换为当前参数提供的文件;
+     * false-根据接口指定的数据类型返回;
+     */
+    boolean isFile() default false;
 }

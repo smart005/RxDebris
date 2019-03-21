@@ -15,6 +15,10 @@ import java.io.InputStream;
 public class ResponseParsing {
 
     /**
+     * 数据类
+     */
+    private Class dataClass = null;
+    /**
      * 响应数据类型
      */
     private ResponseDataType responseDataType = ResponseDataType.object;
@@ -30,6 +34,14 @@ public class ResponseParsing {
      * 流数据
      */
     private InputStream stream = null;
+
+    public Class getDataClass() {
+        return dataClass;
+    }
+
+    public void setDataClass(Class dataClass) {
+        this.dataClass = dataClass;
+    }
 
     public ResponseDataType getResponseDataType() {
         if (responseDataType == null) {

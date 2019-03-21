@@ -127,6 +127,11 @@ public class RetrofitParams {
      * 数据响应类型
      */
     private ResponseDataType responseDataType = ResponseDataType.object;
+    /**
+     * 当responseDataType()为byteData或stream类型时且value()为File类型,
+     * 则最终将转换为以targetFilePath()作为路径的文件;
+     */
+    private String targetFilePath = "";
 
     public RequestType getRequestType() {
         return requestType;
@@ -364,5 +369,13 @@ public class RetrofitParams {
 
     public void setResponseDataType(ResponseDataType responseDataType) {
         this.responseDataType = responseDataType;
+    }
+
+    public String getTargetFilePath() {
+        return targetFilePath;
+    }
+
+    public void setTargetFilePath(String targetFilePath) {
+        this.targetFilePath = targetFilePath;
     }
 }

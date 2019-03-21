@@ -11,9 +11,15 @@ import android.view.View;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.logs.Logger;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -623,5 +629,77 @@ public class ConvertUtils {
         bFString = bFString + bSString;
         result = "#" + rFString + gFString + bFString;
         return result;
+    }
+
+    /**
+     * 字节数组转为文件
+     *
+     * @param targetFile 目标文件
+     * @param bytes      字节
+     */
+    public static void toFile(File targetFile, byte[] bytes) {
+        if (targetFile == null || bytes == null || !targetFile.exists()) {
+            return;
+        }
+        BufferedOutputStream bos = null;
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(targetFile);
+            bos = new BufferedOutputStream(fos);
+            bos.write(bytes);
+        } catch (IOException e) {
+            Logger.error(e);
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            }
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 流转为文件
+     *
+     * @param targetFile 目标文件
+     * @param stream     流对象
+     */
+    public static void toFile(File targetFile, InputStream stream) {
+        if (targetFile == null || stream == null || !targetFile.exists()) {
+            return;
+        }
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(targetFile);
+            int bytesRead = 0;
+            byte[] buffer = new byte[4096];
+            while ((bytesRead = stream.read(buffer, 0, 4096)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            Logger.error(e);
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            }
+            try {
+                stream.close();
+            } catch (IOException e) {
+                Logger.error(e);
+            }
+        }
     }
 }

@@ -1,7 +1,5 @@
 package com.cloud.debrisTest.okhttp.services;
 
-import android.graphics.Bitmap;
-
 import com.cloud.debrisTest.okhttp.UrlsProvider;
 import com.cloud.debrisTest.okhttp.annotations.IGetAPI;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
@@ -14,7 +12,10 @@ import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.objects.events.Func2;
+import com.cloud.objects.storage.StorageUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -69,13 +70,22 @@ public class GetService extends BaseOkrxService {
     }
 
     @ApiCheckAnnotation
-    public void getValidateCode(OnSuccessfulListener<Bitmap> successfulListener) {
-        BaseSubscriber baseSubscriber = new BaseSubscriber<Bitmap, GetService>(this);
+    public void getValidateCode(OnSuccessfulListener<File> successfulListener) {
+        BaseSubscriber baseSubscriber = new BaseSubscriber<File, GetService>(this);
         baseSubscriber.setOnSuccessfulListener(successfulListener);
         requestObject(IGetAPI.class, this, baseSubscriber, new Func2<RetrofitParams, IGetAPI, HashMap<String, Object>>() {
             @Override
             public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
-                return getAPI.getValidateCode("lijh");
+                File dir = StorageUtils.getRootDir();
+                File file = new File(dir, "test_image.jpg");
+                if (!file.exists()) {
+                    try {
+                        file.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return getAPI.getValidateCode("lijh", file);
             }
         });
     }

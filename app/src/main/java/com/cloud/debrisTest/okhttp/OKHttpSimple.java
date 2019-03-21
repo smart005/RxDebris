@@ -1,7 +1,6 @@
 package com.cloud.debrisTest.okhttp;
 
 import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
@@ -14,6 +13,8 @@ import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.objects.utils.JsonUtils;
+
+import java.io.File;
 
 public class OKHttpSimple extends AppCompatActivity {
 
@@ -34,9 +35,9 @@ public class OKHttpSimple extends AppCompatActivity {
 //            }
 //        });
 
-        getService.getValidateCode(new OnSuccessfulListener<Bitmap>() {
+        getService.getValidateCode(new OnSuccessfulListener<File>() {
             @Override
-            public void onSuccessful(Bitmap bitmap, DataType dataType, Object... extras) {
+            public void onSuccessful(File file, DataType dataType, Object... extras) {
 
             }
 

@@ -43,6 +43,7 @@ import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.PathsUtils;
 import com.cloud.objects.utils.ThreadPoolUtils;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -229,6 +230,7 @@ public class BaseService {
             boolean isBasicData = false;
             //解析后结果数据
             ResponseParsing responseParsing = new ResponseParsing();
+            responseParsing.setDataClass(dataClass);
             //数据类型object\byte\stream
             ResponseDataType responseDataType = responseData.getResponseDataType();
             responseParsing.setResponseDataType(responseDataType);
@@ -292,6 +294,8 @@ public class BaseService {
                     } else if (dataClass == String.class) {
                         responseParsing.setData(new String(responseParsing.getBytes()));
                         responseParsing.setBytes(null);
+                    } else if (dataClass == File.class) {
+
                     }
                 }
                 successAction.call(responseParsing, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
@@ -943,7 +947,7 @@ public class BaseService {
                                                        S server,
                                                        final BaseSubscriber<Object, S> baseSubscriber,
                                                        OkRxValidParam validParam,
-                                                       RetrofitParams retrofitParams,
+                                                       final RetrofitParams retrofitParams,
                                                        Func2<String, S, Integer> urlAction) {
         //设置回调是否作验证
         baseSubscriber.setValidCallResult(retrofitParams.isValidCallResult());
@@ -1008,9 +1012,11 @@ public class BaseService {
                         if (responseDataType == ResponseDataType.object) {
                             baseSubscriber.onNext(responseParsing.getData(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
                         } else if (responseDataType == ResponseDataType.byteData) {
-                            baseSubscriber.onNext(responseParsing.getBytes() == null ? responseParsing.getData() : responseParsing.getBytes(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+                            //绑定字节
+                            bindBytes(baseSubscriber, responseParsing, retrofitParams, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
                         } else if (responseDataType == ResponseDataType.stream) {
-                            baseSubscriber.onNext(responseParsing.getStream(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+                            //绑定流
+                            bindStream(baseSubscriber, responseParsing, retrofitParams, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
                         }
                     }
                 },
@@ -1031,5 +1037,37 @@ public class BaseService {
                 //此处完成回调不回调外面完成回调，若有其它业务或判断可在这里处理；
                 null,
                 apiRequestKey);
+    }
+
+    private <S extends BaseService> void bindStream(BaseSubscriber<Object, S> baseSubscriber, ResponseParsing responseParsing, RetrofitParams retrofitParams, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType, Long requestStartTime, Long requestTotalTime) {
+        if (responseParsing.getDataClass() == File.class && !TextUtils.isEmpty(retrofitParams.getTargetFilePath())) {
+            File file = new File(retrofitParams.getTargetFilePath());
+            if (file.exists()) {
+                ConvertUtils.toFile(file, responseParsing.getStream());
+                baseSubscriber.onNext(file, reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+            } else {
+                baseSubscriber.onNext(responseParsing.getStream(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+            }
+        } else {
+            baseSubscriber.onNext(responseParsing.getStream(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+        }
+    }
+
+    private <S extends BaseService> void bindBytes(BaseSubscriber<Object, S> baseSubscriber, ResponseParsing responseParsing, RetrofitParams retrofitParams, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType, Long requestStartTime, Long requestTotalTime) {
+        if (responseParsing.getBytes() == null) {
+            baseSubscriber.onNext(responseParsing.getData(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+        } else {
+            if (responseParsing.getDataClass() == File.class && !TextUtils.isEmpty(retrofitParams.getTargetFilePath())) {
+                File file = new File(retrofitParams.getTargetFilePath());
+                if (file.exists()) {
+                    ConvertUtils.toFile(file, responseParsing.getBytes());
+                    baseSubscriber.onNext(file, reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+                } else {
+                    baseSubscriber.onNext(responseParsing.getBytes(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+                }
+            } else {
+                baseSubscriber.onNext(responseParsing.getBytes(), reqQueueItemHashMap, apiRequestKey, dataType, requestStartTime, requestTotalTime);
+            }
+        }
     }
 }
