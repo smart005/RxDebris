@@ -12,10 +12,9 @@ import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.nets.properties.ReqQueueItem;
-import com.cloud.objects.handler.HandlerManager;
-import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.ResultState;
 import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.ThreadPoolUtils;
@@ -132,40 +131,10 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
         return this.allowRetCodes;
     }
 
-    public void setLoginValid(boolean isLoginValid) {
-        this.isLoginValid = isLoginValid;
-    }
-
-    public void setApiUnloginRetCodes(List<String> apiUnloginRetCodes) {
-        this.apiUnloginRetCodes = apiUnloginRetCodes;
-    }
-
     public <ExtraT> BaseSubscriber(BaseT cls) {
         this.baseT = cls;
         if (baseT != null) {
             baseT.setBaseSubscriber(this);
-        }
-    }
-
-    public void onCompleted() {
-        if (baseT == null) {
-            return;
-        }
-        if (ObjectJudge.isMainThread()) {
-            if (onSuccessfulListener != null) {
-                onSuccessfulListener.onCompleted(extra);
-            }
-            baseT.onRequestCompleted();
-        } else {
-            mhandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (onSuccessfulListener != null) {
-                        onSuccessfulListener.onCompleted(extra);
-                    }
-                    baseT.onRequestCompleted();
-                }
-            });
         }
     }
 
@@ -244,8 +213,8 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
             }
             if (onSuccessfulListener != null) {
                 onSuccessfulListener.onSuccessful(params.t, params.dataType, extra);
+                onSuccessfulListener.onCompleted(extra);
             }
-            onCompleted();
         }
     }
 
@@ -268,7 +237,6 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
             try {
                 if (t == null) {
                     successWith(t, ResultState.Fail, dataType, requestStartTime, requestTotalTime);
-                    onCompleted();
                     return;
                 }
                 if (TextUtils.isEmpty(apiName)) {
@@ -312,7 +280,6 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
                 }
             } catch (Exception e) {
                 successWith(t, ResultState.Fail, dataType, requestStartTime, requestTotalTime);
-                onCompleted();
                 Logger.error(e);
             }
         }

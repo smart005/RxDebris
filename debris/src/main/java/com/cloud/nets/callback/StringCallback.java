@@ -4,18 +4,20 @@ import android.text.TextUtils;
 
 import com.cloud.cache.RxStacks;
 import com.cloud.nets.OkRx;
+import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
+import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.nets.requests.NetErrorWith;
-import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action4;
 import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.JsonUtils;
 
@@ -43,7 +45,7 @@ import okhttp3.ResponseBody;
 public abstract class StringCallback implements Callback {
 
     //处理成功回调
-    private Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction = null;
+    private Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType> successAction = null;
     //请求完成时回调(成功或失败)
     private Action2<RequestState, ErrorType> completeAction = null;
     //请求完成时输出日志
@@ -53,7 +55,7 @@ public abstract class StringCallback implements Callback {
     //请求标识
     private String apiRequestKey = "";
     //数据返回内容
-    private String responseString = "";
+    private ResponseData responseData = new ResponseData();
     //api唯一标识
     private String apiUnique = "";
     //请求回调状态
@@ -68,6 +70,8 @@ public abstract class StringCallback implements Callback {
     private Map<String, String> headers = null;
     //请求参数
     private Map<String, Object> params = null;
+    //响应数据类型
+    private ResponseDataType responseDataType = null;
 
     public boolean isCancelIntervalCacheCall() {
         return isCancelIntervalCacheCall;
@@ -85,7 +89,7 @@ public abstract class StringCallback implements Callback {
         this.dataClass = dataClass;
     }
 
-    protected abstract void onSuccessCall(String responseString);
+    protected abstract void onSuccessCall(ResponseData responseData);
 
     public void setRequestMethodName(String requestMethodName) {
         this.requestMethodName = requestMethodName;
@@ -99,7 +103,11 @@ public abstract class StringCallback implements Callback {
         this.params = params;
     }
 
-    public StringCallback(Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
+    public void setResponseDataType(ResponseDataType responseDataType) {
+        this.responseDataType = responseDataType;
+    }
+
+    public StringCallback(Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                           Action2<RequestState, ErrorType> completeAction,
                           Action2<String, String> printLogAction,
                           HashMap<String, ReqQueueItem> reqQueueItemHashMap,
@@ -208,33 +216,8 @@ public abstract class StringCallback implements Callback {
                     //输出debug模式下日志
                     outputLogForDebug(call, String.format("protocol=%s;code=%s;message=%s;", response.protocol().toString(), response.code(), response.message()));
                 } else {
-                    responseString = body.string();
-                    //输出debug模式下日志
-                    outputLogForDebug(call, "");
-                    if (successAction != null) {
-                        //如果不是json且请求的数据类型不是基础数据类型则回调error
-                        if (dataClass == String.class ||
-                                dataClass == Integer.class ||
-                                dataClass == Double.class ||
-                                dataClass == Float.class ||
-                                dataClass == Long.class ||
-                                ObjectJudge.isJson(responseString)) {
-                            if (callStatus != CallStatus.WeakCache && !isCancelIntervalCacheCall()) {
-                                //此状态下不做网络回调但做缓存
-                                successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
-                            }
-                            onSuccessCall(responseString);
-                        } else {
-                            if (completeAction != null) {
-                                completeAction.call(RequestState.Error, ErrorType.businessProcess);
-                            }
-                        }
-                    }
+                    bindResponseData(call, body);
                 }
-            }
-            //输出日志
-            if (printLogAction != null) {
-                printLogAction.call(apiRequestKey, responseString);
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -250,6 +233,48 @@ public abstract class StringCallback implements Callback {
             }
             //清除本次请求堆栈信息
             RxStacks.clearBusStacks(requestMethodName);
+        }
+    }
+
+    private void bindResponseData(Call call, ResponseBody body) throws IOException {
+        responseData.setResponseDataType(responseDataType);
+        if (responseDataType == ResponseDataType.object) {
+            //object\int\double\float\long\string
+            responseData.setResponse(body.string());
+            //输出debug模式下日志
+            outputLogForDebug(call, "");
+            if (successAction == null) {
+                return;
+            }
+            //如果不是json且请求的数据类型不是基础数据类型则回调error
+            if (dataClass == String.class ||
+                    dataClass == Integer.class ||
+                    dataClass == Double.class ||
+                    dataClass == Float.class ||
+                    dataClass == Long.class ||
+                    ObjectJudge.isJson(responseData.getResponse())) {
+                if (callStatus != CallStatus.WeakCache && !isCancelIntervalCacheCall()) {
+                    //此状态下不做网络回调但做缓存
+                    successAction.call(responseData, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
+                }
+                onSuccessCall(responseData);
+            } else {
+                if (completeAction != null) {
+                    completeAction.call(RequestState.Error, ErrorType.businessProcess);
+                }
+            }
+        } else if (responseDataType == ResponseDataType.byteData) {
+            responseData.setBytes(body.bytes());
+            if (successAction == null) {
+                return;
+            }
+            successAction.call(responseData, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
+        } else if (responseDataType == ResponseDataType.stream) {
+            responseData.setStream(body.byteStream());
+            if (successAction == null) {
+                return;
+            }
+            successAction.call(responseData, apiRequestKey, reqQueueItemHashMap, DataType.NetData);
         }
     }
 
@@ -269,10 +294,10 @@ public abstract class StringCallback implements Callback {
             logbuilder.append(String.format("url:%s\n", url));
             logbuilder.append(String.format("header:%s\n", JsonUtils.toStr(headers)));
             logbuilder.append(String.format("params:%s\n", JsonUtils.toStr(params)));
-            if (TextUtils.isEmpty(responseString)) {
+            if (TextUtils.isEmpty(responseData.getResponse())) {
                 logbuilder.append(String.format("message:%s", message));
             } else {
-                logbuilder.append(String.format("result:%s", responseString));
+                logbuilder.append(String.format("result:%s", responseData.getResponse()));
             }
             HandlerManager.getInstance().post(new RunnableParamsN<StringBuilder>() {
                 @Override

@@ -3,7 +3,9 @@ package com.cloud.nets.requests;
 import android.text.TextUtils;
 
 import com.cloud.nets.OkRx;
+import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.enums.ErrorType;
+import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.nets.properties.ByteRequestItem;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
@@ -45,7 +47,7 @@ public class OkRxUploadByteRequest {
                      HashMap<String, String> headers,
                      HashMap<String, Object> params,
                      List<ByteRequestItem> byteRequestItems,
-                     final Action3<String, String, HashMap<String, ReqQueueItem>> successAction,
+                     final Action3<ResponseData, String, HashMap<String, ReqQueueItem>> successAction,
                      final Action2<RequestState, ErrorType> completeAction,
                      final Action2<String, String> printLogAction,
                      final String apiRequestKey,
@@ -108,7 +110,10 @@ public class OkRxUploadByteRequest {
                         if (successAction != null && response != null) {
                             ResponseBody body = response.body();
                             responseString = body.string();
-                            successAction.call(responseString, apiRequestKey, reqQueueItemHashMap);
+                            ResponseData responseData = new ResponseData();
+                            responseData.setResponseDataType(ResponseDataType.object);
+                            responseData.setResponse(responseString);
+                            successAction.call(responseData, apiRequestKey, reqQueueItemHashMap);
                         }
                     } catch (Exception e) {
                         Logger.error(e);

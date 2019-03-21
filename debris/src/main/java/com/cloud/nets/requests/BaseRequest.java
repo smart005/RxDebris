@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.cloud.nets.OkRx;
 import com.cloud.nets.OkRxKeys;
+import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
@@ -83,7 +84,7 @@ public class BaseRequest {
 
     public void call(String url,
                      HashMap<String, String> headers,
-                     Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction,
+                     Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                      Action2<RequestState, ErrorType> completeAction,
                      Action2<String, String> printLogAction,
                      String apiRequestKey,

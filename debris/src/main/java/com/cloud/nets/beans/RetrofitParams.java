@@ -3,6 +3,7 @@ package com.cloud.nets.beans;
 import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.BaseUrlTypeName;
 import com.cloud.nets.enums.CallStatus;
+import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.objects.enums.RequestContentType;
 import com.cloud.objects.enums.RequestType;
 
@@ -122,6 +123,10 @@ public class RetrofitParams {
      * 请求方法名
      */
     private String invokeMethodName = "";
+    /**
+     * 数据响应类型
+     */
+    private ResponseDataType responseDataType = ResponseDataType.object;
 
     public RequestType getRequestType() {
         return requestType;
@@ -348,5 +353,16 @@ public class RetrofitParams {
 
     public void setInvokeMethodName(String invokeMethodName) {
         this.invokeMethodName = invokeMethodName;
+    }
+
+    public ResponseDataType getResponseDataType() {
+        if (responseDataType == null) {
+            responseDataType = ResponseDataType.object;
+        }
+        return responseDataType;
+    }
+
+    public void setResponseDataType(ResponseDataType responseDataType) {
+        this.responseDataType = responseDataType;
     }
 }

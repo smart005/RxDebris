@@ -153,6 +153,7 @@ public class OkRxParsing {
                 DataParam annotation = method.getAnnotation(DataParam.class);
                 retrofitParams.setDataClass(annotation.value());
                 retrofitParams.setCollectionDataType(annotation.isCollection());
+                retrofitParams.setResponseDataType(annotation.responseDataType());
             } else if (declaredAnnotation.annotationType() == RetCodes.class) {
                 RetCodes annotation = method.getAnnotation(RetCodes.class);
                 if (!ObjectJudge.isNullOrEmpty(annotation.value())) {

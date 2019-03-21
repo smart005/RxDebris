@@ -8,6 +8,7 @@ import com.cloud.mixed.h5.beans.ArgFieldItem;
 import com.cloud.mixed.h5.beans.H5GetAPIMethodArgsBean;
 import com.cloud.mixed.h5.enums.APIRequestState;
 import com.cloud.nets.OkRxManager;
+import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
@@ -111,12 +112,12 @@ public class H5InteractionAPIUtils {
                 headers,
                 retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
+                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(response);
+                            apiReturnResult.setResponse(responseData.getResponse());
                             apiReturnResult.setTarget(target);
                             callback.call(APIRequestState.Success, apiReturnResult);
                         }
@@ -150,12 +151,12 @@ public class H5InteractionAPIUtils {
                 headers,
                 retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
+                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(response);
+                            apiReturnResult.setResponse(responseData.getResponse());
                             apiReturnResult.setTarget(target);
                             callback.call(APIRequestState.Success, apiReturnResult);
                         }
@@ -188,12 +189,12 @@ public class H5InteractionAPIUtils {
                 headers,
                 retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
+                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(response);
+                            apiReturnResult.setResponse(responseData.getResponse());
                             apiReturnResult.setTarget(target);
                             callback.call(APIRequestState.Success, apiReturnResult);
                         }
@@ -228,12 +229,12 @@ public class H5InteractionAPIUtils {
                 headers,
                 retrofitParams,
                 requestContentType,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
+                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(response);
+                            apiReturnResult.setResponse(responseData.getResponse());
                             apiReturnResult.setTarget(target);
                             callback.call(APIRequestState.Success, apiReturnResult);
                         }
@@ -266,12 +267,12 @@ public class H5InteractionAPIUtils {
         OkRxManager.getInstance().get(url,
                 headers,
                 retrofitParams,
-                new Action4<String, String, HashMap<String, ReqQueueItem>, DataType>() {
+                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
-                    public void call(String response, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
                         if (callback != null) {
                             APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(response);
+                            apiReturnResult.setResponse(responseData.getResponse());
                             apiReturnResult.setTarget(target);
                             callback.call(APIRequestState.Success, apiReturnResult);
                         }

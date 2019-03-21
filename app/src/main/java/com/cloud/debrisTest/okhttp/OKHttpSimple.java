@@ -1,6 +1,7 @@
 package com.cloud.debrisTest.okhttp;
 
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
@@ -24,7 +25,7 @@ public class OKHttpSimple extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.okhttp_view);
         binding.setModel(new NetModel());
 
-        getService.requestRecommandInfo(42, recommandListener);
+        //getService.requestRecommandInfo(42, recommandListener);
 
 //        getService.requestUserList(new OnSuccessfulListener<String>() {
 //            @Override
@@ -32,6 +33,23 @@ public class OKHttpSimple extends AppCompatActivity {
 //
 //            }
 //        });
+
+        getService.getValidateCode(new OnSuccessfulListener<Bitmap>() {
+            @Override
+            public void onSuccessful(Bitmap bitmap, DataType dataType, Object... extras) {
+
+            }
+
+            @Override
+            public void onError(ErrorType errorType, Object... extras) {
+
+            }
+
+            @Override
+            public void onCompleted(Object... extras) {
+
+            }
+        });
     }
 
     private OnSuccessfulListener<RecommandInfo> recommandListener = new OnSuccessfulListener<RecommandInfo>() {

@@ -68,6 +68,17 @@ public class ConvertUtils {
     }
 
     /**
+     * 字节转bitmap
+     *
+     * @param bytes 字节
+     * @return Bitmap
+     */
+    public static Bitmap toBitmap(byte[] bytes) {
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        return bitmap;
+    }
+
+    /**
      * 数字Object对象转int型
      * <p>
      * param obj          要转换的对象

@@ -6,11 +6,13 @@ import com.cloud.cache.CacheDataItem;
 import com.cloud.cache.RxCache;
 import com.cloud.cache.RxStacks;
 import com.cloud.nets.OkRx;
+import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.callback.StringCallback;
 import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
+import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestContentType;
@@ -36,14 +38,12 @@ import okhttp3.Request;
  */
 public class OkRxOptionsRequest extends BaseRequest {
 
-    private String responseString = "";
-
     public OkRxOptionsRequest(RequestContentType requestContentType) {
         super.setRequestContentType(requestContentType);
     }
 
     @Override
-    public void call(String url, final HashMap<String, String> headers, Action4<String, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action2<RequestState, ErrorType> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique) {
+    public void call(String url, final HashMap<String, String> headers, Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType> successAction, Action2<RequestState, ErrorType> completeAction, Action2<String, String> printLogAction, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, String apiUnique) {
         if (TextUtils.isEmpty(url)) {
             if (reqQueueItemHashMap != null && reqQueueItemHashMap.containsKey(apiRequestKey)) {
                 reqQueueItemHashMap.remove(apiRequestKey);
@@ -75,8 +75,10 @@ public class OkRxOptionsRequest extends BaseRequest {
             String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
             CacheDataItem dataItem = RxCache.getBaseCacheData(ckey, true);
             if (successAction != null && dataItem != null && !TextUtils.isEmpty(dataItem.getValue())) {
-                responseString = dataItem.getValue();
-                successAction.call(responseString, apiRequestKey, reqQueueItemHashMap, DataType.CacheData);
+                ResponseData responseData = new ResponseData();
+                responseData.setResponseDataType(ResponseDataType.object);
+                responseData.setResponse(dataItem.getValue());
+                successAction.call(responseData, apiRequestKey, reqQueueItemHashMap, DataType.CacheData);
                 //1.有缓存时先回调缓存数据再请求网络数据然后[缓存+回调];
                 //2.无缓存时不作缓存回调直接请求网络数据后[缓存+回调];
                 //3.有缓存时先回调缓存数据再请求网络数据然后[缓存]不作网络回调;
@@ -113,12 +115,16 @@ public class OkRxOptionsRequest extends BaseRequest {
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
         StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique) {
             @Override
-            protected void onSuccessCall(String responseString) {
+            protected void onSuccessCall(ResponseData responseData) {
+                ResponseDataType responseDataType = responseData.getResponseDataType();
+                if (responseDataType != ResponseDataType.object) {
+                    return;
+                }
                 RetrofitParams retrofitParams = getRetrofitParams();
                 CallStatus callStatus = retrofitParams.getCallStatus();
                 if (callStatus != CallStatus.OnlyNet && !TextUtils.isEmpty(retrofitParams.getCacheKey())) {
                     String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
-                    RxCache.setBaseCacheData(ckey, responseString, retrofitParams.getCacheTime(), TimeUnit.MILLISECONDS, retrofitParams.getIntervalCacheTime());
+                    RxCache.setBaseCacheData(ckey, responseData.getResponse(), retrofitParams.getCacheTime(), TimeUnit.MILLISECONDS, retrofitParams.getIntervalCacheTime());
                 }
             }
         };
@@ -129,6 +135,7 @@ public class OkRxOptionsRequest extends BaseRequest {
         //数据类型
         callback.setDataClass(retrofitParams.getDataClass());
         callback.setCallStatus(callStatus);
+        callback.setResponseDataType(retrofitParams.getResponseDataType());
         //绑定cookies
         bindCookies(client, request.url());
         //请求网络

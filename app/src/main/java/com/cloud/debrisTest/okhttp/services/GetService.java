@@ -1,5 +1,7 @@
 package com.cloud.debrisTest.okhttp.services;
 
+import android.graphics.Bitmap;
+
 import com.cloud.debrisTest.okhttp.UrlsProvider;
 import com.cloud.debrisTest.okhttp.annotations.IGetAPI;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
@@ -62,6 +64,18 @@ public class GetService extends BaseOkrxService {
             @Override
             public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
                 return getAPI.requestUserList();
+            }
+        });
+    }
+
+    @ApiCheckAnnotation
+    public void getValidateCode(OnSuccessfulListener<Bitmap> successfulListener) {
+        BaseSubscriber baseSubscriber = new BaseSubscriber<Bitmap, GetService>(this);
+        baseSubscriber.setOnSuccessfulListener(successfulListener);
+        requestObject(IGetAPI.class, this, baseSubscriber, new Func2<RetrofitParams, IGetAPI, HashMap<String, Object>>() {
+            @Override
+            public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
+                return getAPI.getValidateCode("lijh");
             }
         });
     }
