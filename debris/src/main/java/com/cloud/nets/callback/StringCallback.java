@@ -305,7 +305,7 @@ public abstract class StringCallback implements Callback {
                     if (ObjectJudge.isNullOrEmpty(builders)) {
                         return;
                     }
-                    Logger.info("net", builders[0].toString(), null);
+                    Logger.info("net", builders[0].toString());
                 }
             }, logbuilder);
         }

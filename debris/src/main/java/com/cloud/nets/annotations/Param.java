@@ -51,10 +51,10 @@ public @interface Param {
     String fileSuffixAfterUpload() default "";
 
     /**
-     * 是否文件
+     * 是否目标文件
      *
      * @return true-当responseDataType()为byteData或stream类型时,则最终将转换为当前参数提供的文件;
      * false-根据接口指定的数据类型返回;
      */
-    boolean isFile() default false;
+    boolean isTargetFile() default false;
 }

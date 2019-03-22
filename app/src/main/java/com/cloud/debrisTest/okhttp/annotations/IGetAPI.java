@@ -43,6 +43,6 @@ public interface IGetAPI {
     @DataParam(value = File.class, responseDataType = ResponseDataType.byteData)
     RetrofitParams getValidateCode(
             @Param("username") String username,
-            @Param(isFile = true) File file
+            @Param(isTargetFile = true) File file
     );
 }

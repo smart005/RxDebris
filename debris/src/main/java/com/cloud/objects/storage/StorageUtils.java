@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.config.RxAndroid;
+import com.cloud.objects.logs.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,27 +71,33 @@ public class StorageUtils {
     }
 
     /**
-     * 创建文件
-     * <p>
-     * param dir    主目录
-     * param name   文件名称
-     * param delete 如果存在是否删除原文件重新创建
-     * return
+     * 获取文件
+     *
+     * @param dir      目录
+     * @param fileName 文件名称
+     * @param delete   如果存在是否删除原文件重新创建
+     * @return File
      */
-    public static File createFile(File dir, String name, boolean delete) throws IOException {
-        if (dir != null && !dir.exists()) {
-            dir.mkdirs();
-        }
-        File result = new File(dir, name);
-        if (result.exists()) {
-            if (delete) {
-                result.delete();
-                result.createNewFile();
+    public static File getFile(File dir, String fileName, boolean delete) {
+        File file = new File(dir, fileName);
+        try {
+            if (file.exists()) {
+                if (delete) {
+                    if (file.delete()) {
+                        if (!file.createNewFile()) {
+                            Logger.info(String.format("文件创建失败%s", file.getAbsolutePath()));
+                        }
+                    }
+                }
+            } else {
+                if (!file.createNewFile()) {
+                    Logger.info(String.format("文件创建失败%s", file.getAbsolutePath()));
+                }
             }
-        } else {
-            result.createNewFile();
+        } catch (IOException e) {
+            Logger.error(e);
         }
-        return result;
+        return file;
     }
 
     /**

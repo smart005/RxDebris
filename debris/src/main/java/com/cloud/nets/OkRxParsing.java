@@ -290,7 +290,7 @@ public class OkRxParsing {
         HashMap<String, String> suffixParams = retrofitParams.getFileSuffixParams();
         for (Map.Entry<Integer, Param> paramIntegerEntry : paramAnnotationObject.entrySet()) {
             Param key = paramIntegerEntry.getValue();
-            if (key.isFile()) {
+            if (key.isTargetFile()) {
                 Object arg = args[paramIntegerEntry.getKey()];
                 if (arg instanceof File) {
                     File file = (File) arg;
