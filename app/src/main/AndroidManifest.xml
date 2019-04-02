@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.cloud.debrisTest">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".TestApplication"
         android:allowBackup="true"
@@ -26,10 +27,13 @@
             android:name=".okhttp.OKHttpSimple"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".H5Test"
+            android:name=".web.H5Test"
             android:screenOrientation="portrait" />
         <activity
             android:name=".images.ImagesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".web.NKitActivity"
             android:screenOrientation="portrait" />
     </application>
 

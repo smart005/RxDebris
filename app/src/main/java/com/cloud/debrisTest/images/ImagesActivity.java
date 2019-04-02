@@ -10,11 +10,11 @@ import com.bumptech.glide.Priority;
 import com.cloud.debris.BaseFragmentActivity;
 import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.ImagesViewBinding;
-import com.cloud.images2.RxImage;
-import com.cloud.images2.beans.SelectImageProperties;
-import com.cloud.images2.figureset.ImageSelectDialog;
-import com.cloud.images2.glide.GlideOptimize;
-import com.cloud.images2.glide.ScaleType;
+import com.cloud.images.RxImage;
+import com.cloud.images.beans.SelectImageProperties;
+import com.cloud.images.figureset.ImageSelectDialog;
+import com.cloud.images.glide.GlideOptimize;
+import com.cloud.images.glide.ScaleType;
 import com.cloud.objects.ObjectManager;
 import com.cloud.objects.events.Action1;
 
@@ -69,7 +69,7 @@ public class ImagesActivity extends BaseFragmentActivity {
                 //图片圆角弧度(由第三方规则处理)
                 .setRoundCorners(20)
                 //图片规则(根据第三方文档设定,如阿里、七牛)
-                .setImageRule("sdfsf")
+                .setImageRule(ImgRuleType.GeometricForWidth.getRule())
                 //gif图片需要设置此属性
                 //.asGif()
                 .into(binding.testIv0);
@@ -80,8 +80,7 @@ public class ImagesActivity extends BaseFragmentActivity {
                 .into(new Action1<Bitmap>() {
                     @Override
                     public void call(Bitmap bitmap) {
-                        //glide内部原因这里可能会被回调两次,
-                        //没有特殊要求最好使用第一种方式渲染图片
+                        
                     }
                 });
     }

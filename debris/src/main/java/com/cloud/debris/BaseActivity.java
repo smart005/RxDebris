@@ -177,4 +177,9 @@ public class BaseActivity extends Activity implements OnSupperProperties, OnLife
     protected Activity getActivity() {
         return this;
     }
+
+    @Override
+    public String getClassAction() {
+        return bundleData.getClassAction(this.getClass());
+    }
 }

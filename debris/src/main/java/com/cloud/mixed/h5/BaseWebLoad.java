@@ -28,13 +28,13 @@ import com.cloud.debris.R;
 import com.cloud.dialogs.BaseMessageBox;
 import com.cloud.dialogs.enums.DialogButtonsEnum;
 import com.cloud.dialogs.enums.MsgBoxClickButtonEnum;
-import com.cloud.images2.beans.SelectImageProperties;
-import com.cloud.images2.figureset.ImageSelectDialog;
+import com.cloud.images.beans.SelectImageProperties;
+import com.cloud.images.figureset.ImageSelectDialog;
 import com.cloud.mixed.RxMixed;
-import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RuleParams;
 import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.PixelUtils;
@@ -77,6 +77,13 @@ public abstract class BaseWebLoad extends WebView {
     private boolean isOverriedUrl = false;
     private ValueCallback<Uri> uploadMsg;
     private ValueCallback<Uri[]> sdk5UploadMsg;
+
+    public BaseWebLoad(Context context) {
+        super(context);
+        onPreCreated(context);
+        init();
+        initListener();
+    }
 
     public BaseWebLoad(Context context, AttributeSet attrs) {
         super(context, attrs);

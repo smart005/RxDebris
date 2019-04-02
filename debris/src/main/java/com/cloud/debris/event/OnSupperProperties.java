@@ -210,7 +210,6 @@ public interface OnSupperProperties {
     /**
      * 从bundle中获取Serializable对象
      *
-     * @param bundle       bundle对象
      * @param key
      * @param defaultValue 默认值
      * @return
@@ -220,9 +219,7 @@ public interface OnSupperProperties {
     /**
      * 从bundle中获取Serializable对象
      *
-     * @param bundle       bundle对象
-     * @param key
-     * @param defaultValue 默认值
+     * @param key key
      * @return
      */
     public <T> T getSerializableBundle(String key);
@@ -243,4 +240,11 @@ public interface OnSupperProperties {
      * @return
      */
     public <T> T getParcelableBundle(String key);
+
+    /**
+     * 获取当前类action
+     *
+     * @return 当前类唯一标识
+     */
+    public String getClassAction();
 }

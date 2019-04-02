@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.SparseArray;
 import android.widget.EditText;
 
 import com.cloud.objects.events.Action1;
@@ -47,6 +48,20 @@ public class ObjectJudge {
      */
     public static <T> Boolean isNullOrEmpty(T[] list) {
         if (list != null && list.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 判断列表是否为空
+     *
+     * @param list 需要检测的列表集合
+     * @return true-空;false-非空;
+     */
+    public static Boolean isNullOrEmpty(SparseArray list) {
+        if (list != null && list.size() > 0) {
             return false;
         } else {
             return true;
@@ -606,5 +621,16 @@ public class ObjectJudge {
         } else {
             return true;
         }
+    }
+
+    /**
+     * 在json中是否包含指定的键
+     *
+     * @param keyName    键名称
+     * @param jsonString json
+     * @return true-包含;false-不包含;
+     */
+    public static boolean isContainerJsonKey(String keyName, String jsonString) {
+        return JsonUtils.containerKey(keyName, jsonString);
     }
 }

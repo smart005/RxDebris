@@ -1,6 +1,6 @@
 package com.cloud.debris.portfolio;
 
-import com.cloud.images2.RxImage;
+import com.cloud.images.RxImage;
 import com.cloud.objects.storage.StorageUtils;
 
 import java.io.File;

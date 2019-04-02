@@ -2,6 +2,7 @@ package com.cloud.nets;
 
 import android.content.Context;
 
+import com.cloud.cache.CacheDataItem;
 import com.cloud.cache.MemoryCache;
 import com.cloud.cache.RxCache;
 import com.cloud.nets.cookie.CookieJarImpl;
@@ -19,6 +20,7 @@ import com.cloud.objects.utils.JsonUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -373,7 +375,6 @@ public class OkRx {
             return;
         }
         cookieStore.removeAllCookie();
-
     }
 
     /**
@@ -383,5 +384,31 @@ public class OkRx {
      */
     public void clearCache(String cacheKey) {
         RxCache.clearContainerKey(cacheKey);
+    }
+
+    /**
+     * 获取缓存列表
+     *
+     * @param cacheBlurKey 请求接口时设置的缓存key
+     * @return List<CacheDataItem>
+     */
+    public List<CacheDataItem> getCacheList(String cacheBlurKey) {
+        List<CacheDataItem> list = RxCache.getBaseCacheList(cacheBlurKey, true, false);
+        return list;
+    }
+
+    /**
+     * 获取最新缓存
+     *
+     * @param cacheBlurKey 请求接口时设置的缓存key
+     * @return CacheDataItem
+     */
+    public CacheDataItem getLatestCache(String cacheBlurKey) {
+        List<CacheDataItem> list = RxCache.getBaseCacheList(cacheBlurKey, true, true);
+        if (ObjectJudge.isNullOrEmpty(list)) {
+            return new CacheDataItem();
+        } else {
+            return list.get(0);
+        }
     }
 }

@@ -5,14 +5,18 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.cloud.debris.BaseActivity;
-import com.cloud.debris.utils.RedirectUtils;
+import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.debrisTest.databinding.MainViewBinding;
 import com.cloud.debrisTest.images.ImagesActivity;
 import com.cloud.debrisTest.okhttp.OKHttpSimple;
-import com.cloud.objects.handler.HandlerManager;
+import com.cloud.debrisTest.web.H5Test;
+import com.cloud.debrisTest.web.NKitActivity;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.beans.MapEntryItem;
 import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.utils.JsonUtils;
 
 /**
  * Author lijinghuan
@@ -43,18 +47,37 @@ public class MainActivity extends BaseActivity {
                 Logger.info("当前消息" + params[0]);
             }
         }, 10);
+
+        json = "{\"uptoken\":\"0KsWRl8QAypL9e3EAKKT7ZPhAFvSNj4iH_LHxsd7:HqctaCmjpKOJrJrd_wdgcWvZqEo=:eyJzY29wZSI6IjEwOHNxdmlkZW90ZXN0IiwiZGVhZGxpbmUiOjE1NTMyMzY1OTUsImluc2VydE9ubHkiOjAsImRldGVjdE1pbWUiOjAsImZzaXplTGltaXQiOjAsImNhbGxiYWNrRmV0Y2hLZXkiOjB9\"}";
+        String uptoken = JsonUtils.getAccurateValue("uptoken", json);
+
+        String jsonString = "{\"page_size\":\"12321321\",\"list\":null,\"name\":\"测试\",\"list2\":[{\"name\":\"杭州\",\"detail\":\"1302室\"}],\"page_size\":\"123\",\"page_index\":0,\"page_count\":0,\"has_next\":false,\"datas\":null,\"code\":0,\"issuccess\":true,\"msg\":null}";
+        boolean containerKey = JsonUtils.containerKey("page_size", jsonString);
+        String value = JsonUtils.getValue("page_size", jsonString);
+        String list = JsonUtils.getValue("list", jsonString);
+        String list2 = JsonUtils.getValue("list2", jsonString);
+        String name = JsonUtils.getValue("name", jsonString);
+        String accurateValue = JsonUtils.getAccurateValue("list2->name", jsonString);
     }
 
     public void OnNetFrameClick(View view) {
-        RedirectUtils.startActivity(this, OKHttpSimple.class);
+        RedirectUtils.startActivity(this, OKHttpSimple.class,
+                new MapEntryItem<>("key1", "1111"),
+                new MapEntryItem<>("key2", null),
+                new MapEntryItem<>("key3", ""),
+                new MapEntryItem<>("key4", 2),
+                new MapEntryItem<>("key5",null));
     }
 
     public void OnH5Click(View view) {
         RedirectUtils.startActivity(this, H5Test.class);
     }
 
+    public void OnAndroidWebkitClick(View view) {
+        RedirectUtils.startActivity(this, NKitActivity.class);
+    }
+
     public void OnImageFunctionClick(View view) {
         RedirectUtils.startActivity(this, ImagesActivity.class);
     }
-
 }

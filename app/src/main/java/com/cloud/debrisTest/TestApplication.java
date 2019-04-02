@@ -7,7 +7,7 @@ import com.cloud.cache.greens.DBManager;
 import com.cloud.cache.greens.OnDatabasePathListener;
 import com.cloud.debris.BaseApplication;
 import com.cloud.debrisTest.images.ImageSuffixCombination;
-import com.cloud.images2.RxImage;
+import com.cloud.images.RxImage;
 import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.RequestErrorInfo;

@@ -177,4 +177,9 @@ public class BaseCompatActivity extends AppCompatActivity implements OnSupperPro
     protected AppCompatActivity getActivity() {
         return this;
     }
+
+    @Override
+    public String getClassAction() {
+        return bundleData.getClassAction(this.getClass());
+    }
 }

@@ -886,6 +886,48 @@ public class BaseService {
                 finishedRequest(ErrorType.businessProcess, baseSubscriber);
                 return;
             }
+            ScheduledThreadPoolExecutor executor = ThreadPoolUtils.getInstance().getMultiTaskExecutor();
+            ApiRequestRunnable<I, S> runnable = new ApiRequestRunnable<>(apiClass, server, baseSubscriber, validParam, urlAction, decApi, params, decApiAction, new Exception());
+            executor.schedule(runnable, 0, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            finishedRequest(ErrorType.businessProcess, baseSubscriber);
+        }
+    }
+
+    private class ApiRequestRunnable<I, S extends BaseService> implements Runnable {
+
+        private Class<I> apiClass;
+        private S server;
+        private BaseSubscriber<Object, S> baseSubscriber;
+        private OkRxValidParam validParam;
+        private Func2<String, S, Integer> urlAction;
+        private I decApi;
+        private HashMap<String, Object> params;
+        private Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction;
+        private Exception exception = null;
+
+        public ApiRequestRunnable(Class<I> apiClass,
+                                  S server,
+                                  final BaseSubscriber<Object, S> baseSubscriber,
+                                  OkRxValidParam validParam,
+                                  Func2<String, S, Integer> urlAction,
+                                  I decApi,
+                                  HashMap<String, Object> params,
+                                  Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction,
+                                  Exception exception) {
+            this.apiClass = apiClass;
+            this.server = server;
+            this.baseSubscriber = baseSubscriber;
+            this.validParam = validParam;
+            this.urlAction = urlAction;
+            this.decApi = decApi;
+            this.params = params;
+            this.decApiAction = decApiAction;
+            this.exception = exception;
+        }
+
+        @Override
+        public void run() {
             RetrofitParams retrofitParams = decApiAction.call(decApi, params);
             retrofitParams.setCurrentRequestTime(validParam.getCurrentRequestTime());
             if (!retrofitParams.getFlag()) {
@@ -901,42 +943,6 @@ public class BaseService {
                 finishedRequest(ErrorType.businessProcess, baseSubscriber);
                 return;
             }
-            ScheduledThreadPoolExecutor executor = ThreadPoolUtils.getInstance().getMultiTaskExecutor();
-            ApiRequestRunnable<I, S> runnable = new ApiRequestRunnable<>(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction, new Exception());
-            executor.schedule(runnable, 0, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            finishedRequest(ErrorType.businessProcess, baseSubscriber);
-        }
-    }
-
-    private class ApiRequestRunnable<I, S extends BaseService> implements Runnable {
-
-        private Class<I> apiClass;
-        private S server;
-        private BaseSubscriber<Object, S> baseSubscriber;
-        private OkRxValidParam validParam;
-        private RetrofitParams retrofitParams;
-        private Func2<String, S, Integer> urlAction;
-        private Exception exception = null;
-
-        public ApiRequestRunnable(Class<I> apiClass,
-                                  S server,
-                                  final BaseSubscriber<Object, S> baseSubscriber,
-                                  OkRxValidParam validParam,
-                                  RetrofitParams retrofitParams,
-                                  Func2<String, S, Integer> urlAction,
-                                  Exception exception) {
-            this.apiClass = apiClass;
-            this.server = server;
-            this.baseSubscriber = baseSubscriber;
-            this.validParam = validParam;
-            this.retrofitParams = retrofitParams;
-            this.urlAction = urlAction;
-            this.exception = exception;
-        }
-
-        @Override
-        public void run() {
             //记录之前main线程堆栈信息
             RxStacks.setStack(validParam.getInvokeMethodName(), exception);
             apiRequest(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction);

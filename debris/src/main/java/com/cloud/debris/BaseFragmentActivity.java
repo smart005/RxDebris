@@ -177,4 +177,9 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
     protected FragmentActivity getActivity() {
         return this;
     }
+
+    @Override
+    public String getClassAction() {
+        return bundleData.getClassAction(this.getClass());
+    }
 }

@@ -15,6 +15,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -116,7 +121,7 @@ public class RxCache {
      * @param
      * @param cacheKey      缓存键
      * @param isLimitations true必须通过有效验证;false有效为0则不验证否则进行时效验证;
-     *                      return
+     * @return CacheDataItem
      */
     public static CacheDataItem getBaseCacheData(String cacheKey, boolean isLimitations) {
         try {
@@ -166,6 +171,94 @@ public class RxCache {
             Logger.error(e);
         }
         return new CacheDataItem();
+    }
+
+    /**
+     * 获取缓存列表
+     *
+     * @param
+     * @param containsKey    缓存键
+     * @param isLimitations  true必须通过有效验证;false有效为0则不验证否则进行时效验证;
+     * @param isLatestRecord 是否根据startTime取最新记录
+     * @return List<CacheDataItem>
+     */
+    public static List<CacheDataItem> getBaseCacheList(String containsKey, boolean isLimitations, boolean isLatestRecord) {
+        try {
+            if (TextUtils.isEmpty(containsKey)) {
+                return null;
+            }
+            DbCacheDao dbCacheDao = new DbCacheDao();
+            CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
+            if (cacheDao == null) {
+                //如果数据对象为空则返回
+                return new LinkedList<CacheDataItem>();
+            }
+            QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
+            QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like("%" + containsKey + "%"));
+            List<CacheDataItem> list = where.list();
+            if (ObjectJudge.isNullOrEmpty(list)) {
+                //数据空
+                return new LinkedList<CacheDataItem>();
+            }
+            if (isLatestRecord) {
+                //根据startTime倒序取第一条数据
+                Collections.sort(list, new Comparator<CacheDataItem>() {
+                    @Override
+                    public int compare(CacheDataItem o1, CacheDataItem o2) {
+                        if (o1.getStartTime() < o2.getStartTime()) {
+                            return 1;
+                        } else if (o1.getStartTime() == o2.getStartTime()) {
+                            return 0;
+                        } else {
+                            return -1;
+                        }
+                    }
+                });
+                LinkedList<CacheDataItem> objects = new LinkedList<>();
+                objects.add(list.get(0));
+                return objects;
+            }
+            //记录删除的keys
+            HashSet<String> keys = new HashSet<String>();
+            //将列表转为迭代方式处理,因为下面对列表循环的同时删除过期数据
+            Iterator<CacheDataItem> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                CacheDataItem next = iterator.next();
+                if (isLimitations) {
+                    //严格按照时间来限制
+                    if (next.getEffective() > 0) {
+                        if (next.getEffective() <= System.currentTimeMillis()) {
+                            //移除当前数据
+                            keys.add(next.getKey());
+                            iterator.remove();
+                        }
+                    } else {
+                        //移除当前数据
+                        keys.add(next.getKey());
+                        iterator.remove();
+                    }
+                } else {
+                    //有效为0不做校验
+                    if (next.getEffective() > 0) {
+                        if (next.getEffective() <= System.currentTimeMillis()) {
+                            //移除当前数据
+                            keys.add(next.getKey());
+                            iterator.remove();
+                        }
+                    }
+                }
+            }
+            //删除已失败数据
+            if (!ObjectJudge.isNullOrEmpty(keys)) {
+                cacheDao.deleteByKeyInTx(keys);
+            }
+            //释放数据库
+            DBManager.getInstance().close();
+            return list;
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+        return new LinkedList<CacheDataItem>();
     }
 
     /**
@@ -242,7 +335,7 @@ public class RxCache {
             if (cacheDao != null) {
                 if (isBlurClear) {
                     QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
-                    QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like(containsKey));
+                    QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like("%" + containsKey + "%"));
                     List<CacheDataItem> dataItems = where.list();
                     if (!ObjectJudge.isNullOrEmpty(dataItems)) {
                         cacheDao.deleteInTx(dataItems);

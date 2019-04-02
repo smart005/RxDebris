@@ -170,4 +170,9 @@ public class BaseFragment extends Fragment implements OnSupperProperties {
     public <T> T getParcelableBundle(String key) {
         return bundleData.getParcelableBundle(key);
     }
+
+    @Override
+    public String getClassAction() {
+        return bundleData.getClassAction(this.getClass());
+    }
 }

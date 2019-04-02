@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.utils.BundleUtils;
 import com.cloud.objects.utils.ConvertUtils;
 
@@ -473,5 +474,21 @@ public class BundleData {
      */
     public <T> T getParcelableBundle(String key) {
         return getParcelableBundle(key, null);
+    }
+
+    /**
+     * 获取当前类action(项目包名+模块全类名)
+     * [示例:com.cloud.debris_com.xxx.xxx.ui.[class name]]
+     *
+     * @param cls 类
+     * @return 当前类唯一标识
+     */
+    public String getClassAction(Class cls) {
+        if (cls == null) {
+            return "";
+        }
+        RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
+        String action = String.format("%s_%s", builder.getProjectBuildConfigPackgeName(), cls.getName());
+        return action;
     }
 }
