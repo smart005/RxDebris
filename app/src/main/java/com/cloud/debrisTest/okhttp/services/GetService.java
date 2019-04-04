@@ -37,8 +37,9 @@ public class GetService extends BaseOkrxService {
     //网络请求-在缓存未失效时网络数据与缓存只会返回其中一个,缓存失效后先请求网络->再缓存->最后返回;
     //@ApiCheckAnnotation(callStatus = CallStatus.OnlyCache, cacheTime = 1, cacheTimeUnit = TimeUnit.MINUTES, cacheKey = "recommand_info")
     //网络请求-在缓存未失败时获取到网络数据和缓存数据均会回调,缓存失效后先请求网络->再缓存->最后返回(即此时只作网络数据的回调);
-    @ApiCheckAnnotation(callStatus = CallStatus.PersistentIntervalCache, cacheIntervalTime = 10000, cacheTime = 1, cacheTimeUnit = TimeUnit.MINUTES, cacheKey = "recommand_info")
+    //@ApiCheckAnnotation(callStatus = CallStatus.PersistentIntervalCache, cacheIntervalTime = 10000, cacheTime = 1, cacheTimeUnit = TimeUnit.MINUTES, cacheKey = "recommand_info")
     //请求时间限制;可在请求方法或接口定义上添加;接口定义上设置的值优先于请求方法设置的值;
+    @ApiCheckAnnotation(callStatus = CallStatus.PersistentIntervalCache)
     @RequestTimeLimit(totalTime = "2", unit = TimeUnit.SECONDS)
     public void requestRecommandInfo(final int siteId, OnSuccessfulListener<RecommandInfo> successfulListener) {
         //请求订阅对象
@@ -51,7 +52,10 @@ public class GetService extends BaseOkrxService {
         requestObject(IGetAPI.class, this, baseSubscriber, new Func2<RetrofitParams, IGetAPI, HashMap<String, Object>>() {
             @Override
             public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
-                return getAPI.requestRecommandInfo(siteId, 3);
+                String url = "http://mtalksvc.sq108.net/api/AHome/GetRecommendInfor";
+                HashMap<String, String> map = new HashMap<>();
+                map.put("parame1", "123");
+                return getAPI.requestRecommandInfo(url, siteId, map, 3, CallStatus.PersistentIntervalCache);
             }
         });
     }

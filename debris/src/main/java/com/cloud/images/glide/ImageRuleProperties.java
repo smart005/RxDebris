@@ -1,5 +1,7 @@
 package com.cloud.images.glide;
 
+import com.cloud.images.enums.GlideRequestType;
+
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
@@ -29,7 +31,7 @@ public class ImageRuleProperties {
     //gif图片
     private boolean isGif = false;
     //图片类型(默认网络图片)
-    private GlideImageType imageType = GlideImageType.netImage;
+    private GlideRequestType imageType = GlideRequestType.netImage;
 
     public int getWidth() {
         return width;
@@ -85,7 +87,7 @@ public class ImageRuleProperties {
      * 获取图片类型(默认网络图片)
      * @return GlideImageType
      */
-    public GlideImageType getImageType() {
+    public GlideRequestType getImageType() {
         return imageType;
     }
 
@@ -93,7 +95,7 @@ public class ImageRuleProperties {
      * 设置图片类型(默认网络图片)
      * @param imageType GlideImageType
      */
-    public void setImageType(GlideImageType imageType) {
+    public void setImageType(GlideRequestType imageType) {
         this.imageType = imageType;
     }
 }

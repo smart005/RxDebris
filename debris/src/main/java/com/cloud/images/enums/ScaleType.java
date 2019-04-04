@@ -1,4 +1,4 @@
-package com.cloud.images.glide;
+package com.cloud.images.enums;
 
 /**
  * Author lijinghuan

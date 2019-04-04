@@ -261,8 +261,13 @@ public class BaseService {
                     if (dataType == DataType.CacheData) {
                         return;
                     }
-                    sendErrorAction(errorAction, baseService, ErrorType.businessProcess);
-                    finishedRequest(baseService, completedAction);
+                    //如果仅是EmptyForOnlyCache(空缓存状态则返回成功回调)
+                    if (dataType == DataType.EmptyForOnlyCache) {
+                        successAction.call(responseParsing, apiRequestKey, reqQueueItemHashMap, dataType, requestStartTime, requestTotalTime);
+                    } else {
+                        sendErrorAction(errorAction, baseService, ErrorType.businessProcess);
+                        finishedRequest(baseService, completedAction);
+                    }
                     return;
                 }
             } else if (responseDataType == ResponseDataType.byteData) {
@@ -881,7 +886,8 @@ public class BaseService {
                 return;
             }
             OkRxParsing parsing = new OkRxParsing();
-            I decApi = parsing.createAPI(apiClass);
+            ApiCheckAnnotation apiCheckAnnotation = validParam.getApiCheckAnnotation();
+            I decApi = parsing.createAPI(apiClass, apiCheckAnnotation.callStatus());
             if (decApiAction == null || decApi == null || validParam.getApiCheckAnnotation() == null) {
                 finishedRequest(ErrorType.businessProcess, baseSubscriber);
                 return;
@@ -980,7 +986,6 @@ public class BaseService {
         //缓存的过期时间,单位毫秒
         //为确保未设置缓存请求几乎不做缓存，此处默认缓存时间暂设为5秒
         ApiCheckAnnotation apiCheckAnnotation = validParam.getApiCheckAnnotation();
-        retrofitParams.setCallStatus(apiCheckAnnotation.callStatus());
         retrofitParams.setCacheKey(apiCheckAnnotation.cacheKey());
         retrofitParams.setIntervalCacheTime(apiCheckAnnotation.cacheIntervalTime());
         //设置缓存时间

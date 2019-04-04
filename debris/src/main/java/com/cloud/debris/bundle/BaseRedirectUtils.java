@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import com.cloud.ebus.EBus;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.beans.MapEntry;
+import com.cloud.objects.beans.MapEntryItem;
 import com.cloud.objects.utils.BundleUtils;
 import com.cloud.objects.utils.OperationUtils;
 
@@ -52,17 +53,6 @@ class BaseRedirectUtils {
             _intent.putExtras(bundle);
         }
         context.startService(_intent);
-    }
-
-    /**
-     * 启动服务
-     *
-     * @param context 上下文
-     * @param cls     需要启动的服务类
-     * @param action  启动服务action,接收时传回
-     */
-    public static void startService(Context context, Class<?> cls, String action) {
-        startService(context, cls, action, null);
     }
 
     /**
@@ -124,16 +114,6 @@ class BaseRedirectUtils {
      *
      * @param context 上下文
      * @param cls     要启动类对象
-     */
-    public static void startActivity(Context context, Class<?> cls) {
-        startActivity(context, cls, null);
-    }
-
-    /**
-     * 启动activity
-     *
-     * @param context 上下文
-     * @param cls     要启动类对象
      * @param params  传入的bundle数据参数
      */
     public static void startActivityNewTask(Context context, Class<?> cls, MapEntry<String, ?>... params) {
@@ -148,16 +128,6 @@ class BaseRedirectUtils {
             _intent.putExtras(bundle);
         }
         context.startActivity(_intent);
-    }
-
-    /**
-     * 启动activity
-     *
-     * @param context 上下文
-     * @param cls     要启动类对象
-     */
-    public static void startActivityNewTask(Context context, Class<?> cls) {
-        startActivityNewTask(context, cls, null);
     }
 
     /**
@@ -192,17 +162,6 @@ class BaseRedirectUtils {
      * @param activity    提供上下文的activity
      * @param cls         要启动类对象
      * @param requestCode 回调onActivityResult时传回的requestCode,0<requestCode<2^16(65536)
-     */
-    public static void startActivityForResult(Activity activity, Class<?> cls, int requestCode) {
-        startActivityForResult(activity, cls, requestCode, null);
-    }
-
-    /**
-     * 以result方式启动activity
-     *
-     * @param activity    提供上下文的activity
-     * @param cls         要启动类对象
-     * @param requestCode 回调onActivityResult时传回的requestCode,0<requestCode<2^16(65536)
      * @param params      传入的bundle数据参数
      */
     public static void startActivityForResultNewTask(Activity activity, Class<?> cls, int requestCode, MapEntry<String, ?>... params) {
@@ -222,17 +181,6 @@ class BaseRedirectUtils {
             requestCode = 0;
         }
         activity.startActivityForResult(_intent, requestCode);
-    }
-
-    /**
-     * 以result方式启动activity
-     *
-     * @param activity    提供上下文的activity
-     * @param cls         要启动类对象
-     * @param requestCode 回调onActivityResult时传回的requestCode,0<requestCode<2^16(65536)
-     */
-    public static void startActivityForResultNewTask(Activity activity, Class<?> cls, int requestCode) {
-        startActivityForResultNewTask(activity, cls, requestCode, null);
     }
 
     /**
@@ -269,35 +217,12 @@ class BaseRedirectUtils {
      * 以result方式启动activity
      *
      * @param activity      提供上下文的activity
-     * @param packageName   包名
-     * @param classFullName 启动activity的全路径
-     * @param requestCode   回调onActivityResult中接收的requestCode参数,0<requestCode<2^16(65536)
-     */
-    public static void startActivityForResult(Activity activity, String packageName, String classFullName, int requestCode) {
-        startActivityForResult(activity, packageName, classFullName, requestCode, null);
-    }
-
-    /**
-     * 以result方式启动activity
-     *
-     * @param activity      提供上下文的activity
      * @param classFullName 启动activity的全路径
      * @param requestCode   回调onActivityResult中接收的requestCode参数,0<requestCode<2^16(65536)
      * @param params        传入的bundle数据参数
      */
     public static void startActivityForResult(Activity activity, String classFullName, int requestCode, MapEntry<String, ?>... params) {
         startActivityForResult(activity, "", classFullName, requestCode, params);
-    }
-
-    /**
-     * 以result方式启动activity
-     *
-     * @param activity      提供上下文的activity
-     * @param classFullName 启动activity的全路径
-     * @param requestCode   回调onActivityResult中接收的requestCode参数,0<requestCode<2^16(65536)
-     */
-    public static void startActivityForResult(Activity activity, String classFullName, int requestCode) {
-        startActivityForResult(activity, classFullName, requestCode, null);
     }
 
     /**
@@ -335,35 +260,12 @@ class BaseRedirectUtils {
      * 以result方式启动activity
      *
      * @param activity      提供上下文的activity
-     * @param packageName   包名
-     * @param classFullName 启动activity的全路径
-     * @param requestCode   回调onActivityResult中接收的requestCode参数,0<requestCode<2^16(65536)
-     */
-    public static void startActivityForResultNewTask(Activity activity, String packageName, String classFullName, int requestCode) {
-        startActivityForResultNewTask(activity, packageName, classFullName, requestCode, null);
-    }
-
-    /**
-     * 以result方式启动activity
-     *
-     * @param activity      提供上下文的activity
      * @param classFullName 启动activity的全路径
      * @param requestCode   回调onActivityResult中接收的requestCode参数,0<requestCode<2^16(65536)
      * @param params        传入的bundle数据参数
      */
     public static void startActivityForResultNewTask(Activity activity, String classFullName, int requestCode, MapEntry<String, ?>... params) {
         startActivityForResultNewTask(activity, "", classFullName, requestCode, params);
-    }
-
-    /**
-     * 以result方式启动activity
-     *
-     * @param activity      提供上下文的activity
-     * @param classFullName 启动activity的全路径
-     * @param requestCode   回调onActivityResult中接收的requestCode参数,0<requestCode<2^16(65536)
-     */
-    public static void startActivityForResultNewTask(Activity activity, String classFullName, int requestCode) {
-        startActivityForResultNewTask(activity, classFullName, requestCode, null);
     }
 
     /**
@@ -398,17 +300,6 @@ class BaseRedirectUtils {
      * 启动activity
      *
      * @param context       提供上下文的activity
-     * @param packageName   包含
-     * @param classFullName activity全路径类名
-     */
-    public static void startActivity(Context context, String packageName, String classFullName) {
-        startActivity(context, packageName, classFullName, null);
-    }
-
-    /**
-     * 启动activity
-     *
-     * @param context       提供上下文的activity
      * @param classFullName activity全路径类名
      * @param params        传入的bundle数据参数
      */
@@ -423,7 +314,7 @@ class BaseRedirectUtils {
      * @param classFullName activity全路径类名
      */
     public static void startActivity(Context context, String classFullName) {
-        startActivity(context, "", classFullName, null);
+        startActivity(context, "", classFullName, (MapEntryItem) null);
     }
 
     /**
@@ -459,17 +350,6 @@ class BaseRedirectUtils {
      * 启动activity
      *
      * @param context       提供上下文的activity
-     * @param packageName   包含
-     * @param classFullName activity全路径类名
-     */
-    public static void startActivityNewTask(Context context, String packageName, String classFullName) {
-        startActivityNewTask(context, packageName, classFullName, null);
-    }
-
-    /**
-     * 启动activity
-     *
-     * @param context       提供上下文的activity
      * @param classFullName activity全路径类名
      * @param params        传入的bundle数据参数
      */
@@ -484,7 +364,7 @@ class BaseRedirectUtils {
      * @param classFullName activity全路径类名
      */
     public static void startActivityNewTask(Context context, String classFullName) {
-        startActivityNewTask(context, "", classFullName, null);
+        startActivityNewTask(context, "", classFullName, (MapEntryItem) null);
     }
 
     /**
@@ -514,16 +394,6 @@ class BaseRedirectUtils {
             activity.setResult(requestCode);
         }
         activity.finish();
-    }
-
-    /**
-     * 结束当前activity
-     *
-     * @param activity    提供上下文的activity
-     * @param requestCode start activity result for request code
-     */
-    public static void finishActivity(Activity activity, int requestCode) {
-        finishActivity(activity, requestCode, null);
     }
 
     /**

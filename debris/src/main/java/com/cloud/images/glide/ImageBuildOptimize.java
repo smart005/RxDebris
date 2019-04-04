@@ -3,12 +3,19 @@ package com.cloud.images.glide;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.signature.ObjectKey;
 import com.cloud.images.RxImage;
+import com.cloud.images.enums.CacheMode;
+import com.cloud.images.enums.GlideCallType;
+import com.cloud.images.enums.GlideRequestType;
+import com.cloud.images.enums.LoadType;
+import com.cloud.images.enums.ScaleType;
 
 import java.io.File;
 
@@ -24,12 +31,6 @@ class ImageBuildOptimize {
 
     //图片url
     private CusGlideUrl glideUrl = null;
-    //图片请求对象
-    private RequestBuilder<Drawable> requestBuilder;
-    //gif图片请求对象
-    private RequestBuilder<GifDrawable> gifRequestBuilder;
-    //bitmap图片
-    private RequestBuilder<Bitmap> bitmapRequestBuilder;
     //默认占位图片
     private int placeholder = 0;
     //图片渲染宽度
@@ -53,7 +54,7 @@ class ImageBuildOptimize {
     //gif图片
     private boolean isGif = false;
     //图片类型(默认网络图片)
-    private GlideImageType imageType = GlideImageType.netImage;
+    private GlideRequestType imageType = GlideRequestType.netImage;
     //文件图片
     private File fileImage = null;
     //资源图片
@@ -62,6 +63,10 @@ class ImageBuildOptimize {
     private Uri uriImage = null;
     //加载图片索引
     private int position = 0;
+    //缓存模式(默认全缓存)
+    private CacheMode cacheMode = CacheMode.memoryDisk;
+    //散列key,适用于请求url不变但图片已更新情况
+    private String hashKey = "";
 
     public CusGlideUrl getGlideUrl() {
         return glideUrl;
@@ -69,22 +74,6 @@ class ImageBuildOptimize {
 
     public void setGlideUrl(CusGlideUrl glideUrl) {
         this.glideUrl = glideUrl;
-    }
-
-    public void setRequestBuilder(RequestBuilder<Drawable> requestBuilder) {
-        this.requestBuilder = requestBuilder;
-    }
-
-    public void setGifRequestBuilder(RequestBuilder<GifDrawable> gifRequestBuilder) {
-        this.gifRequestBuilder = gifRequestBuilder;
-    }
-
-    public RequestBuilder<Bitmap> getBitmapRequestBuilder() {
-        return bitmapRequestBuilder;
-    }
-
-    public void setBitmapRequestBuilder(RequestBuilder<Bitmap> bitmapRequestBuilder) {
-        this.bitmapRequestBuilder = bitmapRequestBuilder;
     }
 
     public void setPlaceholder(int placeholder) {
@@ -247,7 +236,7 @@ class ImageBuildOptimize {
      *
      * @return GlideImageType
      */
-    public GlideImageType getImageType() {
+    public GlideRequestType getImageType() {
         return imageType;
     }
 
@@ -256,7 +245,7 @@ class ImageBuildOptimize {
      *
      * @param imageType GlideImageType
      */
-    public void setImageType(GlideImageType imageType) {
+    public void setImageType(GlideRequestType imageType) {
         this.imageType = imageType;
     }
 
@@ -332,74 +321,78 @@ class ImageBuildOptimize {
         this.position = position;
     }
 
-    public RequestBuilder<Drawable> loadConfig() {
+    /**
+     * 设置缓存模式
+     *
+     * @param cacheMode 缓存模式
+     */
+    public void setCacheMode(CacheMode cacheMode) {
+        this.cacheMode = cacheMode;
+    }
+
+    /**
+     * 散列key,适用于请求url不变但图片已更新情况
+     *
+     * @param hashKey 散列key
+     */
+    public void setHashKey(String hashKey) {
+        this.hashKey = hashKey;
+    }
+
+    /**
+     * loadType加载类型{@link com.cloud.images.enums.LoadType}
+     */
+    public RequestBuilder loadConfig(RequestBuilder requestBuilder, LoadType loadType, GlideCallType callType) {
         //若占位图未设置则取全局设置的默认图片
         if (this.placeholder == 0) {
             RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
             this.placeholder = builder.getDefImage();
         }
-        RequestBuilder<Drawable> builder = requestBuilder.placeholder(this.placeholder)
-                .thumbnail(thumbnailScale)//缩略图相对于原图的比例
+        /**
+         * 默认的策略是DiskCacheStrategy.AUTOMATIC
+         * DiskCacheStrategy有五个常量：
+         * DiskCacheStrategy.ALL 使用DATA和RESOURCE缓存远程数据，仅使用RESOURCE来缓存本地数据。
+         * DiskCacheStrategy.NONE 不使用磁盘缓存
+         * DiskCacheStrategy.DATA 在资源解码前就将原始数据写入磁盘缓存
+         * DiskCacheStrategy.RESOURCE 在资源解码后将数据写入磁盘缓存，即经过缩放等转换后的图片资源。
+         * DiskCacheStrategy.AUTOMATIC 根据原始图片数据和资源编码策略来自动选择磁盘缓存策略。
+         */
+        RequestBuilder builder = (RequestBuilder) requestBuilder.placeholder(this.placeholder)
                 .priority(priority)
-                .timeout(3000)//请求超时时间
-                .skipMemoryCache(true)//设置内存缓存
-                .diskCacheStrategy(DiskCacheStrategy.ALL);
-        builder = bindScaleType(builder);
+                //请求超时时间
+                .timeout(3000);
+        //缩略图相对于原图的比例
+        builder = builder.thumbnail(thumbnailScale);
+        if (loadType == LoadType.normal) {
+            builder = bindScaleType(builder);
+        } else if (loadType == LoadType.bitmap) {
+            builder = bindBitmapScaleType(builder);
+        } else if (loadType == LoadType.file) {
+            builder = bindFileScaleType(builder);
+        } else if (loadType == LoadType.gif) {
+            builder = bindGifScaleType(builder);
+        }
+        //散列key,适用于请求url不变但图片已更新情况
+        if (!TextUtils.isEmpty(hashKey)) {
+            //https://blog.csdn.net/iblade/article/details/79865354
+            builder = (RequestBuilder) builder.signature(new ObjectKey(hashKey));
+        }
+        //设置缓存模式
+        if (cacheMode == CacheMode.onlyMemory) {
+            //此时取消磁盘缓存
+            builder = (RequestBuilder) builder.diskCacheStrategy(DiskCacheStrategy.NONE);
+        } else {
+            DiskCacheStrategy strategy = (callType == GlideCallType.file ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL);
+            builder = (RequestBuilder) builder.diskCacheStrategy(strategy);
+        }
         //如果图片宽高非空则重置图片大小
         if (width > 0 && height > 0) {
-            builder = builder.override(width, height);
+            builder = (RequestBuilder) builder.override(width, height);
         }
         if (isRound) {
             //对于非gif图片,若图片太大会导致transform失败,因此先进行压缩;
             //对于本地图片需要先压缩则处理
-            builder = builder.transform(new GlideCircleTransform());
-        }
-        return builder;
-    }
-
-    public RequestBuilder<Bitmap> loadBitmapConfig() {
-        //若占位图未设置则取全局设置的默认图片
-        if (this.placeholder == 0) {
-            RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
-            this.placeholder = builder.getDefImage();
-        }
-        RequestBuilder<Bitmap> builder = bitmapRequestBuilder.placeholder(this.placeholder)
-                .thumbnail(thumbnailScale)//缩略图相对于原图的比例
-                .priority(priority)
-                .timeout(3000)//请求超时时间
-                .skipMemoryCache(true)//设置内存缓存
-                .diskCacheStrategy(DiskCacheStrategy.ALL);
-        builder = bindBitmapScaleType(builder);
-        //如果图片宽高非空则重置图片大小
-        if (width > 0 && height > 0) {
-            builder = builder.override(width, height);
-        }
-        if (isRound) {
-            //对于非gif图片,若图片太大会导致transform失败,因此先进行压缩;
-            //对于本地图片需要先压缩则处理
-            builder = builder.transform(new GlideCircleTransform());
-        }
-        return builder;
-    }
-
-    public RequestBuilder<GifDrawable> loadGifConfig() {
-        if (this.placeholder == 0) {
-            RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
-            this.placeholder = builder.getDefImage();
-        }
-        RequestBuilder<GifDrawable> builder = gifRequestBuilder.placeholder(this.placeholder)
-                .thumbnail(thumbnailScale)
-                .priority(priority)
-                .timeout(3000)
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.ALL);
-        builder = bindGifScaleType(builder);
-        //如果图片宽高非空则重置图片大小
-        if (width > 0 && height > 0) {
-            builder = builder.override(width, height);
-        }
-        if (isRound) {
-            builder = builder.transform(new GlideCircleTransform());
+            builder = (RequestBuilder) builder.transform(new GlideCircleTransform());
         }
         return builder;
     }
@@ -412,7 +405,7 @@ class ImageBuildOptimize {
         } else if (scaleType == ScaleType.fitCenter) {
             return builder.fitCenter();
         }
-        return builder;
+        return builder.skipMemoryCache(true);
     }
 
     private RequestBuilder<Drawable> bindScaleType(RequestBuilder<Drawable> builder) {
@@ -423,7 +416,7 @@ class ImageBuildOptimize {
         } else if (scaleType == ScaleType.fitCenter) {
             return builder.fitCenter();
         }
-        return builder;
+        return builder.skipMemoryCache(false);
     }
 
     private RequestBuilder<GifDrawable> bindGifScaleType(RequestBuilder<GifDrawable> builder) {
@@ -434,6 +427,17 @@ class ImageBuildOptimize {
         } else if (scaleType == ScaleType.fitCenter) {
             return builder.fitCenter();
         }
-        return builder;
+        return builder.skipMemoryCache(false);
+    }
+
+    private RequestBuilder<File> bindFileScaleType(RequestBuilder<File> builder) {
+        if (scaleType == ScaleType.centerCrop) {
+            return builder.centerCrop();
+        } else if (scaleType == ScaleType.centerInside) {
+            return builder.centerInside();
+        } else if (scaleType == ScaleType.fitCenter) {
+            return builder.fitCenter();
+        }
+        return builder.skipMemoryCache(true);
     }
 }

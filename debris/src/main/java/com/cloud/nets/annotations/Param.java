@@ -18,6 +18,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Param {
+    /**
+     * 若当前属性未设置且请求方式为Form以及对应的数据为Map类型则最终以key-value方式处理
+     *
+     * @return 参数key
+     */
     String value() default "";
 
     /**

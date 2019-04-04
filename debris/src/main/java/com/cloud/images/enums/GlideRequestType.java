@@ -1,14 +1,14 @@
-package com.cloud.images.glide;
+package com.cloud.images.enums;
 
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
  * CreateTime:2019/3/9
- * Description:glide图片类型
+ * Description:glide请求类型
  * Modifier:
  * ModifyContent:
  */
-public enum GlideImageType {
+public enum GlideRequestType {
     /**
      * 网络图片
      */
@@ -24,9 +24,5 @@ public enum GlideImageType {
     /**
      * Uri图片
      */
-    uriImage,
-    /**
-     * bitmap图片
-     */
-    bitmapImage
+    uriImage
 }

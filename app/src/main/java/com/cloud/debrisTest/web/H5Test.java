@@ -62,6 +62,7 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
         @android.webkit.JavascriptInterface
         @JavascriptInterface
         public String getToken() {
+
             //这里获取native登录的令牌
             return null;
         }

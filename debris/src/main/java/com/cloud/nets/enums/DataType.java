@@ -14,6 +14,10 @@ public enum DataType {
      */
     CacheData,
     /**
+     * 仅缓存时数据为空(不作网络请求包括首次)
+     */
+    EmptyForOnlyCache,
+    /**
      * 网络数据
      */
     NetData

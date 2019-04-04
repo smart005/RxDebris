@@ -3,16 +3,20 @@ package com.cloud.debrisTest.okhttp.annotations;
 import com.cloud.debrisTest.okhttp.ServiceAPI;
 import com.cloud.debrisTest.okhttp.beans.RecommandInfo;
 import com.cloud.nets.annotations.BaseUrlTypeName;
+import com.cloud.nets.annotations.DataCallStatus;
 import com.cloud.nets.annotations.DataParam;
 import com.cloud.nets.annotations.GET;
 import com.cloud.nets.annotations.Param;
+import com.cloud.nets.annotations.Path;
 import com.cloud.nets.annotations.RequestTimeLimit;
 import com.cloud.nets.annotations.RequestTimePart;
 import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.objects.enums.RequestContentType;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,11 +31,16 @@ import java.util.concurrent.TimeUnit;
 public interface IGetAPI {
 
     @GET(value = "/AHome/GetRecommendInfor")
+//    @BaseUrlTypeName(contentType = RequestContentType.Form)
+//    @GET(value = "{url}", isFullUrl = true)
     @RequestTimeLimit(totalTime = "{requestTime}", unit = TimeUnit.SECONDS)
     @DataParam(RecommandInfo.class)
     RetrofitParams requestRecommandInfo(
+            @Path("url") String url,
             @Param("SiteID") int siteID,
-            @RequestTimePart("requestTime") long requestTime
+            @Param() HashMap<String, String> map,
+            @RequestTimePart("requestTime") long requestTime,
+            @DataCallStatus() CallStatus callStatus
     );
 
     @GET(value = "http://app.108sq.org:920/Api/UserPrestigeInfos?UserIDs=6070%7C438484%7C438484", isFullUrl = true)

@@ -12,11 +12,13 @@ import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.ImagesViewBinding;
 import com.cloud.images.RxImage;
 import com.cloud.images.beans.SelectImageProperties;
+import com.cloud.images.enums.CacheMode;
+import com.cloud.images.enums.ScaleType;
 import com.cloud.images.figureset.ImageSelectDialog;
+import com.cloud.images.glide.GBitmapCallback;
+import com.cloud.images.glide.GFileCallback;
 import com.cloud.images.glide.GlideOptimize;
-import com.cloud.images.glide.ScaleType;
 import com.cloud.objects.ObjectManager;
-import com.cloud.objects.events.Action1;
 
 import java.io.File;
 import java.util.List;
@@ -70,17 +72,30 @@ public class ImagesActivity extends BaseFragmentActivity {
                 .setRoundCorners(20)
                 //图片规则(根据第三方文档设定,如阿里、七牛)
                 .setImageRule(ImgRuleType.GeometricForWidth.getRule())
+                //缓存模式
+                .setCacheMode(CacheMode.onlyMemory)
+                //散列key,适用于请求url不变但图片已更新情况
+                //.setHashKey(GlobalUtils.getNewGuid())
                 //gif图片需要设置此属性
                 //.asGif()
                 .into(binding.testIv0);
 
-        //所有的参数配置与上面一样
+//        //所有的参数配置与上面一样
         GlideOptimize.with(this)
-                .loadBitmap(url)
-                .into(new Action1<Bitmap>() {
+                .load(url2)
+                .into(new GBitmapCallback() {
                     @Override
                     public void call(Bitmap bitmap) {
-                        
+                        binding.testIv1.setImageBitmap(bitmap);
+                    }
+                });
+        //文件类型
+        GlideOptimize.with(this)
+                .load(url)
+                .into(new GFileCallback() {
+                    @Override
+                    public void call(File file) {
+
                     }
                 });
     }

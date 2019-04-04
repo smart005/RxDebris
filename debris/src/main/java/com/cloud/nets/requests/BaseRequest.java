@@ -2,12 +2,16 @@ package com.cloud.nets.requests;
 
 import android.text.TextUtils;
 
+import com.cloud.cache.CacheDataItem;
+import com.cloud.cache.RxCache;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.OkRxKeys;
 import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.CallStatus;
 import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
+import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.nets.events.OnHeaderCookiesListener;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
@@ -216,7 +220,14 @@ public class BaseRequest {
                     if (entry.getValue() instanceof List) {
                         bodyBuilder.add(entry.getKey(), JsonUtils.toStr(entry.getValue()));
                     } else {
-                        bodyBuilder.add(entry.getKey(), entry.getValue() + "");
+                        if (entry.getValue() instanceof Map) {
+                            Map<String, Object> childMap = (Map<String, Object>) entry.getValue();
+                            for (Map.Entry<String, Object> childEntry : childMap.entrySet()) {
+                                bodyBuilder.add(childEntry.getKey(), String.valueOf(childEntry.getValue()));
+                            }
+                        } else {
+                            bodyBuilder.add(entry.getKey(), String.valueOf(entry.getValue()));
+                        }
                     }
                 }
             }
@@ -285,8 +296,14 @@ public class BaseRequest {
         int index = 0;
         int count = params.size();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            String value = entry.getValue() + "";
-            builder.append(entry.getKey() + "=" + value.trim() + ((index + 1) < count ? "&" : ""));
+            if (entry.getValue() instanceof Map) {
+                Map<String, Object> childMap = (Map) entry.getValue();
+                for (Map.Entry<String, Object> childEntry : childMap.entrySet()) {
+                    joinSingleParamForGet(builder, childEntry, index, count);
+                }
+            } else {
+                joinSingleParamForGet(builder, entry, index, count);
+            }
             index++;
         }
         //判断原url中是否包含?
@@ -295,6 +312,19 @@ public class BaseRequest {
         } else {
             return String.format("%s?%s&time=%s", url, builder.toString(), System.currentTimeMillis());
         }
+    }
+
+    private void joinSingleParamForGet(StringBuilder builder, Map.Entry<String, Object> entry, int index, int count) {
+        String value = "";
+        try {
+            value = URLEncoder.encode(String.valueOf(entry.getValue()).trim(), "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            Logger.error(e);
+        }
+        builder.append(entry.getKey());
+        builder.append("=");
+        builder.append(value);
+        builder.append((index + 1) < count ? "&" : "");
     }
 
     protected String getAllParamsJoin(HashMap<String, String> headers, TreeMap<String, Object> params) {
@@ -400,5 +430,66 @@ public class BaseRequest {
                 break;
             }
         }
+    }
+
+    //缓存处理返回true继续之后处理,false不作之后网络处理
+    protected boolean cacheDealWith(CallStatus callStatus,
+                                    HashMap<String, String> headers,
+                                    Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType> successAction,
+                                    String apiRequestKey,
+                                    HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
+        //网络请求-在缓存未失效时网络数据与缓存只会返回其中一个,缓存失效后先请求网络->再缓存->最后返回;
+        //即首次请求或缓存失效的情况会走网络,否则每次只取缓存数据;
+        //OnlyCache,
+        //
+        //每次只作网络请求;
+        //OnlyNet,
+        //
+        //网络请求-在缓存未失败时获取到网络数据和缓存数据均会回调,缓存失效后先请求网络->再缓存->最后返回(即此时只作网络数据的回调);
+        //1.有缓存时先回调缓存数据再请求网络数据然后[缓存+回调];
+        //2.无缓存时不作缓存回调直接请求网络数据后[缓存+回调];
+        //WeakCacheAccept,
+        //
+        //1.有缓存时先回调缓存数据再请求网络数据然后[缓存]不作网络回调;
+        //2.无缓存时不作缓存回调直接请求网络数据后[缓存]不作网络回调;
+        //WeakCache
+        if (callStatus != CallStatus.OnlyNet) {
+            String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
+            CacheDataItem dataItem = RxCache.getBaseCacheData(ckey, true);
+            if (successAction != null && dataItem != null) {
+                ResponseData responseData = new ResponseData();
+                responseData.setResponseDataType(ResponseDataType.object);
+                responseData.setResponse(dataItem.getValue());
+                if (callStatus == CallStatus.TakNetwork) {
+                    if (TextUtils.isEmpty(responseData.getResponse())) {
+                        successAction.call(responseData, apiRequestKey, reqQueueItemHashMap, DataType.EmptyForOnlyCache);
+                    } else {
+                        successAction.call(responseData, apiRequestKey, reqQueueItemHashMap, DataType.CacheData);
+                    }
+                    //此状态下不作网络请求
+                    return false;
+                } else if (!TextUtils.isEmpty(dataItem.getValue())) {
+                    successAction.call(responseData, apiRequestKey, reqQueueItemHashMap, DataType.CacheData);
+                    //1.有缓存时先回调缓存数据再请求网络数据然后[缓存+回调];
+                    //2.无缓存时不作缓存回调直接请求网络数据后[缓存+回调];
+                    //3.有缓存时先回调缓存数据再请求网络数据然后[缓存]不作网络回调;
+                    //4.无缓存时不作缓存回调直接请求网络数据后[缓存]不作网络回调;
+                    //首次请求时缓存失效的情况会走网络,否则每次只取缓存数据;
+                    //具体类型参考{@link }
+                    if (callStatus == CallStatus.OnlyCache) {
+                        return false;
+                    } else if (callStatus == CallStatus.PersistentIntervalCache) {
+                        long intervalCacheTime = dataItem.getIntervalCacheTime();
+                        long stime = dataItem.getStartTime() + intervalCacheTime;
+                        if (stime > System.currentTimeMillis()) {
+                            //如果stime大于当前时间表示在间隔时间的有效范围内不作网络请求
+                            setCancelIntervalCacheCall(true);
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

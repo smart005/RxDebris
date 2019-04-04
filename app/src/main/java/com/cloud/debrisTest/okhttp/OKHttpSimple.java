@@ -14,8 +14,6 @@ import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.objects.utils.JsonUtils;
 
-import java.io.File;
-
 public class OKHttpSimple extends AppCompatActivity {
 
     private OkhttpViewBinding binding = null;
@@ -26,7 +24,7 @@ public class OKHttpSimple extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.okhttp_view);
         binding.setModel(new NetModel());
 
-        //getService.requestRecommandInfo(42, recommandListener);
+        getService.requestRecommandInfo(42, recommandListener);
 
 //        getService.requestUserList(new OnSuccessfulListener<String>() {
 //            @Override
@@ -34,28 +32,29 @@ public class OKHttpSimple extends AppCompatActivity {
 //
 //            }
 //        });
-
-        getService.getValidateCode(new OnSuccessfulListener<File>() {
-            @Override
-            public void onSuccessful(File file, DataType dataType, Object... extras) {
-
-            }
-
-            @Override
-            public void onError(ErrorType errorType, Object... extras) {
-
-            }
-
-            @Override
-            public void onCompleted(Object... extras) {
-
-            }
-        });
+//
+//        getService.getValidateCode(new OnSuccessfulListener<File>() {
+//            @Override
+//            public void onSuccessful(File file, DataType dataType, Object... extras) {
+//
+//            }
+//
+//            @Override
+//            public void onError(ErrorType errorType, Object... extras) {
+//
+//            }
+//
+//            @Override
+//            public void onCompleted(Object... extras) {
+//
+//            }
+//        });
     }
 
     private OnSuccessfulListener<RecommandInfo> recommandListener = new OnSuccessfulListener<RecommandInfo>() {
         @Override
         public void onSuccessful(RecommandInfo recommandInfo, DataType dataType, Object... extras) {
+            //如果dataType==DataType.EmptyForOnlyCache则recommandInfo==null
             //具体接口请求成功回调;
             //如果有缓存且存在缓存和网络均会回调时则isLastCall==true表示最后一次回调
             String json = JsonUtils.toStr(recommandInfo);

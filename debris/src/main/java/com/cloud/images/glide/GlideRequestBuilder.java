@@ -15,9 +15,16 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.transition.Transition;
+import com.cloud.images.enums.CacheMode;
+import com.cloud.images.enums.GlideCallType;
+import com.cloud.images.enums.GlideRequestType;
+import com.cloud.images.enums.LoadType;
+import com.cloud.images.enums.ScaleType;
 import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action3;
+
+import java.io.File;
 
 /**
  * Author lijinghuan
@@ -151,6 +158,28 @@ public class GlideRequestBuilder {
     }
 
     /**
+     * 设置缓存模式
+     *
+     * @param cacheMode 缓存模式
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder setCacheMode(CacheMode cacheMode) {
+        this.optimize.setCacheMode(cacheMode);
+        return this;
+    }
+
+    /**
+     * 散列key,适用于请求url不变但图片已更新情况
+     *
+     * @param hashKey 散列key
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder setHashKey(String hashKey) {
+        this.optimize.setHashKey(hashKey);
+        return this;
+    }
+
+    /**
      * 设置图片的scaleType类型
      *
      * @param scaleType 默认为centerCrop
@@ -186,6 +215,25 @@ public class GlideRequestBuilder {
         return this;
     }
 
+    private class RendBuilderAction<T> implements Action2<ImageRuleProperties, RequestBuilder> {
+
+        private Action3<RequestBuilder<T>, ImageView, ImageRuleProperties> call;
+        private ImageView imageView;
+        private LoadType loadType = LoadType.normal;
+
+        public RendBuilderAction(Action3<RequestBuilder<T>, ImageView, ImageRuleProperties> call, ImageView imageView, LoadType loadType) {
+            this.call = call;
+            this.imageView = imageView;
+            this.loadType = loadType;
+        }
+
+        @Override
+        public void call(ImageRuleProperties properties, RequestBuilder requestBuilder) {
+            RequestBuilder builder = optimize.loadConfig(requestBuilder, loadType, GlideCallType.view);
+            call.call(builder, imageView, properties);
+        }
+    }
+
     /**
      * 获取Glide builder
      *
@@ -196,6 +244,7 @@ public class GlideRequestBuilder {
         if (imageView == null || call == null) {
             return;
         }
+        LoadType loadType = optimize.isGif() ? LoadType.gif : LoadType.normal;
         //若未设置width和height(或其中之一<=0)则获取控件的宽高作为图片尺寸
         int width = this.optimize.getWidth();
         int height = this.optimize.getHeight();
@@ -203,32 +252,12 @@ public class GlideRequestBuilder {
             width = imageView.getWidth();
             height = imageView.getHeight();
             if (width <= 0 || height <= 0) {
-                imageView.post(new ImagePostRunable<T>(imageView, call));
+                imageView.post(new ImagePostRunable<T>(imageView, loadType, call));
             } else {
-                ImageRuleProperties properties = this.into(width, height);
-                if (properties == null) {
-                    return;
-                }
-                if (optimize.isGif()) {
-                    RequestBuilder builder = this.optimize.loadGifConfig();
-                    call.call(builder, imageView, properties);
-                } else {
-                    RequestBuilder builder = this.optimize.loadConfig();
-                    call.call(builder, imageView, properties);
-                }
+                this.into(width, height, GlideCallType.view, new RendBuilderAction(call, imageView, loadType));
             }
         } else {
-            ImageRuleProperties properties = this.into(width, height);
-            if (properties == null) {
-                return;
-            }
-            if (optimize.isGif()) {
-                RequestBuilder builder = this.optimize.loadGifConfig();
-                call.call(builder, imageView, properties);
-            } else {
-                RequestBuilder builder = this.optimize.loadConfig();
-                call.call(builder, imageView, properties);
-            }
+            this.into(width, height, GlideCallType.view, new RendBuilderAction(call, imageView, loadType));
         }
     }
 
@@ -236,34 +265,26 @@ public class GlideRequestBuilder {
 
         private ImageView imageView;
         private Action3<RequestBuilder<T>, ImageView, ImageRuleProperties> call;
+        private LoadType loadType = LoadType.normal;
 
-        public ImagePostRunable(ImageView imageView, Action3<RequestBuilder<T>, ImageView, ImageRuleProperties> call) {
+        public ImagePostRunable(ImageView imageView, LoadType loadType, Action3<RequestBuilder<T>, ImageView, ImageRuleProperties> call) {
             this.imageView = imageView;
             this.call = call;
+            this.loadType = loadType;
         }
 
         @Override
         public void run() {
-            ImageRuleProperties properties = GlideRequestBuilder.this.into(imageView.getWidth(), imageView.getHeight());
-            if (properties == null) {
-                return;
-            }
-            if (optimize.isGif()) {
-                RequestBuilder builder = optimize.loadGifConfig();
-                call.call(builder, imageView, properties);
-            } else {
-                RequestBuilder builder = optimize.loadConfig();
-                call.call(builder, imageView, properties);
-            }
+            GlideRequestBuilder.this.into(imageView.getWidth(), imageView.getHeight(), GlideCallType.view, new RendBuilderAction(call, imageView, loadType));
         }
     }
 
     /**
      * 渲染图片
      */
-    private ImageRuleProperties into(int width, int height) {
-        if (manager == null) {
-            return null;
+    private void into(int width, int height, GlideCallType callType, Action2<ImageRuleProperties, RequestBuilder> call) {
+        if (manager == null || call == null) {
+            return;
         }
         ImageRuleProperties properties = new ImageRuleProperties();
         properties.setRoundCorners(optimize.getRoundCorners());
@@ -273,60 +294,67 @@ public class GlideRequestBuilder {
         properties.setWidth(width);
         properties.setHeight(height);
 
-        CusGlideUrl glideUrl = optimize.getGlideUrl();
-
-        if (optimize.getImageType() == GlideImageType.fileImage) {
+        if (optimize.getImageType() == GlideRequestType.fileImage) {
             if (optimize.isGif()) {
                 //如果是gif则加asGif
                 RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                optimize.setGifRequestBuilder(requestBuilder.load(optimize.getFileImage()));
+                call.call(properties, requestBuilder.load(optimize.getFileImage()));
             } else {
-                optimize.setRequestBuilder(manager.load(optimize.getFileImage()));
+                call.call(properties, manager.load(optimize.getFileImage()));
             }
-        } else if (optimize.getImageType() == GlideImageType.resImage) {
+        } else if (optimize.getImageType() == GlideRequestType.resImage) {
             if (optimize.isGif()) {
                 //如果是gif则加asGif
                 RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                optimize.setGifRequestBuilder(requestBuilder.load(optimize.getResImage()));
+                call.call(properties, requestBuilder.load(optimize.getResImage()));
             } else {
-                optimize.setRequestBuilder(manager.load(optimize.getResImage()));
+                call.call(properties, manager.load(optimize.getResImage()));
             }
-        } else if (optimize.getImageType() == GlideImageType.uriImage) {
+        } else if (optimize.getImageType() == GlideRequestType.uriImage) {
             if (optimize.isGif()) {
                 //如果是gif则加asGif
                 RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                optimize.setGifRequestBuilder(requestBuilder.load(optimize.getUriImage()));
+                call.call(properties, requestBuilder.load(optimize.getUriImage()));
             } else {
-                optimize.setRequestBuilder(manager.load(optimize.getUriImage()));
-            }
-        } else if (optimize.getImageType() == GlideImageType.bitmapImage) {
-            //bitmap只针对网络图片
-            RequestBuilder<Bitmap> requestBuilder = manager.asBitmap();
-            if (glideUrl != null) {
-                glideUrl.setProperties(properties);
-                optimize.setBitmapRequestBuilder(requestBuilder.load(glideUrl.getUrl()));
-            } else if (optimize.getFileImage() != null) {
-                optimize.setBitmapRequestBuilder(requestBuilder.load(optimize.getFileImage()));
-            } else if (optimize.getResImage() != 0) {
-                optimize.setBitmapRequestBuilder(requestBuilder.load(optimize.getResImage()));
-            } else if (optimize.getUriImage() != null) {
-                optimize.setBitmapRequestBuilder(requestBuilder.load(optimize.getUriImage()));
+                call.call(properties, manager.load(optimize.getUriImage()));
             }
         } else {
-            if (glideUrl == null) {
-                return null;
-            }
+            CusGlideUrl glideUrl = optimize.getGlideUrl();
             //初始url拼接相关属性
-            glideUrl.setProperties(properties);
-            if (optimize.isGif()) {
-                //如果是gif则加asGif
-                RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                optimize.setGifRequestBuilder(requestBuilder.load(glideUrl.getUrl()));
+            if (callType == GlideCallType.bitmap) {
+                RequestBuilder<Bitmap> requestBuilder = manager.asBitmap();
+                if (glideUrl != null) {
+                    glideUrl.setProperties(properties);
+                    call.call(properties, requestBuilder.load(glideUrl.getUrl()));
+                } else if (optimize.getFileImage() != null) {
+                    call.call(properties, requestBuilder.load(optimize.getFileImage()));
+                } else if (optimize.getResImage() != 0) {
+                    call.call(properties, requestBuilder.load(optimize.getResImage()));
+                } else if (optimize.getUriImage() != null) {
+                    call.call(properties, requestBuilder.load(optimize.getUriImage()));
+                }
+            } else if (callType == GlideCallType.file) {
+                RequestBuilder<File> requestBuilder = manager.asFile();
+                if (glideUrl != null) {
+                    glideUrl.setProperties(properties);
+                    call.call(properties, requestBuilder.load(glideUrl.getUrl()));
+                } else if (optimize.getFileImage() != null) {
+                    call.call(properties, requestBuilder.load(optimize.getFileImage()));
+                } else if (optimize.getResImage() != 0) {
+                    call.call(properties, requestBuilder.load(optimize.getResImage()));
+                } else if (optimize.getUriImage() != null) {
+                    call.call(properties, requestBuilder.load(optimize.getUriImage()));
+                }
             } else {
-                optimize.setRequestBuilder(manager.load(glideUrl.getUrl()));
+                if (optimize.isGif()) {
+                    //如果是gif则加asGif
+                    RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
+                    call.call(properties, requestBuilder.load(glideUrl.getUrl()));
+                } else {
+                    call.call(properties, manager.load(glideUrl.getUrl()));
+                }
             }
         }
-        return properties;
     }
 
     /**
@@ -371,44 +399,75 @@ public class GlideRequestBuilder {
         into(imageView, null);
     }
 
+    private class ObjectBuilderAction<T> implements Action2<ImageRuleProperties, RequestBuilder> {
+
+        private Action1<T> call;
+        private LoadType loadType;
+        private GlideCallType callType;
+
+        public ObjectBuilderAction(Action1<T> call, LoadType loadType, GlideCallType callType) {
+            this.call = call;
+            this.loadType = loadType;
+            this.callType = callType;
+        }
+
+        @Override
+        public void call(ImageRuleProperties properties, RequestBuilder requestBuilder) {
+            if (call == null) {
+                return;
+            }
+            RequestBuilder<T> builder = optimize.loadConfig(requestBuilder, loadType, callType);
+            builder.into(new ObjectTarget(properties, call));
+        }
+    }
+
     /**
-     * 获取bitmap图片
+     * 获取Bitmap图片
      *
-     * @param call bitmap图片回调
+     * @param call 图片回调
      */
-    public void into(Action1<Bitmap> call) {
+    public void into(GBitmapCallback call) {
         if (call == null) {
             return;
         }
-        ImageRuleProperties properties = this.into(optimize.getWidth(), optimize.getHeight());
-        if (properties == null) {
-            return;
-        }
-        RequestBuilder<Bitmap> builder = this.optimize.loadBitmapConfig();
-        builder.into(new BitmapTarget(properties, call));
+        this.into(optimize.getWidth(), optimize.getHeight(), GlideCallType.bitmap, new ObjectBuilderAction(call, LoadType.bitmap, GlideCallType.bitmap));
     }
 
-    private class BitmapTarget extends CustomTarget<Bitmap> {
+    private class ObjectTarget<T> extends CustomTarget<T> {
 
         private ImageRuleProperties properties;
-        private Action1<Bitmap> call;
+        private Action1<T> call;
+        private int renderCount = 0;
 
-        public BitmapTarget(ImageRuleProperties properties, Action1<Bitmap> call) {
+        public ObjectTarget(ImageRuleProperties properties, Action1<T> call) {
             this.properties = properties;
             this.call = call;
         }
 
         @Override
-        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-            if (call == null) {
+        public void onResourceReady(@NonNull T resource, @Nullable Transition<? super T> transition) {
+            if (call == null || renderCount > 0) {
                 return;
             }
             call.call(resource);
+            renderCount++;
         }
 
         @Override
         public void onLoadCleared(@Nullable Drawable placeholder) {
             //占位图加载
         }
+    }
+
+    /**
+     * 获取File图片
+     *
+     * @param call 图片回调
+     */
+    public void into(GFileCallback call) {
+        if (call == null) {
+            return;
+        }
+        this.into(optimize.getWidth(), optimize.getHeight(), GlideCallType.file, new ObjectBuilderAction(call, LoadType.file, GlideCallType.file));
     }
 }

@@ -40,7 +40,7 @@ public class InputEditText extends EditText {
         if (connection == null) {
             return null;
         }
-        return new MyInputConnection(super.onCreateInputConnection(outAttrs), true);
+        return new MyInputConnection(connection, true);
     }
 
     public class MyInputConnection extends InputConnectionWrapper {

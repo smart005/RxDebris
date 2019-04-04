@@ -126,6 +126,7 @@ public class TestApplication extends BaseApplication {
                 //图片缓存目录名称(根目录:sdcard存在取RxAndroid.setExternalCacheRootDir()
                 //设置的目录;sdcard不存在取RxAndroid.setInternalCacheRootDir()设置的目录)
                 .setImageCacheDirName("images")
+
                 //用于glide请求远程图片时追加第三方优化后缀(如阿里、七牛等)
                 .setOnImageUrlCombinationListener(new ImageSuffixCombination());
     }

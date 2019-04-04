@@ -6,6 +6,7 @@ import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.BYTES;
 import com.cloud.nets.annotations.BaseUrlTypeName;
 import com.cloud.nets.annotations.DELETE;
+import com.cloud.nets.annotations.DataCallStatus;
 import com.cloud.nets.annotations.DataParam;
 import com.cloud.nets.annotations.DelQuery;
 import com.cloud.nets.annotations.GET;
@@ -24,6 +25,7 @@ import com.cloud.nets.annotations.RetCodes;
 import com.cloud.nets.annotations.UrlItem;
 import com.cloud.nets.annotations.UrlItemKey;
 import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.enums.CallStatus;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
 import com.cloud.objects.enums.RequestType;
@@ -57,20 +59,23 @@ import java.util.concurrent.TimeUnit;
  * ModifyContent:
  */
 public class OkRxParsing {
-    public <T> T createAPI(Class<T> service) {
+    //第二参数从接口请求方法取出并传入，若后面参数中有配置则被替换，若没有配置则以此值为准;
+    public <T> T createAPI(Class<T> service, CallStatus callStatus) {
         if (!ValidUtils.validateServiceInterface(service)) {
             return null;
         }
         return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[]{service},
-                new ApiInvocationHandler(service));
+                new ApiInvocationHandler(service, callStatus));
     }
 
     private class ApiInvocationHandler<T> implements InvocationHandler {
 
         private Class<T> apiClass = null;
+        private CallStatus callStatus = CallStatus.OnlyNet;
 
-        public ApiInvocationHandler(Class<T> apiClass) {
+        public ApiInvocationHandler(Class<T> apiClass, CallStatus callStatus) {
             this.apiClass = apiClass;
+            this.callStatus = callStatus;
         }
 
         @Override
@@ -80,6 +85,9 @@ public class OkRxParsing {
                     return method.invoke(this, args);
                 } else if (method.getReturnType() == RetrofitParams.class) {
                     RetrofitParams retrofitParams = new RetrofitParams();
+                    //数据回调状态值设置
+                    retrofitParams.setCallStatus(callStatus);
+                    //相关注解值获取
                     Annotation[] declaredAnnotations = method.getDeclaredAnnotations();
                     if (ObjectJudge.isNullOrEmpty(declaredAnnotations)) {
                         retrofitParams.setFlag(false);
@@ -433,6 +441,25 @@ public class OkRxParsing {
         bindParamList(paramAnnotations, retrofitParams, args, isRemoveEmptyValueField);
         //绑定DelQuery参数
         bindDeletes(method, retrofitParams, args, isRemoveEmptyValueField, annotationType);
+        //绑定DataCallStatus参数
+        bindDataCallStatus(method, retrofitParams, args);
+    }
+
+    private void bindDataCallStatus(Method method, RetrofitParams retrofitParams, Object[] args) {
+        TreeMap<Integer, DataCallStatus> callStatusTreeMap = getParamAnnotationObject(method, DataCallStatus.class);
+        if (ObjectJudge.isNullOrEmpty(callStatusTreeMap)) {
+            //如果为这不处理
+            return;
+        }
+        //如果接口参数里加了多个配置，那么以第一个配置为准
+        Map.Entry<Integer, DataCallStatus> entry = callStatusTreeMap.firstEntry();
+        Object arg = args[entry.getKey()];
+        //如果传入的类型非CallStatus类型则不处理
+        if (!(arg instanceof CallStatus)) {
+            return;
+        }
+        CallStatus callStatus = (CallStatus) arg;
+        retrofitParams.setCallStatus(callStatus);
     }
 
     private void putValueByIsRemoveEmpty(Param key, Object arg, TreeMap<String, Object> params) {

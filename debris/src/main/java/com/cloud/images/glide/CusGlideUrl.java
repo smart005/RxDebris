@@ -1,6 +1,7 @@
 package com.cloud.images.glide;
 
 import com.cloud.images.RxImage;
+import com.cloud.images.enums.GlideRequestType;
 
 /**
  * Author lijinghuan
@@ -27,9 +28,9 @@ public class CusGlideUrl {
         //如果gif图片或本地图片则用默认地址
         if (properties == null ||
                 properties.isGif() ||
-                properties.getImageType() == GlideImageType.fileImage ||
-                properties.getImageType() == GlideImageType.resImage ||
-                properties.getImageType() == GlideImageType.uriImage) {
+                properties.getImageType() == GlideRequestType.fileImage ||
+                properties.getImageType() == GlideRequestType.resImage ||
+                properties.getImageType() == GlideRequestType.uriImage) {
             return url;
         }
         RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
