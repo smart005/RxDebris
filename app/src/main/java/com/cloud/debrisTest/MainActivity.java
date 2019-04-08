@@ -16,7 +16,10 @@ import com.cloud.objects.beans.MapEntryItem;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.storage.DirectoryUtils;
 import com.cloud.objects.utils.JsonUtils;
+
+import java.io.File;
 
 /**
  * Author lijinghuan
@@ -58,6 +61,18 @@ public class MainActivity extends BaseActivity {
         String list2 = JsonUtils.getValue("list2", jsonString);
         String name = JsonUtils.getValue("name", jsonString);
         String accurateValue = JsonUtils.getAccurateValue("list2->name", jsonString);
+
+        String dirs = "[images->[forum->[video,temp],user,comments]]";
+        DirectoryUtils.getInstance().addDirectory("images")
+                .addChildDirectory("forum")
+                .addChildDirectory("video")
+                .addDirectory("temp")
+                .prevDirectory("user")
+                .addDirectory("comments")
+                .buildDirectories();
+        File video = DirectoryUtils.getInstance().getDirectory("video");
+        File directory = DirectoryUtils.getInstance().getDirectory("video");
+        String dirJson = DirectoryUtils.getInstance().toString();
     }
 
     public void OnNetFrameClick(View view) {
@@ -66,7 +81,7 @@ public class MainActivity extends BaseActivity {
                 new MapEntryItem<>("key2", null),
                 new MapEntryItem<>("key3", ""),
                 new MapEntryItem<>("key4", 2),
-                new MapEntryItem<>("key5",null));
+                new MapEntryItem<>("key5", null));
     }
 
     public void OnH5Click(View view) {

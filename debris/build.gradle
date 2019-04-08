@@ -45,7 +45,7 @@ android {
     }
 }
 greendao {
-    schemaVersion 5
+    schemaVersion 8
     daoPackage 'com.cloud.cache.daos'
     targetGenDir 'src/main/java/'
 }

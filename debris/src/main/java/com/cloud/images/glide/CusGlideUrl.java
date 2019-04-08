@@ -15,13 +15,19 @@ public class CusGlideUrl {
 
     private ImageRuleProperties properties = null;
     private String url = "";
+    private String originalUrl = "";
 
     public CusGlideUrl(String url) {
         this.url = url;
+        this.originalUrl = url;
     }
 
     public void setProperties(ImageRuleProperties properties) {
         this.properties = properties;
+    }
+
+    public String getOriginalUrl() {
+        return this.originalUrl;
     }
 
     public String getUrl() {

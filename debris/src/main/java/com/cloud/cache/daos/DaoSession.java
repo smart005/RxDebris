@@ -8,10 +8,12 @@ import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.greenrobot.greendao.internal.DaoConfig;
 
+import com.cloud.cache.PathCacheInfoItem;
 import com.cloud.cache.CacheDataItem;
 import com.cloud.cache.StackInfoItem;
 import com.cloud.dialogs.options.beans.OptionsItem;
 
+import com.cloud.cache.daos.PathCacheInfoItemDao;
 import com.cloud.cache.daos.CacheDataItemDao;
 import com.cloud.cache.daos.StackInfoItemDao;
 import com.cloud.cache.daos.OptionsItemDao;
@@ -25,10 +27,12 @@ import com.cloud.cache.daos.OptionsItemDao;
  */
 public class DaoSession extends AbstractDaoSession {
 
+    private final DaoConfig pathCacheInfoItemDaoConfig;
     private final DaoConfig cacheDataItemDaoConfig;
     private final DaoConfig stackInfoItemDaoConfig;
     private final DaoConfig optionsItemDaoConfig;
 
+    private final PathCacheInfoItemDao pathCacheInfoItemDao;
     private final CacheDataItemDao cacheDataItemDao;
     private final StackInfoItemDao stackInfoItemDao;
     private final OptionsItemDao optionsItemDao;
@@ -36,6 +40,9 @@ public class DaoSession extends AbstractDaoSession {
     public DaoSession(Database db, IdentityScopeType type, Map<Class<? extends AbstractDao<?, ?>>, DaoConfig>
             daoConfigMap) {
         super(db);
+
+        pathCacheInfoItemDaoConfig = daoConfigMap.get(PathCacheInfoItemDao.class).clone();
+        pathCacheInfoItemDaoConfig.initIdentityScope(type);
 
         cacheDataItemDaoConfig = daoConfigMap.get(CacheDataItemDao.class).clone();
         cacheDataItemDaoConfig.initIdentityScope(type);
@@ -46,19 +53,26 @@ public class DaoSession extends AbstractDaoSession {
         optionsItemDaoConfig = daoConfigMap.get(OptionsItemDao.class).clone();
         optionsItemDaoConfig.initIdentityScope(type);
 
+        pathCacheInfoItemDao = new PathCacheInfoItemDao(pathCacheInfoItemDaoConfig, this);
         cacheDataItemDao = new CacheDataItemDao(cacheDataItemDaoConfig, this);
         stackInfoItemDao = new StackInfoItemDao(stackInfoItemDaoConfig, this);
         optionsItemDao = new OptionsItemDao(optionsItemDaoConfig, this);
 
+        registerDao(PathCacheInfoItem.class, pathCacheInfoItemDao);
         registerDao(CacheDataItem.class, cacheDataItemDao);
         registerDao(StackInfoItem.class, stackInfoItemDao);
         registerDao(OptionsItem.class, optionsItemDao);
     }
     
     public void clear() {
+        pathCacheInfoItemDaoConfig.clearIdentityScope();
         cacheDataItemDaoConfig.clearIdentityScope();
         stackInfoItemDaoConfig.clearIdentityScope();
         optionsItemDaoConfig.clearIdentityScope();
+    }
+
+    public PathCacheInfoItemDao getPathCacheInfoItemDao() {
+        return pathCacheInfoItemDao;
     }
 
     public CacheDataItemDao getCacheDataItemDao() {

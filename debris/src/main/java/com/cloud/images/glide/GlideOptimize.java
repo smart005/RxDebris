@@ -4,10 +4,19 @@ import android.app.Activity;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.cloud.cache.DbCacheDao;
+import com.cloud.cache.PathCacheInfoItem;
+import com.cloud.cache.daos.PathCacheInfoItemDao;
+import com.cloud.objects.logs.Logger;
+
+import org.greenrobot.greendao.query.QueryBuilder;
+
+import java.io.File;
 
 /**
  * Author lijinghuan
@@ -85,5 +94,65 @@ public class GlideOptimize {
         RequestManager manager = Glide.with(fragmentActivity);
         GlideImageModels builder = GlideImageModels.getBuilder(density, fragmentActivity, manager);
         return builder;
+    }
+
+    /**
+     * 通过orginalUrl获取本地文件
+     *
+     * @param originalUrl 原url
+     * @return 本地文件
+     */
+    public File getLocalFile(String originalUrl) {
+        if (TextUtils.isEmpty(originalUrl)) {
+            return null;
+        }
+        DbCacheDao dbCacheDao = new DbCacheDao();
+        PathCacheInfoItemDao cacheInfoItemDao = dbCacheDao.getPathCacheInfoItemDao();
+        if (cacheInfoItemDao == null) {
+            return null;
+        }
+        QueryBuilder<PathCacheInfoItem> builder = cacheInfoItemDao.queryBuilder();
+        builder.where(PathCacheInfoItemDao.Properties.Url.eq(originalUrl));
+        PathCacheInfoItem unique = builder.unique();
+        if (unique == null) {
+            return null;
+        }
+        File file = new File(unique.getTargetPath());
+        if (!file.exists()) {
+            return null;
+        }
+        return file;
+    }
+
+    /**
+     * 移除文件
+     *
+     * @param originalUrl 原文件对应的网络url
+     */
+    public void removeFile(String originalUrl) {
+        if (TextUtils.isEmpty(originalUrl)) {
+            return;
+        }
+        DbCacheDao dbCacheDao = new DbCacheDao();
+        PathCacheInfoItemDao cacheInfoItemDao = dbCacheDao.getPathCacheInfoItemDao();
+        if (cacheInfoItemDao == null) {
+            return;
+        }
+        QueryBuilder<PathCacheInfoItem> builder = cacheInfoItemDao.queryBuilder();
+        builder.where(PathCacheInfoItemDao.Properties.Url.eq(originalUrl));
+        PathCacheInfoItem unique = builder.unique();
+        if (unique == null) {
+            return;
+        }
+        File file = new File(unique.getTargetPath());
+        //删除文件
+        if (file.exists()) {
+            boolean delete = file.delete();
+            if (!delete) {
+                Logger.info("remove file fail.");
+            }
+        }
+        //删除记录信息
+        cacheInfoItemDao.deleteByKeyInTx(unique.getUrl());
     }
 }

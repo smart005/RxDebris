@@ -4,6 +4,7 @@ import com.cloud.cache.daos.CacheDataItemDao;
 import com.cloud.cache.daos.DaoMaster;
 import com.cloud.cache.daos.DaoSession;
 import com.cloud.cache.daos.OptionsItemDao;
+import com.cloud.cache.daos.PathCacheInfoItemDao;
 import com.cloud.cache.daos.StackInfoItemDao;
 import com.cloud.cache.greens.DbHelper;
 import com.cloud.cache.greens.RxSqliteOpenHelper;
@@ -67,5 +68,19 @@ public class DbCacheDao {
         }
         StackInfoItemDao.createTable(daoSession.getDatabase(), true);
         return daoSession.getStackInfoItemDao();
+    }
+
+    /**
+     * 获取路径缓存信息
+     *
+     * @return PathCacheInfoItemDao
+     */
+    public PathCacheInfoItemDao getPathCacheInfoItemDao() {
+        DaoSession daoSession = getDaoSession();
+        if (daoSession == null) {
+            return null;
+        }
+        PathCacheInfoItemDao.createTable(daoSession.getDatabase(), true);
+        return daoSession.getPathCacheInfoItemDao();
     }
 }

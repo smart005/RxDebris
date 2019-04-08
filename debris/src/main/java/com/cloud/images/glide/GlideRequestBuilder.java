@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Priority;
@@ -15,14 +16,21 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.transition.Transition;
+import com.cloud.cache.DbCacheDao;
+import com.cloud.cache.PathCacheInfoItem;
+import com.cloud.cache.daos.PathCacheInfoItemDao;
+import com.cloud.cache.greens.DBManager;
 import com.cloud.images.enums.CacheMode;
 import com.cloud.images.enums.GlideCallType;
 import com.cloud.images.enums.GlideRequestType;
 import com.cloud.images.enums.LoadType;
 import com.cloud.images.enums.ScaleType;
-import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.events.Action3;
+import com.cloud.objects.observable.ObservableComponent;
+import com.cloud.objects.storage.DirectoryUtils;
+import com.cloud.objects.storage.StorageUtils;
+import com.cloud.objects.utils.GlobalUtils;
 
 import java.io.File;
 
@@ -210,12 +218,28 @@ public class GlideRequestBuilder {
         return this;
     }
 
+    /**
+     * 转换为gif类型
+     *
+     * @return GlideRequestBuilder
+     */
     public GlideRequestBuilder asGif() {
         this.optimize.setGif(true);
         return this;
     }
 
-    private class RendBuilderAction<T> implements Action2<ImageRuleProperties, RequestBuilder> {
+    /**
+     * 返回类型为File时，文件要移动至目录的目录名
+     *
+     * @param directoryName 目录名
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder toMove(String directoryName) {
+        this.optimize.setMoveDirectoryName(directoryName);
+        return this;
+    }
+
+    private class RendBuilderAction<T> implements Action3<ImageRuleProperties, RequestBuilder, String> {
 
         private Action3<RequestBuilder<T>, ImageView, ImageRuleProperties> call;
         private ImageView imageView;
@@ -228,7 +252,7 @@ public class GlideRequestBuilder {
         }
 
         @Override
-        public void call(ImageRuleProperties properties, RequestBuilder requestBuilder) {
+        public void call(ImageRuleProperties properties, RequestBuilder requestBuilder, String originalUrl) {
             RequestBuilder builder = optimize.loadConfig(requestBuilder, loadType, GlideCallType.view);
             call.call(builder, imageView, properties);
         }
@@ -282,7 +306,7 @@ public class GlideRequestBuilder {
     /**
      * 渲染图片
      */
-    private void into(int width, int height, GlideCallType callType, Action2<ImageRuleProperties, RequestBuilder> call) {
+    private void into(int width, int height, GlideCallType callType, Action3<ImageRuleProperties, RequestBuilder, String> call) {
         if (manager == null || call == null) {
             return;
         }
@@ -298,25 +322,25 @@ public class GlideRequestBuilder {
             if (optimize.isGif()) {
                 //如果是gif则加asGif
                 RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                call.call(properties, requestBuilder.load(optimize.getFileImage()));
+                call.call(properties, requestBuilder.load(optimize.getFileImage()), "");
             } else {
-                call.call(properties, manager.load(optimize.getFileImage()));
+                call.call(properties, manager.load(optimize.getFileImage()), "");
             }
         } else if (optimize.getImageType() == GlideRequestType.resImage) {
             if (optimize.isGif()) {
                 //如果是gif则加asGif
                 RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                call.call(properties, requestBuilder.load(optimize.getResImage()));
+                call.call(properties, requestBuilder.load(optimize.getResImage()), "");
             } else {
-                call.call(properties, manager.load(optimize.getResImage()));
+                call.call(properties, manager.load(optimize.getResImage()), "");
             }
         } else if (optimize.getImageType() == GlideRequestType.uriImage) {
             if (optimize.isGif()) {
                 //如果是gif则加asGif
                 RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                call.call(properties, requestBuilder.load(optimize.getUriImage()));
+                call.call(properties, requestBuilder.load(optimize.getUriImage()), "");
             } else {
-                call.call(properties, manager.load(optimize.getUriImage()));
+                call.call(properties, manager.load(optimize.getUriImage()), "");
             }
         } else {
             CusGlideUrl glideUrl = optimize.getGlideUrl();
@@ -325,33 +349,33 @@ public class GlideRequestBuilder {
                 RequestBuilder<Bitmap> requestBuilder = manager.asBitmap();
                 if (glideUrl != null) {
                     glideUrl.setProperties(properties);
-                    call.call(properties, requestBuilder.load(glideUrl.getUrl()));
+                    call.call(properties, requestBuilder.load(glideUrl.getUrl()), "");
                 } else if (optimize.getFileImage() != null) {
-                    call.call(properties, requestBuilder.load(optimize.getFileImage()));
+                    call.call(properties, requestBuilder.load(optimize.getFileImage()), "");
                 } else if (optimize.getResImage() != 0) {
-                    call.call(properties, requestBuilder.load(optimize.getResImage()));
+                    call.call(properties, requestBuilder.load(optimize.getResImage()), "");
                 } else if (optimize.getUriImage() != null) {
-                    call.call(properties, requestBuilder.load(optimize.getUriImage()));
+                    call.call(properties, requestBuilder.load(optimize.getUriImage()), "");
                 }
             } else if (callType == GlideCallType.file) {
                 RequestBuilder<File> requestBuilder = manager.asFile();
                 if (glideUrl != null) {
                     glideUrl.setProperties(properties);
-                    call.call(properties, requestBuilder.load(glideUrl.getUrl()));
+                    call.call(properties, requestBuilder.load(glideUrl.getUrl()), "");
                 } else if (optimize.getFileImage() != null) {
-                    call.call(properties, requestBuilder.load(optimize.getFileImage()));
+                    call.call(properties, requestBuilder.load(optimize.getFileImage()), "");
                 } else if (optimize.getResImage() != 0) {
-                    call.call(properties, requestBuilder.load(optimize.getResImage()));
+                    call.call(properties, requestBuilder.load(optimize.getResImage()), "");
                 } else if (optimize.getUriImage() != null) {
-                    call.call(properties, requestBuilder.load(optimize.getUriImage()));
+                    call.call(properties, requestBuilder.load(optimize.getUriImage()), "");
                 }
             } else {
                 if (optimize.isGif()) {
                     //如果是gif则加asGif
                     RequestBuilder<GifDrawable> requestBuilder = manager.asGif();
-                    call.call(properties, requestBuilder.load(glideUrl.getUrl()));
+                    call.call(properties, requestBuilder.load(glideUrl.getUrl()), glideUrl.getOriginalUrl());
                 } else {
-                    call.call(properties, manager.load(glideUrl.getUrl()));
+                    call.call(properties, manager.load(glideUrl.getUrl()), glideUrl.getOriginalUrl());
                 }
             }
         }
@@ -399,25 +423,25 @@ public class GlideRequestBuilder {
         into(imageView, null);
     }
 
-    private class ObjectBuilderAction<T> implements Action2<ImageRuleProperties, RequestBuilder> {
+    private class ObjectBuilderAction<T> implements Action3<ImageRuleProperties, RequestBuilder, String> {
 
-        private Action1<T> call;
+        private GFileCallback<T> call;
         private LoadType loadType;
         private GlideCallType callType;
 
-        public ObjectBuilderAction(Action1<T> call, LoadType loadType, GlideCallType callType) {
+        public ObjectBuilderAction(GFileCallback<T> call, LoadType loadType, GlideCallType callType) {
             this.call = call;
             this.loadType = loadType;
             this.callType = callType;
         }
 
         @Override
-        public void call(ImageRuleProperties properties, RequestBuilder requestBuilder) {
+        public void call(ImageRuleProperties properties, RequestBuilder requestBuilder, String originalUrl) {
             if (call == null) {
                 return;
             }
             RequestBuilder<T> builder = optimize.loadConfig(requestBuilder, loadType, callType);
-            builder.into(new ObjectTarget(properties, call));
+            builder.into(new ObjectTarget(properties, originalUrl, call));
         }
     }
 
@@ -436,11 +460,13 @@ public class GlideRequestBuilder {
     private class ObjectTarget<T> extends CustomTarget<T> {
 
         private ImageRuleProperties properties;
-        private Action1<T> call;
+        private GFileCallback<T> call;
         private int renderCount = 0;
+        private String originalUrl = "";
 
-        public ObjectTarget(ImageRuleProperties properties, Action1<T> call) {
+        public ObjectTarget(ImageRuleProperties properties, String originalUrl, GFileCallback<T> call) {
             this.properties = properties;
+            this.originalUrl = originalUrl;
             this.call = call;
         }
 
@@ -449,8 +475,15 @@ public class GlideRequestBuilder {
             if (call == null || renderCount > 0) {
                 return;
             }
-            call.call(resource);
             renderCount++;
+            //如果resource非File类型只作回调处理
+            if (!(resource instanceof File)) {
+                this.call.call(resource);
+                return;
+            }
+            File file = (File) resource;
+            //缓存图片信息
+            cacheImageInfoComponent.build(file, originalUrl, this.call);
         }
 
         @Override
@@ -458,6 +491,50 @@ public class GlideRequestBuilder {
             //占位图加载
         }
     }
+
+    private ObservableComponent<File, Object> cacheImageInfoComponent = new ObservableComponent<File, Object>() {
+        @Override
+        protected File subscribeWith(Object[] params) throws Exception {
+            //需要处理的文件
+            File file = (File) params[0];
+            if (file == null) {
+                return null;
+            }
+            //原url
+            String originalUrl = String.valueOf(params[1]);
+            if (TextUtils.isEmpty(originalUrl)) {
+                return null;
+            }
+            //移动文件至目标目录
+            File targetDir = DirectoryUtils.getInstance().getDirectory(optimize.getMoveDirectoryName());
+            String fileName = String.format("%s.%s", GlobalUtils.getGuidNoConnect(), GlobalUtils.getSuffixName(file.getName()));
+            File targetFile = new File(targetDir, fileName);
+            StorageUtils.copyFile(file, targetFile);
+            //移动成功后file-originalUrl-targetFile关联
+            DbCacheDao dbCacheDao = new DbCacheDao();
+            PathCacheInfoItemDao cacheInfoItemDao = dbCacheDao.getPathCacheInfoItemDao();
+            if (cacheInfoItemDao != null) {
+                PathCacheInfoItem cacheInfoItem = new PathCacheInfoItem();
+                cacheInfoItem.setUrl(originalUrl);
+                cacheInfoItem.setPath(file.getAbsolutePath());
+                cacheInfoItem.setTargetPath(targetFile.getAbsolutePath());
+                cacheInfoItem.setName(file.getName());
+                cacheInfoItemDao.insertOrReplaceInTx(cacheInfoItem);
+                //关闭链接
+                DBManager.getInstance().close();
+            }
+            return targetFile;
+        }
+
+        @Override
+        protected void nextWith(File file, Object[] params) {
+            if (file == null || params[2] == null) {
+                return;
+            }
+            GFileCallback<File> callback = (GFileCallback<File>) params[2];
+            callback.call(file);
+        }
+    };
 
     /**
      * 获取File图片

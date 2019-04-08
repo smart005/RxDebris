@@ -92,10 +92,12 @@ public class ImagesActivity extends BaseFragmentActivity {
         //文件类型
         GlideOptimize.with(this)
                 .load(url)
-                .into(new GFileCallback() {
+                //将文件移动至此目录下
+                .toMove(DirectoryNames.forum.name())
+                .into(new GFileCallback<File>() {
                     @Override
                     public void call(File file) {
-
+                        //这里做移动文件、加载等操作
                     }
                 });
     }

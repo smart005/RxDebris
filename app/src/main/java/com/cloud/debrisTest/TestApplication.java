@@ -8,6 +8,7 @@ import com.cloud.cache.greens.OnDatabasePathListener;
 import com.cloud.debris.BaseApplication;
 import com.cloud.debrisTest.images.ImageSuffixCombination;
 import com.cloud.images.RxImage;
+import com.cloud.images.events.OnImageDirectoryListener;
 import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.RequestErrorInfo;
@@ -20,6 +21,7 @@ import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.events.OnNetworkConnectListener;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.storage.DirectoryUtils;
 import com.cloud.objects.storage.StorageUtils;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.NetworkUtils;
@@ -125,8 +127,15 @@ public class TestApplication extends BaseApplication {
         RxImage.getInstance().getBuilder()
                 //图片缓存目录名称(根目录:sdcard存在取RxAndroid.setExternalCacheRootDir()
                 //设置的目录;sdcard不存在取RxAndroid.setInternalCacheRootDir()设置的目录)
-                .setImageCacheDirName("images")
-
+                //示例：images->[forum->[video,temp],user,comments]
+                .setImageDirectories("images", new OnImageDirectoryListener() {
+                    @Override
+                    public void onImageDirectoryBuild(DirectoryUtils directoryUtils) {
+                        directoryUtils.addChildDirectory("forum")
+                                .addDirectory("user")
+                                .buildDirectories();
+                    }
+                })
                 //用于glide请求远程图片时追加第三方优化后缀(如阿里、七牛等)
                 .setOnImageUrlCombinationListener(new ImageSuffixCombination());
     }

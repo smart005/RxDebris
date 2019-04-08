@@ -67,6 +67,8 @@ class ImageBuildOptimize {
     private CacheMode cacheMode = CacheMode.memoryDisk;
     //散列key,适用于请求url不变但图片已更新情况
     private String hashKey = "";
+    //返回类型为File时，文件要移动至目录的目录名
+    private String moveDirectoryName = "";
 
     public CusGlideUrl getGlideUrl() {
         return glideUrl;
@@ -229,6 +231,24 @@ class ImageBuildOptimize {
      */
     public void setGif(boolean gif) {
         isGif = gif;
+    }
+
+    /**
+     * 获取返回类型为File时，文件要移动至目录的目录名
+     *
+     * @return 目录名
+     */
+    public String getMoveDirectoryName() {
+        return moveDirectoryName;
+    }
+
+    /**
+     * 设置返回类型为File时，文件要移动至目录的目录名
+     *
+     * @param moveDirectoryName 目录名
+     */
+    public void setMoveDirectoryName(String moveDirectoryName) {
+        this.moveDirectoryName = moveDirectoryName;
     }
 
     /**

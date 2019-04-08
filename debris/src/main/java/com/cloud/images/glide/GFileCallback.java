@@ -1,9 +1,5 @@
 package com.cloud.images.glide;
 
-import com.cloud.objects.events.Action1;
-
-import java.io.File;
-
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
@@ -12,6 +8,11 @@ import java.io.File;
  * Modifier:
  * ModifyContent:
  */
-public interface GFileCallback extends Action1<File> {
-
+public abstract class GFileCallback<T> {
+    /**
+     * 处理完后将对象返回内部作信息存储
+     *
+     * @param t glide存储对象
+     */
+    public abstract void call(T t);
 }

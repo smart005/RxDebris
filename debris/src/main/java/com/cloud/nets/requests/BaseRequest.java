@@ -475,7 +475,7 @@ public class BaseRequest {
                     //3.有缓存时先回调缓存数据再请求网络数据然后[缓存]不作网络回调;
                     //4.无缓存时不作缓存回调直接请求网络数据后[缓存]不作网络回调;
                     //首次请求时缓存失效的情况会走网络,否则每次只取缓存数据;
-                    //具体类型参考{@link }
+                    //具体类型参考{@link CallStatus}
                     if (callStatus == CallStatus.OnlyCache) {
                         return false;
                     } else if (callStatus == CallStatus.PersistentIntervalCache) {

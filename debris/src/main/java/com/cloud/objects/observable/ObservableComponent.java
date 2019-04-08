@@ -27,7 +27,7 @@ public abstract class ObservableComponent<Param, Params> {
      *
      * @return
      */
-    protected abstract Param subscribeWith(Params... params);
+    protected abstract Param subscribeWith(Params... params) throws Exception;
 
     /**
      * onNext

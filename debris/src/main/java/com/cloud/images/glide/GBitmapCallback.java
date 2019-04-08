@@ -2,8 +2,6 @@ package com.cloud.images.glide;
 
 import android.graphics.Bitmap;
 
-import com.cloud.objects.events.Action1;
-
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
@@ -12,6 +10,6 @@ import com.cloud.objects.events.Action1;
  * Modifier:
  * ModifyContent:
  */
-public interface GBitmapCallback extends Action1<Bitmap> {
-    
+public abstract class GBitmapCallback extends GFileCallback<Bitmap> {
+
 }
