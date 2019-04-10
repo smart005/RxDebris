@@ -239,6 +239,17 @@ public class GlideRequestBuilder {
         return this;
     }
 
+    /**
+     * 设置高斯模糊半径[1,200]
+     *
+     * @param blurRadius 高斯模糊半径[1,200]
+     * @return GlideRequestBuilder
+     */
+    public GlideRequestBuilder setBlurRadius(int blurRadius) {
+        this.optimize.setBlurRadius(blurRadius);
+        return this;
+    }
+
     private class RendBuilderAction<T> implements Action3<ImageRuleProperties, RequestBuilder, String> {
 
         private Action3<RequestBuilder<T>, ImageView, ImageRuleProperties> call;

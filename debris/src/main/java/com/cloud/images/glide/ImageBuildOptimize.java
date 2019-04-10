@@ -69,6 +69,8 @@ class ImageBuildOptimize {
     private String hashKey = "";
     //返回类型为File时，文件要移动至目录的目录名
     private String moveDirectoryName = "";
+    //高斯模糊半径[1,200]
+    private int blurRadius = 1;
 
     public CusGlideUrl getGlideUrl() {
         return glideUrl;
@@ -357,6 +359,15 @@ class ImageBuildOptimize {
      */
     public void setHashKey(String hashKey) {
         this.hashKey = hashKey;
+    }
+
+    /**
+     * 设置高斯模糊半径[1,200]
+     *
+     * @param blurRadius 高斯模糊半径[1,200]
+     */
+    public void setBlurRadius(int blurRadius) {
+        this.blurRadius = blurRadius;
     }
 
     /**

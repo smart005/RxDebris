@@ -43,7 +43,12 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
 
         binding.h5Test.bindInterface("mibao");
 //        binding.h5Test.load("http://www.slcore.com:201");
-        binding.h5Test.load("http://www.slcore.com:201/upload_image.html");
+//        binding.h5Test.load("http://www.slcore.com:201/upload_image.html");
+//    binding.h5Test.load("http://192.168.188.129:8020/worklinks/post_detail.html");
+//        File file = new File("/storage/emulated/0/Android/data/com.changshuo.ui/.bundle/bundledest/article_detail/index.html");
+//        String content = StorageUtils.readContent(file);
+//        binding.h5Test.loadData(content);
+        binding.h5Test.load("http://sz.108sq.org:920/shuo/detail/267401");
     }
 
     @Override

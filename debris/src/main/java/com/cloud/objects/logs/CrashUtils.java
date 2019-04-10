@@ -57,7 +57,7 @@ public class CrashUtils {
         //系统版本
         map.put("OS_VERSION_NAME", Build.VERSION.RELEASE);
         //系统版本号
-        map.put("OS_VERSION_CODE", Build.VERSION.SDK_INT);
+        map.put("OS_VERSION_CODE", String.valueOf(Build.VERSION.SDK_INT));
         //无线电固件版本
         map.put("RADIO_VERSION", Build.getRadioVersion());
         //与产品/硬件相关联的消费者可见品牌

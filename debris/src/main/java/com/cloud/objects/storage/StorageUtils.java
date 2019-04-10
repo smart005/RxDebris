@@ -345,17 +345,21 @@ public class StorageUtils {
      * param targetfile 目标文件
      * return 内容
      */
-    public static String readContent(File targetfile) throws IOException {
+    public static String readContent(File targetfile) {
         if (targetfile == null || !targetfile.exists()) {
             return "";
         }
         String result = "";
-        FileInputStream fis = new FileInputStream(targetfile);
-        int lenght = fis.available();
-        byte[] buffer = new byte[lenght];
-        fis.read(buffer);
-        result = new String(buffer, "UTF-8");
-        fis.close();
+        try {
+            FileInputStream fis = new FileInputStream(targetfile);
+            int lenght = fis.available();
+            byte[] buffer = new byte[lenght];
+            fis.read(buffer);
+            result = new String(buffer, "UTF-8");
+            fis.close();
+        } catch (IOException e) {
+            Logger.error(e);
+        }
         return result;
     }
 

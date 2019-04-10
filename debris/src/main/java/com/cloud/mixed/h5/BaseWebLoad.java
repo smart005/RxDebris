@@ -674,10 +674,11 @@ public abstract class BaseWebLoad extends WebView {
             if (flag) {
                 activity.finish();
             } else {
-                if (this.canGoBack()) {
+                boolean canGoBack = this.canGoBack();
+                if (canGoBack) {
                     this.goBack();
                     if (finishOrGoBackListener != null) {
-                        finishOrGoBackListener.onFinishOrGoBack(this.canGoBack());
+                        finishOrGoBackListener.onFinishOrGoBack(canGoBack);
                     }
                 } else {
                     if (finishOrGoBackListener != null) {
@@ -761,6 +762,11 @@ public abstract class BaseWebLoad extends WebView {
      * @param data        data
      */
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_CANCELED) {
+            //页面被取消操作
+            //结束后需要重置上传，否则h5调用native回调只能执行一次
+            finishFileUpload();
+        }
         imageSelectDialog.onActivityResult(activity, requestCode, resultCode, data);
     }
 

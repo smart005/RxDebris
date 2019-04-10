@@ -63,7 +63,7 @@ public class ImagesActivity extends BaseFragmentActivity {
                 .setPriority(Priority.HIGH)
                 //true-将图片转为正圆再渲染;false-不作转换处理;
                 //对于网络图片若尺寸或文件大小太大会导致不能转成圆形
-                .setRound(true)
+                .setRound(false)
                 //先加载相对于原图的缩放比例(按宽高比)的缩略图
                 .setThumbnailScale(0.5f)
                 //具体说明看{@link ScaleType}

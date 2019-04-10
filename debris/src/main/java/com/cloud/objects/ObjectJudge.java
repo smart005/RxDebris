@@ -633,4 +633,44 @@ public class ObjectJudge {
     public static boolean isContainerJsonKey(String keyName, String jsonString) {
         return JsonUtils.containerKey(keyName, jsonString);
     }
+
+    /**
+     * 对应值是否在匹配列表中
+     *
+     * @param array      匹配列表
+     * @param matchValue 被匹配的值
+     * @return true-在匹配项中,反之不在;
+     */
+    public static boolean isMatch(int[] array, int matchValue) {
+        if (isNullOrEmpty(array)) {
+            return false;
+        }
+        //不用Arrays.asList处理
+        for (int i : array) {
+            if (i == matchValue) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 对应值是否在匹配列表中
+     *
+     * @param array      匹配列表
+     * @param matchValue 被匹配的值
+     * @return true-在匹配项中,反之不在;
+     */
+    public static boolean isMatch(String[] array, String matchValue) {
+        if (isNullOrEmpty(array)) {
+            return false;
+        }
+        //不用Arrays.asList处理
+        for (String s : array) {
+            if (TextUtils.equals(s, matchValue)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

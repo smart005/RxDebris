@@ -45,7 +45,7 @@ public class ImageSuffixCombination implements OnImageUrlCombinationListener {
         if (TextUtils.equals(imageRule, ImgRuleType.GeometricForWidth.getRule())) {
             //按宽度进行缩放
             imageRule = MessageFormat.format(imageRule, properties.getWidth());
-        } else if (TextUtils.equals(imageRule, ImgRuleType.TailoringWHRectangular.getRule())) {
+        } else if (TextUtils.equals(imageRule, ImgRuleType.TailoringForWH.getRule())) {
             //裁剪(矩形)
             imageRule = MessageFormat.format(imageRule, properties.getWidth(), properties.getHeight());
         }
