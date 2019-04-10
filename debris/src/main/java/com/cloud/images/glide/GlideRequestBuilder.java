@@ -12,7 +12,6 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.transition.Transition;
@@ -452,7 +451,7 @@ public class GlideRequestBuilder {
                 return;
             }
             RequestBuilder<T> builder = optimize.loadConfig(requestBuilder, loadType, callType);
-            builder.into(new ObjectTarget(properties, originalUrl, call));
+            //builder.into(new ObjectTarget(properties, originalUrl, call));
         }
     }
 
@@ -468,40 +467,40 @@ public class GlideRequestBuilder {
         this.into(optimize.getWidth(), optimize.getHeight(), GlideCallType.bitmap, new ObjectBuilderAction(call, LoadType.bitmap, GlideCallType.bitmap));
     }
 
-    private class ObjectTarget<T> extends CustomTarget<T> {
-
-        private ImageRuleProperties properties;
-        private GFileCallback<T> call;
-        private int renderCount = 0;
-        private String originalUrl = "";
-
-        public ObjectTarget(ImageRuleProperties properties, String originalUrl, GFileCallback<T> call) {
-            this.properties = properties;
-            this.originalUrl = originalUrl;
-            this.call = call;
-        }
-
-        @Override
-        public void onResourceReady(@NonNull T resource, @Nullable Transition<? super T> transition) {
-            if (call == null || renderCount > 0) {
-                return;
-            }
-            renderCount++;
-            //如果resource非File类型只作回调处理
-            if (!(resource instanceof File)) {
-                this.call.call(resource);
-                return;
-            }
-            File file = (File) resource;
-            //缓存图片信息
-            cacheImageInfoComponent.build(file, originalUrl, this.call);
-        }
-
-        @Override
-        public void onLoadCleared(@Nullable Drawable placeholder) {
-            //占位图加载
-        }
-    }
+//    private class ObjectTarget<T> extends CustomTarget<T> {
+//
+//        private ImageRuleProperties properties;
+//        private GFileCallback<T> call;
+//        private int renderCount = 0;
+//        private String originalUrl = "";
+//
+//        public ObjectTarget(ImageRuleProperties properties, String originalUrl, GFileCallback<T> call) {
+//            this.properties = properties;
+//            this.originalUrl = originalUrl;
+//            this.call = call;
+//        }
+//
+//        @Override
+//        public void onResourceReady(@NonNull T resource, @Nullable Transition<? super T> transition) {
+//            if (call == null || renderCount > 0) {
+//                return;
+//            }
+//            renderCount++;
+//            //如果resource非File类型只作回调处理
+//            if (!(resource instanceof File)) {
+//                this.call.call(resource);
+//                return;
+//            }
+//            File file = (File) resource;
+//            //缓存图片信息
+//            cacheImageInfoComponent.build(file, originalUrl, this.call);
+//        }
+//
+//        @Override
+//        public void onLoadCleared(@Nullable Drawable placeholder) {
+//            //占位图加载
+//        }
+//    }
 
     private ObservableComponent<File, Object> cacheImageInfoComponent = new ObservableComponent<File, Object>() {
         @Override

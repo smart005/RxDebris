@@ -12,6 +12,7 @@ import com.cloud.debrisTest.okhttp.OKHttpSimple;
 import com.cloud.debrisTest.web.H5Test;
 import com.cloud.debrisTest.web.NKitActivity;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.TimingManager;
 import com.cloud.objects.beans.MapEntryItem;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
@@ -62,17 +63,22 @@ public class MainActivity extends BaseActivity {
         String name = JsonUtils.getValue("name", jsonString);
         String accurateValue = JsonUtils.getAccurateValue("list2->name", jsonString);
 
-        String dirs = "[images->[forum->[video,temp],user,comments]]";
-        DirectoryUtils.getInstance().addDirectory("images")
-                .addChildDirectory("forum")
-                .addChildDirectory("video")
-                .addDirectory("temp")
-                .prevDirectory("user")
-                .addDirectory("comments")
-                .buildDirectories();
-        File video = DirectoryUtils.getInstance().getDirectory("video");
-        File directory = DirectoryUtils.getInstance().getDirectory("video");
-        String dirJson = DirectoryUtils.getInstance().toString();
+        TimingManager.executionTimeStatistics(new Runnable() {
+            @Override
+            public void run() {
+                String dirs = "[images->[forum->[video,temp],user,comments]]";
+                DirectoryUtils.getInstance().addDirectory("images")
+                        .addChildDirectory("forum")
+                        .addChildDirectory("video")
+                        .addDirectory("temp")
+                        .prevDirectory("user")
+                        .addDirectory("comments")
+                        .buildDirectories();
+                File video = DirectoryUtils.getInstance().getDirectory("video");
+                File directory = DirectoryUtils.getInstance().getDirectory("video");
+                String dirJson = DirectoryUtils.getInstance().toString();
+            }
+        });
     }
 
     public void OnNetFrameClick(View view) {

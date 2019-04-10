@@ -673,4 +673,22 @@ public class ObjectJudge {
         }
         return false;
     }
+
+    /**
+     * 判断数组中的字符串均不为空
+     *
+     * @param values 字符串数组
+     * @return true-所有元素均不为空,反之false;
+     */
+    public static boolean isBothNotEmpty(String... values) {
+        if (isNullOrEmpty(values)) {
+            return false;
+        }
+        for (String value : values) {
+            if (TextUtils.isEmpty(value)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

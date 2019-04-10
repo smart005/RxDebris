@@ -1,15 +1,9 @@
 package com.cloud.images.glide;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.text.TextUtils;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.signature.ObjectKey;
 import com.cloud.images.RxImage;
 import com.cloud.images.enums.CacheMode;
 import com.cloud.images.enums.GlideCallType;
@@ -379,96 +373,97 @@ class ImageBuildOptimize {
             RxImage.ImagesBuilder builder = RxImage.getInstance().getBuilder();
             this.placeholder = builder.getDefImage();
         }
-        /**
-         * 默认的策略是DiskCacheStrategy.AUTOMATIC
-         * DiskCacheStrategy有五个常量：
-         * DiskCacheStrategy.ALL 使用DATA和RESOURCE缓存远程数据，仅使用RESOURCE来缓存本地数据。
-         * DiskCacheStrategy.NONE 不使用磁盘缓存
-         * DiskCacheStrategy.DATA 在资源解码前就将原始数据写入磁盘缓存
-         * DiskCacheStrategy.RESOURCE 在资源解码后将数据写入磁盘缓存，即经过缩放等转换后的图片资源。
-         * DiskCacheStrategy.AUTOMATIC 根据原始图片数据和资源编码策略来自动选择磁盘缓存策略。
-         */
-        RequestBuilder builder = (RequestBuilder) requestBuilder.placeholder(this.placeholder)
-                .priority(priority)
-                //请求超时时间
-                .timeout(3000);
-        //缩略图相对于原图的比例
-        builder = builder.thumbnail(thumbnailScale);
-        if (loadType == LoadType.normal) {
-            builder = bindScaleType(builder);
-        } else if (loadType == LoadType.bitmap) {
-            builder = bindBitmapScaleType(builder);
-        } else if (loadType == LoadType.file) {
-            builder = bindFileScaleType(builder);
-        } else if (loadType == LoadType.gif) {
-            builder = bindGifScaleType(builder);
-        }
-        //散列key,适用于请求url不变但图片已更新情况
-        if (!TextUtils.isEmpty(hashKey)) {
-            //https://blog.csdn.net/iblade/article/details/79865354
-            builder = (RequestBuilder) builder.signature(new ObjectKey(hashKey));
-        }
-        //设置缓存模式
-        if (cacheMode == CacheMode.onlyMemory) {
-            //此时取消磁盘缓存
-            builder = (RequestBuilder) builder.diskCacheStrategy(DiskCacheStrategy.NONE);
-        } else {
-            DiskCacheStrategy strategy = (callType == GlideCallType.file ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL);
-            builder = (RequestBuilder) builder.diskCacheStrategy(strategy);
-        }
-        //如果图片宽高非空则重置图片大小
-        if (width > 0 && height > 0) {
-            builder = (RequestBuilder) builder.override(width, height);
-        }
-        if (isRound) {
-            //对于非gif图片,若图片太大会导致transform失败,因此先进行压缩;
-            //对于本地图片需要先压缩则处理
-            builder = (RequestBuilder) builder.transform(new GlideCircleTransform());
-        }
-        return builder;
+//        /**
+//         * 默认的策略是DiskCacheStrategy.AUTOMATIC
+//         * DiskCacheStrategy有五个常量：
+//         * DiskCacheStrategy.ALL 使用DATA和RESOURCE缓存远程数据，仅使用RESOURCE来缓存本地数据。
+//         * DiskCacheStrategy.NONE 不使用磁盘缓存
+//         * DiskCacheStrategy.DATA 在资源解码前就将原始数据写入磁盘缓存
+//         * DiskCacheStrategy.RESOURCE 在资源解码后将数据写入磁盘缓存，即经过缩放等转换后的图片资源。
+//         * DiskCacheStrategy.AUTOMATIC 根据原始图片数据和资源编码策略来自动选择磁盘缓存策略。
+//         */
+//        RequestBuilder builder = (RequestBuilder) requestBuilder.placeholder(this.placeholder)
+//                .priority(priority)
+//                //请求超时时间
+//                .timeout(3000);
+//        //缩略图相对于原图的比例
+//        builder = builder.thumbnail(thumbnailScale);
+//        if (loadType == LoadType.normal) {
+//            builder = bindScaleType(builder);
+//        } else if (loadType == LoadType.bitmap) {
+//            builder = bindBitmapScaleType(builder);
+//        } else if (loadType == LoadType.file) {
+//            builder = bindFileScaleType(builder);
+//        } else if (loadType == LoadType.gif) {
+//            builder = bindGifScaleType(builder);
+//        }
+//        //散列key,适用于请求url不变但图片已更新情况
+//        if (!TextUtils.isEmpty(hashKey)) {
+//            //https://blog.csdn.net/iblade/article/details/79865354
+//            builder = (RequestBuilder) builder.signature(new ObjectKey(hashKey));
+//        }
+//        //设置缓存模式
+//        if (cacheMode == CacheMode.onlyMemory) {
+//            //此时取消磁盘缓存
+//            builder = (RequestBuilder) builder.diskCacheStrategy(DiskCacheStrategy.NONE);
+//        } else {
+//            DiskCacheStrategy strategy = (callType == GlideCallType.file ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL);
+//            builder = (RequestBuilder) builder.diskCacheStrategy(strategy);
+//        }
+//        //如果图片宽高非空则重置图片大小
+//        if (width > 0 && height > 0) {
+//            builder = (RequestBuilder) builder.override(width, height);
+//        }
+//        if (isRound) {
+//            //对于非gif图片,若图片太大会导致transform失败,因此先进行压缩;
+//            //对于本地图片需要先压缩则处理
+//            builder = (RequestBuilder) builder.transform(new GlideCircleTransform());
+//        }
+//        return builder;
+        return null;
     }
 
-    private RequestBuilder<Bitmap> bindBitmapScaleType(RequestBuilder<Bitmap> builder) {
-        if (scaleType == ScaleType.centerCrop) {
-            return builder.centerCrop();
-        } else if (scaleType == ScaleType.centerInside) {
-            return builder.centerInside();
-        } else if (scaleType == ScaleType.fitCenter) {
-            return builder.fitCenter();
-        }
-        return builder.skipMemoryCache(true);
-    }
-
-    private RequestBuilder<Drawable> bindScaleType(RequestBuilder<Drawable> builder) {
-        if (scaleType == ScaleType.centerCrop) {
-            return builder.centerCrop();
-        } else if (scaleType == ScaleType.centerInside) {
-            return builder.centerInside();
-        } else if (scaleType == ScaleType.fitCenter) {
-            return builder.fitCenter();
-        }
-        return builder.skipMemoryCache(false);
-    }
-
-    private RequestBuilder<GifDrawable> bindGifScaleType(RequestBuilder<GifDrawable> builder) {
-        if (scaleType == ScaleType.centerCrop) {
-            return builder.centerCrop();
-        } else if (scaleType == ScaleType.centerInside) {
-            return builder.centerInside();
-        } else if (scaleType == ScaleType.fitCenter) {
-            return builder.fitCenter();
-        }
-        return builder.skipMemoryCache(false);
-    }
-
-    private RequestBuilder<File> bindFileScaleType(RequestBuilder<File> builder) {
-        if (scaleType == ScaleType.centerCrop) {
-            return builder.centerCrop();
-        } else if (scaleType == ScaleType.centerInside) {
-            return builder.centerInside();
-        } else if (scaleType == ScaleType.fitCenter) {
-            return builder.fitCenter();
-        }
-        return builder.skipMemoryCache(true);
-    }
+//    private RequestBuilder<Bitmap> bindBitmapScaleType(RequestBuilder<Bitmap> builder) {
+//        if (scaleType == ScaleType.centerCrop) {
+//            return builder.centerCrop();
+//        } else if (scaleType == ScaleType.centerInside) {
+//            return builder.centerInside();
+//        } else if (scaleType == ScaleType.fitCenter) {
+//            return builder.fitCenter();
+//        }
+//        return builder.skipMemoryCache(true);
+//    }
+//
+//    private RequestBuilder<Drawable> bindScaleType(RequestBuilder<Drawable> builder) {
+//        if (scaleType == ScaleType.centerCrop) {
+//            return builder.centerCrop();
+//        } else if (scaleType == ScaleType.centerInside) {
+//            return builder.centerInside();
+//        } else if (scaleType == ScaleType.fitCenter) {
+//            return builder.fitCenter();
+//        }
+//        return builder.skipMemoryCache(false);
+//    }
+//
+//    private RequestBuilder<GifDrawable> bindGifScaleType(RequestBuilder<GifDrawable> builder) {
+//        if (scaleType == ScaleType.centerCrop) {
+//            return builder.centerCrop();
+//        } else if (scaleType == ScaleType.centerInside) {
+//            return builder.centerInside();
+//        } else if (scaleType == ScaleType.fitCenter) {
+//            return builder.fitCenter();
+//        }
+//        return builder.skipMemoryCache(false);
+//    }
+//
+//    private RequestBuilder<File> bindFileScaleType(RequestBuilder<File> builder) {
+//        if (scaleType == ScaleType.centerCrop) {
+//            return builder.centerCrop();
+//        } else if (scaleType == ScaleType.centerInside) {
+//            return builder.centerInside();
+//        } else if (scaleType == ScaleType.fitCenter) {
+//            return builder.fitCenter();
+//        }
+//        return builder.skipMemoryCache(true);
+//    }
 }
