@@ -98,7 +98,7 @@ public class HandlerManager {
                 return;
             }
             Message message = handler.obtainMessage(48820, runnable);
-            message.obj = params;
+            message.obj = runnable;
             if (delayMillis <= 0) {
                 handler.sendMessage(message);
             } else {

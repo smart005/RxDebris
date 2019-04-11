@@ -132,6 +132,10 @@ public class RetrofitParams {
      * 则最终将转换为以targetFilePath()作为路径的文件;
      */
     private String targetFilePath = "";
+    /**
+     * 失败后是否启用重试
+     */
+    private boolean isFailureRetry = false;
 
     public RequestType getRequestType() {
         return requestType;
@@ -377,5 +381,13 @@ public class RetrofitParams {
 
     public void setTargetFilePath(String targetFilePath) {
         this.targetFilePath = targetFilePath;
+    }
+
+    public boolean isFailureRetry() {
+        return isFailureRetry;
+    }
+
+    public void setFailureRetry(boolean failureRetry) {
+        isFailureRetry = failureRetry;
     }
 }

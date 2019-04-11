@@ -3,6 +3,7 @@ package com.cloud.objects.config;
 import android.text.TextUtils;
 
 import com.cloud.cache.MemoryCache;
+import com.cloud.objects.events.OnLogPrinterListener;
 import com.cloud.objects.events.OnNetworkConnectListener;
 
 import java.lang.ref.SoftReference;
@@ -25,6 +26,8 @@ public class RxAndroid {
     private SoftReference<HashMap<String, Object>> softConfig = new SoftReference<HashMap<String, Object>>(softConfigMap);
     //网络状态事件监听
     private OnNetworkConnectListener onNetworkConnectListener = null;
+    //release状态下打印日志监听
+    private OnLogPrinterListener onLogPrinterListener = null;
 
     private RxAndroid() {
         //外部不能直接实例
@@ -283,6 +286,33 @@ public class RxAndroid {
     public RxAndroid setOnNetworkConnectListener(OnNetworkConnectListener listener) {
         this.onNetworkConnectListener = listener;
         MemoryCache.getInstance().setSoftCache("$_NetworkConnectListener", listener);
+        return this;
+    }
+
+    /**
+     * 获取在线状态下日志打印监听
+     *
+     * @return 日志监听类
+     */
+    public OnLogPrinterListener getOnLogPrinterListener() {
+        if (onLogPrinterListener == null) {
+            Object logPrinterListener = MemoryCache.getInstance().getSoftCache("$_LogPrinterListener");
+            if (logPrinterListener instanceof OnLogPrinterListener) {
+                onLogPrinterListener = (OnLogPrinterListener) logPrinterListener;
+            }
+        }
+        return onLogPrinterListener;
+    }
+
+    /**
+     * 设置在线状态下日志打印监听
+     *
+     * @param listener 日志监听类
+     * @return RxAndroid
+     */
+    public RxAndroid setOnLogPrinterListener(OnLogPrinterListener listener) {
+        this.onLogPrinterListener = listener;
+        MemoryCache.getInstance().setSoftCache("$_LogPrinterListener", listener);
         return this;
     }
 }

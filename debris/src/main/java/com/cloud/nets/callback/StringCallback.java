@@ -12,6 +12,8 @@ import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.nets.requests.NetErrorWith;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.TaskManager;
+import com.cloud.objects.beans.TaskEntry;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestState;
 import com.cloud.objects.events.Action2;
@@ -72,6 +74,8 @@ public abstract class StringCallback implements Callback {
     private Map<String, Object> params = null;
     //响应数据类型
     private ResponseDataType responseDataType = null;
+    //请求失败后是否重试
+    private boolean isFailureRetry = false;
 
     public boolean isCancelIntervalCacheCall() {
         return isCancelIntervalCacheCall;
@@ -107,6 +111,10 @@ public abstract class StringCallback implements Callback {
         this.responseDataType = responseDataType;
     }
 
+    public void setFailureRetry(boolean failureRetry) {
+        isFailureRetry = failureRetry;
+    }
+
     public StringCallback(Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType> successAction,
                           Action2<RequestState, ErrorType> completeAction,
                           Action2<String, String> printLogAction,
@@ -133,7 +141,15 @@ public abstract class StringCallback implements Callback {
         outputLogForDebug(call, e.getMessage());
         if (call.isCanceled()) {
             if (completeAction != null) {
+                //请求失败后是否重试
+                if (isFailureRetry) {
+                    if (failureAutoCall(call)) {
+                        return;
+                    }
+                }
+                //回调错误
                 completeAction.call(RequestState.Error, ErrorType.netRequest);
+                //结束回调
                 completeAction.call(RequestState.Completed, ErrorType.none);
             }
             return;
@@ -143,8 +159,9 @@ public abstract class StringCallback implements Callback {
                 message.contains("Failed to connect")) {
             //这里做dns处理
             if (completeAction != null) {
+                //错误回调
                 completeAction.call(RequestState.Error, ErrorType.netRequest);
-
+                //完成回调
                 completeAction.call(RequestState.Completed, ErrorType.none);
             }
             NetErrorWith netErrorWith = new NetErrorWith();
@@ -155,7 +172,10 @@ public abstract class StringCallback implements Callback {
             if (!failReConnect(call)) {
                 //抛出失败回调到全局监听
                 if (completeAction != null) {
+                    //错误回调
                     completeAction.call(RequestState.Error, ErrorType.netRequest);
+                    //完成回调
+                    completeAction.call(RequestState.Completed, ErrorType.none);
                 }
                 NetErrorWith netErrorWith = new NetErrorWith();
                 netErrorWith.call(requestMethodName, call, e, headers, params);
@@ -164,7 +184,15 @@ public abstract class StringCallback implements Callback {
         }
         //抛出失败回调到全局监听
         if (completeAction != null) {
+            //请求失败后是否重试
+            if (isFailureRetry) {
+                if (failureAutoCall(call)) {
+                    return;
+                }
+            }
+            //错误回调
             completeAction.call(RequestState.Error, ErrorType.netRequest);
+            //完成回调
             completeAction.call(RequestState.Completed, ErrorType.none);
         }
         NetErrorWith netErrorWith = new NetErrorWith();
@@ -203,6 +231,12 @@ public abstract class StringCallback implements Callback {
             }
             if (response == null || !response.isSuccessful()) {
                 if (completeAction != null) {
+                    //请求失败后是否重试
+                    if (isFailureRetry) {
+                        if (failureAutoCall(call)) {
+                            return;
+                        }
+                    }
                     completeAction.call(RequestState.Error, ErrorType.businessProcess);
                 }
                 //输出debug模式下日志
@@ -211,6 +245,12 @@ public abstract class StringCallback implements Callback {
                 ResponseBody body = response.body();
                 if (body == null) {
                     if (completeAction != null) {
+                        //请求失败后是否重试
+                        if (isFailureRetry) {
+                            if (failureAutoCall(call)) {
+                                return;
+                            }
+                        }
                         completeAction.call(RequestState.Error, ErrorType.businessProcess);
                     }
                     //输出debug模式下日志
@@ -260,6 +300,12 @@ public abstract class StringCallback implements Callback {
                 onSuccessCall(responseData);
             } else {
                 if (completeAction != null) {
+                    //请求失败后是否重试
+                    if (isFailureRetry) {
+                        if (failureAutoCall(call)) {
+                            return;
+                        }
+                    }
                     completeAction.call(RequestState.Error, ErrorType.businessProcess);
                 }
             }
@@ -308,6 +354,59 @@ public abstract class StringCallback implements Callback {
                     Logger.info("net", builders[0].toString());
                 }
             }, logbuilder);
+        }
+    }
+
+    //失败自动回调
+    private boolean failureAutoCall(Call call) {
+        //获取请求对象
+        Request request = call.request();
+        //获取请求url
+        HttpUrl httpUrl = request.url();
+        String url = httpUrl.toString();
+
+        TaskManager taskManager = TaskManager.getInstance();
+        TaskEntry<? extends Runnable> taskEntry = taskManager.getTask(url);
+        if (taskEntry == null) {
+            taskManager.addPerformTask(url, new TaskRunable(url, call.clone(), this, taskManager), 100, 5000);
+        } else {
+            if (taskEntry.getCount() > taskEntry.getPerformCounts()) {
+                taskManager.removeTask(url);
+                return false;
+            } else {
+                taskEntry.setCount(taskEntry.getCount() + 1);
+                taskEntry.setDelayTime(taskEntry.getDelayTime() + 5000);
+                taskManager.execute(taskEntry);
+            }
+        }
+        return true;
+    }
+
+    private class TaskRunable implements Runnable {
+
+        private String key;
+        private Call call;
+        private StringCallback callback;
+        private TaskManager taskManager;
+
+        public TaskRunable(String key, Call call, StringCallback callback, TaskManager taskManager) {
+            this.key = key;
+            this.call = call;
+            this.callback = callback;
+            this.taskManager = taskManager;
+        }
+
+        @Override
+        public void run() {
+            if (call == null || callback == null) {
+                if (taskManager != null) {
+                    taskManager.removeTask(key);
+                }
+                return;
+            }
+            OkHttpClient client = OkRx.getInstance().getOkHttpClient();
+            //创建新请求
+            client.newCall(call.request()).enqueue(callback);
         }
     }
 }

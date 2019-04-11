@@ -80,4 +80,13 @@ public @interface BYTES {
      * @return
      */
     boolean isValidCallResult() default true;
+
+    /**
+     * 请求失败时是否重试(默认false)
+     * 若为true则在{@link com.cloud.nets.properties.OkRxConfigParams}.retryCount之后，
+     * 每次请求后延时间增加5秒；最多重试100;
+     *
+     * @return true-请求失败时自动重新请求直到成功为止,false-只请求一次;
+     */
+    boolean isFailureRetry() default false;
 }

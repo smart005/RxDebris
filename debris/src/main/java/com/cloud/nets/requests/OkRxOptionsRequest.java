@@ -96,6 +96,8 @@ public class OkRxOptionsRequest extends BaseRequest {
         callback.setDataClass(retrofitParams.getDataClass());
         callback.setCallStatus(callStatus);
         callback.setResponseDataType(retrofitParams.getResponseDataType());
+        //请求失败后是否重试
+        callback.setFailureRetry(retrofitParams.isFailureRetry());
         //绑定cookies
         bindCookies(client, request.url());
         //请求网络
