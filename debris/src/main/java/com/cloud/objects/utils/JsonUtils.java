@@ -1,10 +1,11 @@
 package com.cloud.objects.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import com.cloud.objects.ObjectJudge;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -12,43 +13,80 @@ import java.util.regex.Pattern;
 
 public class JsonUtils {
 
+    /**
+     * 将对象转为json
+     *
+     * @param object 要转换的对象
+     * @return json
+     */
     public static String toStr(Object object) {
         if (object == null) {
             return "";
         }
-        return JSON.toJSONString(object);
+        Gson gson = new Gson();
+        return gson.toJson(object);
     }
 
-    public static String toStr(String key, Object object) {
-        JSONObject j = new JSONObject();
-        j.put(key, object);
-        return j.toJSONString();
-    }
-
-    public static <T> T parse(String json, Class<T> clazz) {
-        try {
-            return JSON.parseObject(json, clazz);
-        } catch (JSONException e) {
-            return newNull(clazz);
-        }
-    }
-
+    /**
+     * 解析json数据至对象
+     *
+     * @param json  json数据
+     * @param clazz 类对象
+     * @param <T>   泛型
+     * @return 对象
+     */
     public static <T> T parseT(String json, Class<T> clazz) {
         try {
-            return JSON.parseObject(json, clazz);
-        } catch (JSONException e) {
+            Gson gson = new Gson();
+            return gson.fromJson(json, clazz);
+        } catch (JsonSyntaxException e) {
             return newNull(clazz);
         }
     }
 
+    /**
+     * 解析json数据至对象
+     *
+     * @param json  json数据
+     * @param clazz 类对象
+     * @param <T>   泛型
+     * @return 对象
+     */
+    @Deprecated
+    public static <T> T fromJson(String json, Class<T> clazz) {
+        try {
+            Gson gson = new Gson();
+            return gson.fromJson(json, clazz);
+        } catch (JsonSyntaxException e) {
+            return null;
+        }
+    }
+
+    /**
+     * 将json数据解析成列表
+     *
+     * @param json  json数据
+     * @param clazz 类class对象
+     * @param <T>   泛型
+     * @return 集合
+     */
     public static <T> List<T> parseArray(String json, Class<T> clazz) {
         try {
-            return JSON.parseArray(json.trim(), clazz);
-        } catch (JSONException e) {
+            Gson gson = new Gson();
+            Type type = new JsonParameterizedType(clazz);
+            return gson.fromJson(json, type);
+        } catch (JsonSyntaxException e) {
             return new ArrayList<T>(0);
         }
     }
 
+    /**
+     * 根据class实例化对象
+     *
+     * @param clazz 类class对象
+     * @param <T>   泛型
+     * @return 对象
+     */
     public static <T> T newNull(Class<T> clazz) {
         try {
             T t = clazz.newInstance();
@@ -149,5 +187,28 @@ public class JsonUtils {
             }
         }
         return value;
+    }
+
+    private static class JsonParameterizedType implements ParameterizedType {
+        Class clazz;
+
+        public JsonParameterizedType(Class clz) {
+            clazz = clz;
+        }
+
+        @Override
+        public Type[] getActualTypeArguments() {
+            return new Type[]{clazz};
+        }
+
+        @Override
+        public Type getRawType() {
+            return List.class;
+        }
+
+        @Override
+        public Type getOwnerType() {
+            return null;
+        }
     }
 }

@@ -1,7 +1,5 @@
 package com.cloud.objects.utils;
 
-import com.alibaba.fastjson.JSON;
-
 import java.util.List;
 
 /**
@@ -24,8 +22,8 @@ public class MapperUtils {
      * @return
      */
     public static <T> T toEntity(Object object, Class<T> cls) {
-        JSON json = (JSON) JSON.toJSON(object);
-        return JSON.toJavaObject(json, cls);
+        String json = JsonUtils.toStr(object);
+        return JsonUtils.parseT(json, cls);
     }
 
     /**
@@ -37,7 +35,7 @@ public class MapperUtils {
      * @return
      */
     public static <T> List<T> toList(Object object, Class<T> cls) {
-        JSON json = (JSON) JSON.toJSON(object);
-        return JSON.parseArray(json.toString(), cls);
+        String json = JsonUtils.toStr(object);
+        return JsonUtils.parseArray(json, cls);
     }
 }

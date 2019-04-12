@@ -9,7 +9,6 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
 
-import com.alibaba.fastjson.JSONObject;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.logs.Logger;
 
@@ -24,7 +23,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -337,17 +335,6 @@ public class ConvertUtils {
     public static String toAmount(String format, double amount) {
         DecimalFormat df = new DecimalFormat(format);
         return df.format(amount);
-    }
-
-    public static <V> HashMap<String, V> toHashMap(JSONObject jsonObject) {
-        HashMap<String, V> map = new HashMap<String, V>();
-        if (jsonObject != null && !jsonObject.isEmpty()) {
-            for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                V value = (V) entry.getValue();
-                map.put(entry.getKey(), value);
-            }
-        }
-        return map;
     }
 
     /**
