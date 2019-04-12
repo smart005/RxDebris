@@ -18,10 +18,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UrlItemKey {
-    /**
-     * key名称
-     *
-     * return
-     */
-    String value() default "";
+
 }

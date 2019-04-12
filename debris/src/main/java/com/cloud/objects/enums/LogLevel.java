@@ -14,13 +14,25 @@ public enum LogLevel {
      */
     debug,
     /**
+     * 上报debug日志
+     */
+    reportDebug,
+    /**
      * 控制台信息类日志
      */
     info,
     /**
+     * 上报info日志
+     */
+    reportInfo,
+    /**
      * 版本相关日志
      */
     version,
+    /**
+     * 上报version日志
+     */
+    reportVersion,
     /**
      * json格式日志
      */
@@ -34,19 +46,15 @@ public enum LogLevel {
      */
     warn,
     /**
+     * 上报警告信息
+     */
+    reportWarn,
+    /**
      * 错误类日志(normal)
      */
     error,
     /**
-     * 微小错误日志
+     * 上报error日志
      */
-    errorTrivial,
-    /**
-     * 主要错误日志
-     */
-    errorMajor,
-    /**
-     * 致命错误日志
-     */
-    errorDeadly
+    reportError
 }

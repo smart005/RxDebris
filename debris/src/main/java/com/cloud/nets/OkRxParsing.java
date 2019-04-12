@@ -123,6 +123,7 @@ public class OkRxParsing {
                 retrofitParams.setRequestType(RequestType.POST);
                 retrofitParams.setValidCallResult(annotation.isValidCallResult());
                 retrofitParams.setFailureRetry(annotation.isFailureRetry());
+                retrofitParams.setAssociatedAssignment(annotation.isAssociatedAssignment());
                 bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
             } else if (declaredAnnotation.annotationType() == BYTES.class) {
                 BYTES annotation = method.getAnnotation(BYTES.class);
@@ -130,6 +131,7 @@ public class OkRxParsing {
                 retrofitParams.setRequestType(RequestType.BYTES);
                 retrofitParams.setValidCallResult(annotation.isValidCallResult());
                 retrofitParams.setFailureRetry(annotation.isFailureRetry());
+                retrofitParams.setAssociatedAssignment(annotation.isAssociatedAssignment());
                 bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
             } else if (declaredAnnotation.annotationType() == GET.class) {
                 GET annotation = method.getAnnotation(GET.class);
@@ -137,6 +139,7 @@ public class OkRxParsing {
                 retrofitParams.setRequestType(RequestType.GET);
                 retrofitParams.setValidCallResult(annotation.isValidCallResult());
                 retrofitParams.setFailureRetry(annotation.isFailureRetry());
+                retrofitParams.setAssociatedAssignment(annotation.isAssociatedAssignment());
                 bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), RequestContentType.None);
             } else if (declaredAnnotation.annotationType() == DELETE.class) {
                 DELETE annotation = method.getAnnotation(DELETE.class);
@@ -144,6 +147,7 @@ public class OkRxParsing {
                 retrofitParams.setRequestType(RequestType.DELETE);
                 retrofitParams.setValidCallResult(annotation.isValidCallResult());
                 retrofitParams.setFailureRetry(annotation.isFailureRetry());
+                retrofitParams.setAssociatedAssignment(annotation.isAssociatedAssignment());
                 bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
             } else if (declaredAnnotation.annotationType() == PUT.class) {
                 PUT annotation = method.getAnnotation(PUT.class);
@@ -151,6 +155,7 @@ public class OkRxParsing {
                 retrofitParams.setRequestType(RequestType.PUT);
                 retrofitParams.setValidCallResult(annotation.isValidCallResult());
                 retrofitParams.setFailureRetry(annotation.isFailureRetry());
+                retrofitParams.setAssociatedAssignment(annotation.isAssociatedAssignment());
                 bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
             } else if (declaredAnnotation.annotationType() == PATCH.class) {
                 PATCH annotation = method.getAnnotation(PATCH.class);
@@ -158,6 +163,7 @@ public class OkRxParsing {
                 retrofitParams.setRequestType(RequestType.PATCH);
                 retrofitParams.setValidCallResult(annotation.isValidCallResult());
                 retrofitParams.setFailureRetry(annotation.isFailureRetry());
+                retrofitParams.setAssociatedAssignment(annotation.isAssociatedAssignment());
                 bindRequestAnnontation(apiClass, method, retrofitParams, args, annotation.value(), annotation.isFullUrl(), annotation.values(), annotation.isPrintApiLog(), annotation.contentType());
             } else if (declaredAnnotation.annotationType() == Header.class) {
                 bindHeaderAnnontation(method, retrofitParams, args, isRemoveEmptyValueField);

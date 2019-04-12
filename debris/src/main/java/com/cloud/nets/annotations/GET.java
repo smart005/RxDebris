@@ -1,5 +1,7 @@
 package com.cloud.nets.annotations;
 
+import com.cloud.objects.annotations.OriginalField;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -80,4 +82,11 @@ public @interface GET {
      * @return true-请求失败时自动重新请求直到成功为止,false-只请求一次;
      */
     boolean isFailureRetry() default false;
+
+    /**
+     * 是否关联赋值
+     *
+     * @return true-解析后对带有{@link OriginalField}注解的属性进行关联赋值,false-不处理此类逻辑;
+     */
+    boolean isAssociatedAssignment() default false;
 }

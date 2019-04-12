@@ -112,6 +112,20 @@ public class Logger {
     }
 
     /**
+     * 上报debug日志
+     *
+     * @param tag     当前日志标签；示例[全局标签-tag]
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportDebug(String tag, @NonNull String message, @Nullable Object... args) {
+        if (logIntercept(tag, LogLevel.reportDebug, message, null, args)) {
+            return;
+        }
+        printer(tag).d(message, args);
+    }
+
+    /**
      * debug日志
      *
      * @param message 消息
@@ -119,6 +133,19 @@ public class Logger {
      */
     public static void debug(@NonNull String message, @Nullable Object... args) {
         if (logIntercept("", LogLevel.debug, message, null, args)) {
+            return;
+        }
+        debug("", message, args);
+    }
+
+    /**
+     * 上报debug日志
+     *
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportDebug(@NonNull String message, @Nullable Object... args) {
+        if (logIntercept("", LogLevel.reportDebug, message, null, args)) {
             return;
         }
         debug("", message, args);
@@ -140,6 +167,21 @@ public class Logger {
     }
 
     /**
+     * 上报错误日志
+     *
+     * @param tag       当前日志标签；示例[全局标签-tag]
+     * @param throwable 栈信息
+     * @param message   消息
+     * @param args      基础数据结构对象
+     */
+    public static void reportError(String tag, @NonNull Throwable throwable, @NonNull String message, @Nullable Object... args) {
+        if (logIntercept(tag, LogLevel.reportError, message, throwable, args)) {
+            return;
+        }
+        printer(tag).e(throwable, message, args);
+    }
+
+    /**
      * 错误日志
      *
      * @param throwable 栈信息
@@ -151,12 +193,32 @@ public class Logger {
     }
 
     /**
+     * 上报错误日志
+     *
+     * @param throwable 栈信息
+     * @param message   消息
+     * @param args      基础数据结构对象
+     */
+    public static void reportError(@NonNull Throwable throwable, @NonNull String message, @Nullable Object... args) {
+        reportError("", throwable, message, args);
+    }
+
+    /**
      * 错误日志
      *
      * @param throwable 栈信息
      */
     public static void error(@NonNull Throwable throwable) {
         error(throwable, "");
+    }
+
+    /**
+     * 上报错误日志
+     *
+     * @param throwable 栈信息
+     */
+    public static void reportError(@NonNull Throwable throwable) {
+        reportError(throwable, "");
     }
 
     /**
@@ -171,6 +233,17 @@ public class Logger {
     }
 
     /**
+     * 上报错误日志
+     *
+     * @param tag     当前日志标签；示例[全局标签-tag]
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportError(String tag, @NonNull String message, @Nullable Object... args) {
+        reportError(tag, null, message, args);
+    }
+
+    /**
      * 错误日志
      *
      * @param message 消息
@@ -178,6 +251,16 @@ public class Logger {
      */
     public static void error(@NonNull String message, @Nullable Object... args) {
         error("", message, args);
+    }
+
+    /**
+     * 上报错误日志
+     *
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportError(@NonNull String message, @Nullable Object... args) {
+        reportError("", message, args);
     }
 
     /**
@@ -195,6 +278,20 @@ public class Logger {
     }
 
     /**
+     * 上报信息日志
+     *
+     * @param tag     当前日志标签；示例[全局标签-tag]
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportInfo(String tag, String message, Object... args) {
+        if (logIntercept(tag, LogLevel.reportInfo, message, null, args)) {
+            return;
+        }
+        printer(tag).i(message, args);
+    }
+
+    /**
      * 信息日志
      *
      * @param message 消息
@@ -202,6 +299,16 @@ public class Logger {
      */
     public static void info(@NonNull String message, @Nullable Object... args) {
         info("", message, args);
+    }
+
+    /**
+     * 上报信息日志
+     *
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportInfo(@NonNull String message, @Nullable Object... args) {
+        reportInfo("", message, args);
     }
 
     /**
@@ -219,6 +326,20 @@ public class Logger {
     }
 
     /**
+     * 上报版本记录日志
+     *
+     * @param tag     当前日志标签；示例[全局标签-tag]
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportVersion(String tag, @NonNull String message, @Nullable Object... args) {
+        if (logIntercept(tag, LogLevel.reportVersion, message, null, args)) {
+            return;
+        }
+        printer(tag).v(message, args);
+    }
+
+    /**
      * 版本记录日志
      *
      * @param message 消息
@@ -226,6 +347,16 @@ public class Logger {
      */
     public static void version(@NonNull String message, @Nullable Object... args) {
         version("", message, args);
+    }
+
+    /**
+     * 上报版本记录日志
+     *
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportVersion(@NonNull String message, @Nullable Object... args) {
+        reportVersion("", message, args);
     }
 
     /**
@@ -243,6 +374,20 @@ public class Logger {
     }
 
     /**
+     * 上报警告类日志
+     *
+     * @param tag     当前日志标签；示例[全局标签-tag]
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportWarn(String tag, @NonNull String message, @Nullable Object... args) {
+        if (logIntercept(tag, LogLevel.reportWarn, message, null, args)) {
+            return;
+        }
+        printer(tag).w(message, args);
+    }
+
+    /**
      * 警告类日志
      *
      * @param message 消息
@@ -250,6 +395,16 @@ public class Logger {
      */
     public static void warn(@NonNull String message, @Nullable Object... args) {
         warn("", message, args);
+    }
+
+    /**
+     * 上报警告类日志
+     *
+     * @param message 消息
+     * @param args    基础数据结构对象
+     */
+    public static void reportWarn(@NonNull String message, @Nullable Object... args) {
+        reportWarn("", message, args);
     }
 
     /**

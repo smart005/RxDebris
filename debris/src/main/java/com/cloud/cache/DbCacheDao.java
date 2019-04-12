@@ -1,5 +1,7 @@
 package com.cloud.cache;
 
+import android.database.sqlite.SQLiteDatabase;
+
 import com.cloud.cache.daos.CacheDataItemDao;
 import com.cloud.cache.daos.DaoMaster;
 import com.cloud.cache.daos.DaoSession;
@@ -24,7 +26,8 @@ public class DbCacheDao {
         if (helper == null) {
             return null;
         }
-        DaoMaster daoMaster = new DaoMaster(helper.getWritableDatabase());
+        SQLiteDatabase database = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(database);
         return daoMaster.newSession();
     }
 

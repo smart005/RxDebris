@@ -36,6 +36,7 @@ import com.cloud.objects.events.Action3;
 import com.cloud.objects.events.Action4;
 import com.cloud.objects.events.Action6;
 import com.cloud.objects.events.Func2;
+import com.cloud.objects.injection.FieldInjections;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
@@ -223,7 +224,8 @@ public class BaseService {
                                  DataType dataType,
                                  long requestStartTime,
                                  long requestTotalTime,
-                                 final Action0 completedAction) {
+                                 final Action0 completedAction,
+                                 boolean isAssociatedAssignment) {
         if (successAction == null) {
             finishedRequest(baseService, completedAction);
         } else {
@@ -253,6 +255,11 @@ public class BaseService {
                         }
                     } else {
                         responseParsing.setData(jsonListener.onBeanParsingJson(responseData.getResponse(), dataClass, isCollectionDataType));
+                    }
+                    //绑定注入字段值
+                    if (isAssociatedAssignment) {
+                        FieldInjections fieldInjections = new FieldInjections();
+                        fieldInjections.injection(responseParsing.getData(), responseData.getResponse());
                     }
                 }
                 //如果空则回调错误
@@ -359,7 +366,7 @@ public class BaseService {
                 new Action3<ResponseData, String, HashMap<String, ReqQueueItem>>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, DataType.NetData, 0, 0, completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, DataType.NetData, 0, 0, completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 new Action2<RequestState, ErrorType>() {
@@ -417,7 +424,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -460,7 +467,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -502,7 +509,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -545,7 +552,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -588,7 +595,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -631,7 +638,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -674,7 +681,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),
@@ -716,7 +723,7 @@ public class BaseService {
                 new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
                     @Override
                     public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction);
+                        successDealWith(successAction, errorAction, dataClass, retrofitParams.isCollectionDataType(), baseService, responseData, apiRequestKey, reqQueueItemHashMap, dataType, retrofitParams.getCurrentRequestTime(), retrofitParams.getRequestTotalTime(), completedAction, retrofitParams.isAssociatedAssignment());
                     }
                 },
                 apiHeadersCall == null ? "" : apiHeadersCall.unique(),

@@ -136,6 +136,10 @@ public class RetrofitParams {
      * 失败后是否启用重试
      */
     private boolean isFailureRetry = false;
+    /**
+     * 关联赋值
+     */
+    private boolean isAssociatedAssignment = false;
 
     public RequestType getRequestType() {
         return requestType;
@@ -389,5 +393,13 @@ public class RetrofitParams {
 
     public void setFailureRetry(boolean failureRetry) {
         isFailureRetry = failureRetry;
+    }
+
+    public boolean isAssociatedAssignment() {
+        return isAssociatedAssignment;
+    }
+
+    public void setAssociatedAssignment(boolean associatedAssignment) {
+        isAssociatedAssignment = associatedAssignment;
     }
 }
