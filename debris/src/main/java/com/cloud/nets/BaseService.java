@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
-import com.cloud.cache.RxStacks;
 import com.cloud.nets.annotations.ApiCheckAnnotation;
 import com.cloud.nets.annotations.ApiHeadersCall;
 import com.cloud.nets.annotations.ReturnCodeFilter;
@@ -133,7 +132,7 @@ public class BaseService {
                     returnCodeFilter = validParam.getReturnCodeFilter();
                 }
                 //记录当前线程调用的堆栈信息
-                RxStacks.setStack(validParam.getInvokeMethodName(), new Exception());
+                RequestStacksInfo.setStack(validParam.getInvokeMethodName(), new Exception());
                 retrofitParams.setInvokeMethodName(validParam.getInvokeMethodName());
                 //请求api
                 reqQueueItemHashMap.put(apiRequestKey, new ReqQueueItem());
@@ -957,7 +956,7 @@ public class BaseService {
                 return;
             }
             //记录之前main线程堆栈信息
-            RxStacks.setStack(validParam.getInvokeMethodName(), exception);
+            RequestStacksInfo.setStack(validParam.getInvokeMethodName(), exception);
             apiRequest(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction);
         }
     }

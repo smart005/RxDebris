@@ -7,20 +7,14 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
-import android.text.TextUtils;
 
 import com.cloud.objects.ObjectManager;
-import com.cloud.objects.beans.DeviceInfo;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -50,78 +44,6 @@ public class AppInfoUtils {
             }
         }
         return processName;
-    }
-
-    /**
-     * 获取CPU序列号
-     * <p>
-     * return CPU序列号(16位) 读取失败为""
-     */
-    public static String getCPUSerial() {
-        String str = "", strCPU = "", cpuAddress = "";
-        try {
-            // 读取CPU信息
-            Process pp = Runtime.getRuntime().exec("cat/proc/cpuinfo");
-            InputStreamReader ir = new InputStreamReader(pp.getInputStream());
-            LineNumberReader input = new LineNumberReader(ir);
-            // 查找CPU序列号
-            for (int i = 1; i < 100; i++) {
-                str = input.readLine();
-                if (str != null) {
-                    // 查找到序列号所在行
-                    if (str.indexOf("Serial") > -1) {
-                        strCPU = str.substring(str.indexOf(":") + 1,
-                                str.length());
-                        cpuAddress = strCPU.trim();
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        } catch (IOException ex) {
-            // get cpu serial error
-        }
-        return cpuAddress;
-    }
-
-    /**
-     * 获取设备信息
-     *
-     * @param context
-     * @return
-     */
-    public static DeviceInfo getDeviceInfo(Context context) {
-        DeviceInfo dvinfo = new DeviceInfo();
-        WifiManager wifi = (WifiManager) context
-                .getSystemService(Context.WIFI_SERVICE);
-        dvinfo.setMac(wifi.getConnectionInfo().getMacAddress());
-        dvinfo.setImei(getCPUSerial());
-        if (TextUtils.isEmpty(dvinfo.getImei())) {
-            dvinfo.setImei(Build.SERIAL);
-        }
-        if (TextUtils.isEmpty(dvinfo.getImei())) {
-            dvinfo.setImei(dvinfo.getMac());
-        }
-        if (TextUtils.isEmpty(dvinfo.getImei())) {
-            dvinfo.setImei(android.provider.Settings.Secure.getString(
-                    context.getContentResolver(),
-                    android.provider.Settings.Secure.ANDROID_ID));
-        }
-        if (TextUtils.isEmpty(dvinfo.getImei())) {
-            dvinfo.setImei(dvinfo.getImsi());
-        }
-        if (TextUtils.isEmpty(dvinfo.getImei())) {
-            dvinfo.setImei(dvinfo.getSimSerialNumber());
-        }
-        dvinfo.setModel(Build.MODEL);
-        dvinfo.setRelease(Build.VERSION.RELEASE);
-        dvinfo.setSerialNumber(Build.SERIAL);
-        if (TextUtils.isEmpty(dvinfo.getImei())) {
-            dvinfo.setImei(dvinfo.getSerialNumber());
-        }
-        dvinfo.setSdkVersion(Build.VERSION.SDK_INT);
-        return dvinfo;
     }
 
     /**

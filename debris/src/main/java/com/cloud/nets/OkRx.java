@@ -56,6 +56,8 @@ public class OkRx {
     private Set<String> failDomainList = new HashSet<String>();
     //头部cookies监听
     private OnHeaderCookiesListener onHeaderCookiesListener = null;
+    //跟踪日志是否带固件配置信息(默认false)
+    private boolean isHasFirmwareConfigInformationForTraceLog = false;
 
     public static OkRx getInstance() {
         if (okRx == null) {
@@ -308,7 +310,7 @@ public class OkRx {
      */
     public OnAuthListener getOnAuthListener() {
         if (onAuthListener == null) {
-            Object authListener = MemoryCache.getInstance().getSoftCache("NetAuthListener");
+            Object authListener = MemoryCache.getInstance().getSoftCache("$_NetAuthListener");
             if (authListener instanceof OnAuthListener) {
                 onAuthListener = (OnAuthListener) authListener;
             }
@@ -323,7 +325,7 @@ public class OkRx {
      */
     public OkRx setOnAuthListener(OnAuthListener listener) {
         this.onAuthListener = listener;
-        MemoryCache.getInstance().setSoftCache("NetAuthListener", listener);
+        MemoryCache.getInstance().setSoftCache("$_NetAuthListener", listener);
         return this;
     }
 
@@ -382,5 +384,30 @@ public class OkRx {
      */
     public void clearCache(String cacheKey) {
         RxCache.clearContainerKey(cacheKey);
+    }
+
+    /**
+     * 设置跟踪日志是否带固件配置信息(默认false)
+     *
+     * @param isHasFirmwareConfigInformationForTraceLog true-对于请求失败跟踪日志带有设备相关配置信息;反之则不带;
+     * @return OkRx
+     */
+    public OkRx setHasFirmwareConfigInformationForTraceLog(boolean isHasFirmwareConfigInformationForTraceLog) {
+        this.isHasFirmwareConfigInformationForTraceLog = isHasFirmwareConfigInformationForTraceLog;
+        MemoryCache.getInstance().setSoftCache("$_HasFirmwareConfigInformationForTraceLog", isHasFirmwareConfigInformationForTraceLog);
+        return this;
+    }
+
+    /**
+     * 获取跟踪日志是否带固件配置信息(默认false)
+     *
+     * @return true-对于请求失败跟踪日志带有设备相关配置信息;反之则不带;
+     */
+    public boolean isHasFirmwareConfigInformationForTraceLog() {
+        if (!this.isHasFirmwareConfigInformationForTraceLog) {
+            Object o = MemoryCache.getInstance().getSoftCache("$_HasFirmwareConfigInformationForTraceLog");
+            this.isHasFirmwareConfigInformationForTraceLog = ObjectJudge.isTrue(o);
+        }
+        return this.isHasFirmwareConfigInformationForTraceLog;
     }
 }

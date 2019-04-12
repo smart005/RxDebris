@@ -1,12 +1,15 @@
-package com.cloud.cache;
+package com.cloud.nets;
 
 import android.text.TextUtils;
 
+import com.cloud.cache.DbCacheDao;
+import com.cloud.cache.StackInfoItem;
 import com.cloud.cache.daos.StackInfoItemDao;
 import com.cloud.cache.greens.DBManager;
 import com.cloud.nets.beans.RequestErrorInfo;
 import com.cloud.objects.logs.CrashUtils;
 import com.cloud.objects.utils.ConvertUtils;
+import com.cloud.objects.utils.DeviceUtils;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.JsonUtils;
 
@@ -27,7 +30,7 @@ import java.util.TreeSet;
  * Modifier:
  * ModifyContent:
  */
-public class RxStacks {
+public class RequestStacksInfo {
 
     /**
      * 获取堆栈信息缓存key
@@ -45,7 +48,7 @@ public class RxStacks {
      * @param isEffectiveDb 是否有效db
      */
     private static String setCommonInfo(boolean isEffectiveDb) {
-        Map<String, Object> deviceInfo = CrashUtils.getProgramDeviceInfo();
+        Map<String, Object> deviceInfo = DeviceUtils.getProgramDeviceInfo();
         String join = ConvertUtils.toJoin(deviceInfo, "\n");
         if (isEffectiveDb) {
             StackInfoItem stackInfoItem = new StackInfoItem();
@@ -209,7 +212,9 @@ public class RxStacks {
             return errorInfo;
         }
         TreeSet<String> stacks = errorInfo.getStacks();
-        stacks.add(getCommonInfo());
+        if (OkRx.getInstance().isHasFirmwareConfigInformationForTraceLog()) {
+            stacks.add(getCommonInfo());
+        }
         //prefixKey-这里指调用方法的方法名
         stacks.add(prefixKey);
         DbCacheDao dbCacheDao = new DbCacheDao();

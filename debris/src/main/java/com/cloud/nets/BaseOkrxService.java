@@ -2,7 +2,6 @@ package com.cloud.nets;
 
 import android.text.TextUtils;
 
-import com.cloud.cache.RxStacks;
 import com.cloud.nets.annotations.APIUrlInterfaceClass;
 import com.cloud.nets.beans.RetrofitParams;
 import com.cloud.nets.filters.ReturnCodeCheck;
@@ -138,7 +137,7 @@ public class BaseOkrxService extends BaseService {
                 }
                 //记录当前堆栈信息
                 Exception exception = (Exception) params[6];
-                RxStacks.setStack(validParam.getInvokeMethodName(), exception);
+                RequestStacksInfo.setStack(validParam.getInvokeMethodName(), exception);
                 return validParam;
             }
 

@@ -78,6 +78,8 @@ public class TestApplication extends BaseApplication {
         //.bindDaos();
         //网络框架初始化
         OkRx.getInstance().initialize(this)
+                //true-对于请求失败跟踪日志带有设备相关配置信息;反之则不带;
+                .setHasFirmwareConfigInformationForTraceLog(false)
                 .setOnConfigParamsListener(new OnConfigParamsListener() {
                     @Override
                     public OkRxConfigParams onConfigParamsCall(OkRxConfigParams configParams) {

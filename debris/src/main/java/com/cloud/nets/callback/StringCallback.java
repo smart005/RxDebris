@@ -2,7 +2,7 @@ package com.cloud.nets.callback;
 
 import android.text.TextUtils;
 
-import com.cloud.cache.RxStacks;
+import com.cloud.nets.RequestStacksInfo;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.enums.CallStatus;
@@ -272,7 +272,7 @@ public abstract class StringCallback implements Callback {
                 completeAction.call(RequestState.Completed, ErrorType.none);
             }
             //清除本次请求堆栈信息
-            RxStacks.clearBusStacks(requestMethodName);
+            RequestStacksInfo.clearBusStacks(requestMethodName);
         }
     }
 

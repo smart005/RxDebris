@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import com.cloud.objects.enums.DateFormatEnum;
 import com.cloud.objects.storage.StorageUtils;
 import com.cloud.objects.utils.DateUtils;
+import com.cloud.objects.utils.DeviceUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,7 +38,7 @@ class CrashFileTask {
                 return;
             }
             Properties mDeviceCrashInfo = new Properties();
-            mDeviceCrashInfo.putAll(CrashUtils.getProgramDeviceInfo());
+            mDeviceCrashInfo.putAll(DeviceUtils.getProgramDeviceInfo());
             saveToFile(crashInfo, mDeviceCrashInfo);
         } catch (Exception e) {
             // write log error

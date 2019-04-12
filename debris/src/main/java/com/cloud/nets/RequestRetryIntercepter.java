@@ -1,6 +1,5 @@
 package com.cloud.nets;
 
-import com.cloud.cache.RxStacks;
 import com.cloud.objects.ObjectJudge;
 
 import java.io.IOException;
@@ -43,14 +42,14 @@ public class RequestRetryIntercepter implements Interceptor {
             request = builder.build();
         }
         Object tag = request.tag();
-        RxStacks.setRequestChainInfo(tag, request.method(), request.url().toString(), headers);
+        RequestStacksInfo.setRequestChainInfo(tag, request.method(), request.url().toString(), headers);
         Response response = chain.proceed(request);
         while (!response.isSuccessful() && retryNum < maxRetry) {
             retryNum++;
             response = chain.proceed(request);
         }
         //记录状态和协议
-        RxStacks.setRequestStateProtocol(tag, response.code(), response.protocol().toString());
+        RequestStacksInfo.setRequestStateProtocol(tag, response.code(), response.protocol().toString());
         return response;
     }
 }

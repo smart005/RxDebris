@@ -1,6 +1,6 @@
 package com.cloud.nets.requests;
 
-import com.cloud.cache.RxStacks;
+import com.cloud.nets.RequestStacksInfo;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.RequestErrorInfo;
 import com.cloud.nets.events.OnRequestErrorListener;
@@ -23,15 +23,15 @@ public class NetErrorWith {
     public void call(String requestMethodName, Call call, IOException e, Map<String, String> headers, Map<String, Object> params) {
         OnRequestErrorListener errorListener = OkRx.getInstance().getOnRequestErrorListener();
         if (errorListener == null) {
-            RxStacks.clearBusStacks(requestMethodName);
+            RequestStacksInfo.clearBusStacks(requestMethodName);
             return;
         }
         //保存当前堆栈
-        RxStacks.setStack(requestMethodName, e);
+        RequestStacksInfo.setStack(requestMethodName, e);
         //保存基本信息
-        RxStacks.setRequestInfo(requestMethodName, headers, params, e.getMessage());
+        RequestStacksInfo.setRequestInfo(requestMethodName, headers, params, e.getMessage());
         //获取跟踪信息
-        RequestErrorInfo errorInfos = RxStacks.getRequestErrorInfos(requestMethodName);
+        RequestErrorInfo errorInfos = RequestStacksInfo.getRequestErrorInfos(requestMethodName);
         errorListener.onFailure(errorInfos);
     }
 }
