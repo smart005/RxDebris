@@ -12,6 +12,7 @@ import com.cloud.images.events.OnImageDirectoryListener;
 import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.RequestErrorInfo;
+import com.cloud.nets.events.OnAuthListener;
 import com.cloud.nets.events.OnBeanParsingJsonListener;
 import com.cloud.nets.events.OnConfigParamsListener;
 import com.cloud.nets.events.OnGlobalReuqestHeaderListener;
@@ -117,9 +118,14 @@ public class TestApplication extends BaseApplication {
                     @Override
                     public Map<String, String> onCookiesCall() {
                         Map<String, String> cookies = new HashMap<String, String>();
-//                        cookies.put("hhwl_cookies", "108社区");
                         cookies.put("TC108Client", "ui=434060");
                         return cookies;
+                    }
+                })
+                .setOnAuthListener(new OnAuthListener() {
+                    @Override
+                    public void onLoginCall(String requestMethodName) {
+                        //当前接口请求需要用户登录时但未登录,会回调到这里统一处理;
                     }
                 })
                 .build();

@@ -338,8 +338,8 @@ public abstract class StringCallback implements Callback {
             String url = httpUrl.toString();
             StringBuilder logbuilder = new StringBuilder();
             logbuilder.append(String.format("url:%s\n", url));
-            logbuilder.append(String.format("header:%s\n", JsonUtils.toStr(headers)));
-            logbuilder.append(String.format("params:%s\n", JsonUtils.toStr(params)));
+            logbuilder.append(String.format("header:%s\n", JsonUtils.toJson(headers)));
+            logbuilder.append(String.format("params:%s\n", JsonUtils.toJson(params)));
             if (TextUtils.isEmpty(responseData.getResponse())) {
                 logbuilder.append(String.format("message:%s", message));
             } else {

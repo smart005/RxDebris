@@ -199,7 +199,7 @@ public class BaseRequest {
                     String filename = String.format("%s.%s", GlobalUtils.getGuidNoConnect(), suffix);
                     requestBody.addFormDataPart(entry.getKey(), filename, body);
                 } else if ((entry.getValue() instanceof List) || (entry.getValue() instanceof Map)) {
-                    requestBody.addFormDataPart(entry.getKey(), JsonUtils.toStr(entry.getValue()));
+                    requestBody.addFormDataPart(entry.getKey(), JsonUtils.toJson(entry.getValue()));
                 } else {
                     requestBody.addFormDataPart(entry.getKey(), entry.getValue() + "");
                 }
@@ -218,7 +218,7 @@ public class BaseRequest {
             if (!ObjectJudge.isNullOrEmpty(params)) {
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
                     if (entry.getValue() instanceof List) {
-                        bodyBuilder.add(entry.getKey(), JsonUtils.toStr(entry.getValue()));
+                        bodyBuilder.add(entry.getKey(), JsonUtils.toJson(entry.getValue()));
                     } else {
                         if (entry.getValue() instanceof Map) {
                             Map<String, Object> childMap = (Map<String, Object>) entry.getValue();
@@ -238,7 +238,7 @@ public class BaseRequest {
                 return RequestBody.create(MediaType.parse("application/json; charset=utf-8"), "{}");
             }
             if (ObjectJudge.isNullOrEmpty(ignoreParamKeys)) {
-                String body = JsonUtils.toStr(params);
+                String body = JsonUtils.toJson(params);
                 return RequestBody.create(MediaType.parse("application/json; charset=utf-8"), body);
             } else {
                 //如果包含有忽略参数将忽略其它参数提交
@@ -252,7 +252,7 @@ public class BaseRequest {
                     for (String paramKey : ignoreParamKeys) {
                         map.put(paramKey, params.get(paramKey));
                     }
-                    String value = JsonUtils.toStr(map);
+                    String value = JsonUtils.toJson(map);
                     return RequestBody.create(MediaType.parse("application/json; charset=utf-8"), value);
                 }
             }

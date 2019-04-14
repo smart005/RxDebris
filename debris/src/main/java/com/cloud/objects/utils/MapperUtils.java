@@ -22,7 +22,7 @@ public class MapperUtils {
      * @return
      */
     public static <T> T toEntity(Object object, Class<T> cls) {
-        String json = JsonUtils.toStr(object);
+        String json = JsonUtils.toJson(object);
         return JsonUtils.parseT(json, cls);
     }
 
@@ -35,7 +35,7 @@ public class MapperUtils {
      * @return
      */
     public static <T> List<T> toList(Object object, Class<T> cls) {
-        String json = JsonUtils.toStr(object);
+        String json = JsonUtils.toJson(object);
         return JsonUtils.parseArray(json, cls);
     }
 }

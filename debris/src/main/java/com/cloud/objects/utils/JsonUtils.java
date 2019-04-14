@@ -1,10 +1,11 @@
 package com.cloud.objects.utils;
 
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.injection.FieldInjections;
+import com.cloud.objects.injection.GsonParameterizedType;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +20,35 @@ public class JsonUtils {
      * @param object 要转换的对象
      * @return json
      */
-    public static String toStr(Object object) {
+    public static String toJson(Object object) {
         if (object == null) {
             return "";
         }
         Gson gson = new Gson();
         return gson.toJson(object);
+    }
+
+    /**
+     * 解析json数据至对象
+     *
+     * @param json                   json数据
+     * @param clazz                  类对象
+     * @param isAssociatedAssignment true-解析后对带有{@link com.cloud.objects.annotations.OriginalField}注解的属性进行关联赋值,false-不处理此类逻辑;
+     * @param <T>                    泛型
+     * @return 对象
+     */
+    public static <T> T parseT(String json, Class<T> clazz, boolean isAssociatedAssignment) {
+        try {
+            Gson gson = new Gson();
+            T t = gson.fromJson(json, clazz);
+            if (isAssociatedAssignment) {
+                FieldInjections fieldInjections = new FieldInjections();
+                fieldInjections.injection(t, json);
+            }
+            return t;
+        } catch (JsonSyntaxException e) {
+            return newNull(clazz);
+        }
     }
 
     /**
@@ -36,12 +60,7 @@ public class JsonUtils {
      * @return 对象
      */
     public static <T> T parseT(String json, Class<T> clazz) {
-        try {
-            Gson gson = new Gson();
-            return gson.fromJson(json, clazz);
-        } catch (JsonSyntaxException e) {
-            return newNull(clazz);
-        }
+        return parseT(json, clazz, false);
     }
 
     /**
@@ -73,7 +92,7 @@ public class JsonUtils {
     public static <T> List<T> parseArray(String json, Class<T> clazz) {
         try {
             Gson gson = new Gson();
-            Type type = new JsonParameterizedType(clazz);
+            Type type = new GsonParameterizedType(clazz);
             return gson.fromJson(json, type);
         } catch (JsonSyntaxException e) {
             return new ArrayList<T>(0);
@@ -187,28 +206,5 @@ public class JsonUtils {
             }
         }
         return value;
-    }
-
-    private static class JsonParameterizedType implements ParameterizedType {
-        Class clazz;
-
-        public JsonParameterizedType(Class clz) {
-            clazz = clz;
-        }
-
-        @Override
-        public Type[] getActualTypeArguments() {
-            return new Type[]{clazz};
-        }
-
-        @Override
-        public Type getRawType() {
-            return List.class;
-        }
-
-        @Override
-        public Type getOwnerType() {
-            return null;
-        }
     }
 }

@@ -219,7 +219,7 @@ public class EBus {
                         if (binders.containsKey(processName)) {
                             IEBusAidl busAidl = binders.get(processName);
                             if (busAidl != null) {
-                                busAidl.receiveEBusData(receiveKey, JsonUtils.toStr(event));
+                                busAidl.receiveEBusData(receiveKey, JsonUtils.toJson(event));
                             }
                         }
                     }
@@ -238,7 +238,7 @@ public class EBus {
         private void subscriSend(int index, List<IEBusAidl> busAidls) throws RemoteException {
             if (index < busAidls.size()) {
                 IEBusAidl aidl = busAidls.get(index);
-                aidl.receiveEBusData(receiveKey, JsonUtils.toStr(event));
+                aidl.receiveEBusData(receiveKey, JsonUtils.toJson(event));
                 index++;
                 subscriSend(index, busAidls);
             }

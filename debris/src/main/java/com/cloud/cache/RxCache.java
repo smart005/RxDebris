@@ -504,7 +504,7 @@ public class RxCache {
         if (data == null) {
             return;
         }
-        String value = JsonUtils.toStr(data);
+        String value = JsonUtils.toJson(data);
         setBaseCacheData(cacheKey, value, saveTime, timeUnit);
     }
 

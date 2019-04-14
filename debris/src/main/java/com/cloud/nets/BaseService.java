@@ -836,7 +836,7 @@ public class BaseService {
             } else if (value instanceof Boolean) {
                 params2.put(key, value);
             } else if (value instanceof List) {
-                params2.put(key, JsonUtils.toStr(value));
+                params2.put(key, JsonUtils.toJson(value));
             }
         }
         return params2;

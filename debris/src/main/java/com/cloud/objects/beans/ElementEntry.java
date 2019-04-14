@@ -255,7 +255,7 @@ public class ElementEntry {
         LinkedList<EleItem> items = new LinkedList<EleItem>();
         ElementEntry rootElements = getRootElements();
         getChildElements(items, rootElements);
-        return JsonUtils.toStr(items);
+        return JsonUtils.toJson(items);
     }
 
     private void getChildElements(LinkedList<EleItem> items, ElementEntry entry) {

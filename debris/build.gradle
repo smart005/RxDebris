@@ -56,6 +56,8 @@ dependencies {
     //noinspection GradleDependency,GradleCompatible
     api 'com.android.support:appcompat-v7:27.0.2'
     api 'com.google.code.gson:gson:2.8.5'
+    //changshuo project use for aliyun log
+    api 'com.alibaba:fastjson:1.2.46'
     api 'io.reactivex.rxjava2:rxjava:2.2.7'
     api 'io.reactivex.rxjava2:rxandroid:2.0.1'
     api 'org.greenrobot:greendao:3.2.2'
@@ -66,8 +68,8 @@ dependencies {
     //腾讯浏览器
     api 'com.cloud:tbs:4.3.0'
     //glide
-    api 'com.github.bumptech.glide:glide:4.6.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    api 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 }
 
 apply from: 'nexus-push.gradle'

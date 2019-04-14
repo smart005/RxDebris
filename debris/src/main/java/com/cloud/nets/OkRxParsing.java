@@ -244,7 +244,7 @@ public class OkRxParsing {
             }
         } else {
             //对象或集合类型,此时除了开始判断null之外不可能为空字符串;
-            String json = JsonUtils.toStr(arg);
+            String json = JsonUtils.toJson(arg);
             params.put(paramKey, json);
         }
     }
@@ -368,7 +368,7 @@ public class OkRxParsing {
         }
         //若未指定参数个数与params相同,则将所有参数以[{}|[],{}]的json形式作为本次提交的数据
         if (notSpecifiedParamKeys.size() == params.size()) {
-            String json = JsonUtils.toStr(params.values());
+            String json = JsonUtils.toJson(params.values());
             params.clear();
             params.put(OkRxKeys.ignoreParamContainsKey + 1, json);
         }

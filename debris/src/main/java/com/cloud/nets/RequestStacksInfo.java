@@ -134,7 +134,7 @@ public class RequestStacksInfo {
         stackInfoItem.setKey(key);
         stackInfoItem.setRequestType(requestType);
         stackInfoItem.setUrl(url);
-        stackInfoItem.setHeaders(JsonUtils.toStr(commonHeaders));
+        stackInfoItem.setHeaders(JsonUtils.toJson(commonHeaders));
 
         DbCacheDao dbCacheDao = new DbCacheDao();
         StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
@@ -160,8 +160,8 @@ public class RequestStacksInfo {
         String key = getStackKey(String.format("%s_REQUEST_INFO", prefixkey));
         StackInfoItem stackInfoItem = new StackInfoItem();
         stackInfoItem.setKey(key);
-        stackInfoItem.setHeaders(JsonUtils.toStr(headers));
-        stackInfoItem.setParams(JsonUtils.toStr(params));
+        stackInfoItem.setHeaders(JsonUtils.toJson(headers));
+        stackInfoItem.setParams(JsonUtils.toJson(params));
         stackInfoItem.setMessage(message);
 
         DbCacheDao dbCacheDao = new DbCacheDao();

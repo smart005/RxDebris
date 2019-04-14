@@ -341,52 +341,54 @@ public abstract class BaseWebLoad extends WebView {
             //扩展浏览器上传文件
             //3.0++版本
             public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-                if (BaseWebLoad.this.uploadMsg == null) {
-                    BaseWebLoad.this.uploadMsg = uploadMsg;
-                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                    if (selectedListener == null) {
-                        return;
-                    }
-                    selectedListener.openFileChooserImpl(uploadMsg, null);
+                if (BaseWebLoad.this.uploadMsg != null) {
+                    finishFileUpload();
                 }
+                BaseWebLoad.this.uploadMsg = uploadMsg;
+                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                if (selectedListener == null) {
+                    finishFileUpload();
+                    return;
+                }
+                selectedListener.openFileChooserImpl(uploadMsg, null);
             }
 
             //3.0--版本
             public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-                if (BaseWebLoad.this.uploadMsg == null) {
-                    BaseWebLoad.this.uploadMsg = uploadMsg;
-                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                    if (selectedListener == null) {
-                        return;
-                    }
-                    selectedListener.openFileChooserImpl(uploadMsg, null);
+                if (BaseWebLoad.this.uploadMsg != null) {
+                    finishFileUpload();
                 }
+                BaseWebLoad.this.uploadMsg = uploadMsg;
+                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                if (selectedListener == null) {
+                    finishFileUpload();
+                    return;
+                }
+                selectedListener.openFileChooserImpl(uploadMsg, null);
             }
 
             public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType, String capture) {
-                if (BaseWebLoad.this.sdk5UploadMsg != null) {
+                if (BaseWebLoad.this.sdk5UploadMsg != null || BaseWebLoad.this.uploadMsg != null) {
+                    finishFileUpload();
+                }
+                BaseWebLoad.this.uploadMsg = valueCallback;
+                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                if (selectedListener == null) {
+                    //监听null时结束上传
+                    finishFileUpload();
                     return;
                 }
-                if (BaseWebLoad.this.uploadMsg == null) {
-                    BaseWebLoad.this.uploadMsg = valueCallback;
-                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                    if (selectedListener == null) {
-                        return;
-                    }
-                    selectedListener.openFileChooserImpl(valueCallback, null);
-                }
+                selectedListener.openFileChooserImpl(valueCallback, null);
             }
 
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> uploadMsg, WebChromeClient.FileChooserParams fileChooserParams) {
-                if (BaseWebLoad.this.uploadMsg != null) {
-                    return true;
+                if (BaseWebLoad.this.uploadMsg != null || BaseWebLoad.this.sdk5UploadMsg != null) {
+                    finishFileUpload();
                 }
-                if (BaseWebLoad.this.sdk5UploadMsg == null) {
-                    BaseWebLoad.this.sdk5UploadMsg = uploadMsg;
-                    OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                    if (selectedListener != null) {
-                        selectedListener.openFileChooserImpl(null, uploadMsg);
-                    }
+                BaseWebLoad.this.sdk5UploadMsg = uploadMsg;
+                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+                if (selectedListener != null) {
+                    selectedListener.openFileChooserImpl(null, uploadMsg);
                 }
                 return true;
             }
@@ -406,6 +408,7 @@ public abstract class BaseWebLoad extends WebView {
      */
     public void uploadFiles(List<SelectImageProperties> selectImageProperties) {
         if (ObjectJudge.isNullOrEmpty(selectImageProperties)) {
+            finishFileUpload();
             return;
         }
         try {
@@ -425,10 +428,11 @@ public abstract class BaseWebLoad extends WebView {
                 //回调function $_cl_upload_native_file(path){}js方法方便h5处理
                 this.loadUrl("javascript:window.cl_upload_native_file('" + properties.getImagePath() + "');");
             }
-            //结束后需要重置上传，否则h5调用native回调只能执行一次
-            finishFileUpload();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            //结束后需要重置上传，否则h5调用native回调只能执行一次
+            finishFileUpload();
         }
     }
 

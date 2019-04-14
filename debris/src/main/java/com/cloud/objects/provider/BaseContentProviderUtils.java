@@ -79,7 +79,7 @@ public class BaseContentProviderUtils {
             }
             Uri uri = Uri.parse(MessageFormat.format("content://{0}/{1}", hostPackageName, action));
             ContentValues values = new ContentValues();
-            values.put(QUERY_CONDITION_DATA_KEY, JsonUtils.toStr(whereItems));
+            values.put(QUERY_CONDITION_DATA_KEY, JsonUtils.toJson(whereItems));
             Uri data = contentResolver.insert(uri, values);
             String result = String.valueOf(data);
             return result;

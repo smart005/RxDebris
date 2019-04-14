@@ -80,7 +80,7 @@ public class OkRxUploadByteRequest {
                         continue;
                     }
                     if (entry.getValue() instanceof List) {
-                        requestBody.addFormDataPart(entry.getKey(), JsonUtils.toStr(entry.getValue()));
+                        requestBody.addFormDataPart(entry.getKey(), JsonUtils.toJson(entry.getValue()));
                     } else {
                         requestBody.addFormDataPart(entry.getKey(), String.valueOf(entry.getValue()));
                     }

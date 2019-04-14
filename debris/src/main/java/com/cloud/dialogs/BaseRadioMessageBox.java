@@ -152,7 +152,7 @@ public class BaseRadioMessageBox extends BaseMessageBox {
                     }
                     radiorb.setTag(RADIO_TAG_KEY, "radiotag");
                     radiorb.setText(item.getCommandName());
-                    radiorb.setTag(JsonUtils.toStr(item));
+                    radiorb.setTag(JsonUtils.toJson(item));
                     radiorb.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {

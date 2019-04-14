@@ -259,7 +259,7 @@ public class OkRx {
      */
     public OkRx setHeaderParams(HashMap<String, String> headers) {
         this.headers = headers;
-        String json = ObjectJudge.isNullOrEmpty(headers) ? "" : JsonUtils.toStr(headers);
+        String json = ObjectJudge.isNullOrEmpty(headers) ? "" : JsonUtils.toJson(headers);
         RxCache.setCacheData("NetRequestHttpHeaderParams", json);
         return this;
     }
