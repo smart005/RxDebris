@@ -28,9 +28,9 @@ api 'com.cloud:debris:1.0.83'
 文档
 --
 ##### 网络框架文档始终与最新版本库保持一致，若具体写法与文档不一致请升级到最新版本.
-* [我是1.x文档，OkRx网络文档目录请点击这里](docs/okrx-net-document-dir.md)
-* [我是1.x文档，OkRx网络文档目录请点击这里](docs/okrx-net-document-dir.md)
-* [我是1.x文档，OkRx网络文档目录请点击这里](docs/okrx-net-document-dir.md)
+* [我是1.x文档，OkRx网络文档目录请点击这里](/dev_documents/docs/okrx-net-document-dir.md)
+* [我是1.x文档，OkRx网络文档目录请点击这里](/dev_documents/docs/okrx-net-document-dir.md)
+* [我是1.x文档，OkRx网络文档目录请点击这里](/dev_documents/docs/okrx-net-document-dir.md)
 
 Licenses
 --
