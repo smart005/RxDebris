@@ -68,8 +68,8 @@ dependencies {
     //腾讯浏览器
     api 'com.cloud:tbs:4.3.0'
     //glide
-    api 'com.github.bumptech.glide:glide:4.6.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    api 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 }
 
 apply from: 'nexus-push.gradle'
