@@ -166,7 +166,8 @@ public abstract class BaseWebLoad extends WebView {
                 settings.setJavaScriptCanOpenWindowsAutomatically(true);
                 //是否可访问本地文件，默认值true
                 settings.setAllowFileAccess(true);
-                settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
+                //NARROW_COLUMNS
+                settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
                 settings.setSupportZoom(true);
                 settings.setBuiltInZoomControls(true);
                 settings.setUseWideViewPort(true);
@@ -650,7 +651,7 @@ public abstract class BaseWebLoad extends WebView {
                 sb.append("<html>");
                 sb.append("<head>");
                 sb.append("<meta charset=\"utf-8\"/>");
-                sb.append("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no\"/>");
+                sb.append("<meta name=\"viewport\" content=\"width=320,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no\"/>");
                 sb.append("<style type=\"text/css\">body,div,ul,li {padding: 0;margin: 0;display: block;}");
                 sb.append("img{max-width:100% !important; width:auto; height:auto;}</style>");
                 sb.append("</head>");
@@ -658,7 +659,18 @@ public abstract class BaseWebLoad extends WebView {
                 sb.append(htmlContent);
                 sb.append("</body>");
                 sb.append("</html>");
-                sb.append("<script type=\"text/javascript\">window.onload = function() {var imgs = document.getElementsByTagName('img');for(var i in imgs) {imgs[i].style.maxWidth = '100% !important';}};</script>");
+                sb.append("<script type=\"text/javascript\">");
+                sb.append("window.onload = function() {");
+                sb.append("var maxwidth = document.body.clientWidth;");
+                sb.append("var imgs = document.getElementsByTagName('img');");
+                sb.append("for(var i in imgs) {");
+                sb.append("imgs[i].style.width = maxwidth+'px';");
+                sb.append("}");
+                sb.append("var sections = document.getElementsByTagName('section');");
+                sb.append("for(var i in sections) {");
+                sb.append("sections[i].style.width = maxwidth+'px';");
+                sb.append("}");
+                sb.append("document.body.style.width=maxwidth;};</script>");
                 super.loadDataWithBaseURL("", sb.toString(), "text/html", "utf-8", "");
             }
         } catch (Exception e) {

@@ -69,10 +69,6 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
         if (ex == null) {
             return true;
         }
-        String msg = ex.getLocalizedMessage();
-        if (msg == null) {
-            return false;
-        }
         //debug状态下才记录日志
         RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
         if (builder.isDebug() || builder.isBetaVersion()) {

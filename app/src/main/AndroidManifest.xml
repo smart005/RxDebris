@@ -36,6 +36,9 @@
         <activity
             android:name=".web.NKitActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".web.LayoutAdapterActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

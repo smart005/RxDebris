@@ -10,6 +10,7 @@ import com.cloud.debrisTest.databinding.MainViewBinding;
 import com.cloud.debrisTest.images.ImagesActivity;
 import com.cloud.debrisTest.okhttp.OKHttpSimple;
 import com.cloud.debrisTest.web.H5Test;
+import com.cloud.debrisTest.web.LayoutAdapterActivity;
 import com.cloud.debrisTest.web.NKitActivity;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.TimingManager;
@@ -100,5 +101,9 @@ public class MainActivity extends BaseActivity {
 
     public void OnImageFunctionClick(View view) {
         RedirectUtils.startActivity(this, ImagesActivity.class);
+    }
+
+    public void OnWebviewLayoutAdapterClick(View view) {
+        RedirectUtils.startActivity(this, LayoutAdapterActivity.class);
     }
 }

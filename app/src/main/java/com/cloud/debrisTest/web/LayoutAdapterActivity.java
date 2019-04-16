@@ -1,59 +1,66 @@
 package com.cloud.debrisTest.web;
 
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.net.Uri;
+import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
-import com.cloud.components.themes.OnThemeViewKeyListener;
-import com.cloud.debris.BaseFragmentActivity;
+import com.cloud.debris.BaseActivity;
 import com.cloud.debrisTest.R;
-import com.cloud.debrisTest.databinding.H5ViewBinding;
-import com.cloud.mixed.RxMixed;
-import com.cloud.mixed.h5.JavascriptInterface;
-import com.cloud.mixed.h5.OnH5ImageSelectedListener;
-import com.cloud.mixed.h5.OnH5WebViewListener;
-import com.tencent.smtt.sdk.ValueCallback;
-import com.tencent.smtt.sdk.WebView;
-
-import java.util.List;
+import com.cloud.debrisTest.databinding.LayoutAdapterViewBinding;
+import com.cloud.objects.logs.Logger;
 
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
- * CreateTime:2019/3/5
- * Description:
+ * CreateTime:2019/4/15
+ * Description:布局适配
  * Modifier:
  * ModifyContent:
  */
-public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListener, OnH5ImageSelectedListener {
+public class LayoutAdapterActivity extends BaseActivity {
 
-    private H5ViewBinding binding;
+    private LayoutAdapterViewBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        RxMixed.getInstance().registerH5Listener(calls);
+        binding = DataBindingUtil.setContentView(this, R.layout.layout_adapter_view);
+        //bindSetting();
 
-        binding = DataBindingUtil.setContentView(this, R.layout.h5_view);
+        //支持javascript
+        binding.webWv.getSettings().setJavaScriptEnabled(true);
+        // 设置可以支持缩放
+        binding.webWv.getSettings().setSupportZoom(true);
+        // 设置出现缩放工具
+        binding.webWv.getSettings().setBuiltInZoomControls(true);
+        //扩大比例的缩放
+        binding.webWv.getSettings().setUseWideViewPort(true);
+        //自适应屏幕
+        binding.webWv.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        binding.webWv.getSettings().setLoadWithOverviewMode(true);
+        binding.webWv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 
-        RxMixed.getInstance().setOnH5ImageSelectedListener(this);
-        binding.headTtv.setOnThemeViewKeyListener(this);
 
-        android.webkit.WebView webView = new android.webkit.WebView(this);
-        webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        //如果不设置WebViewClient，请求会跳转系统浏览器
+        binding.webWv.setWebViewClient(new WebViewClient() {
 
-        binding.h5Test.bindInterface("mibao");
-//        binding.h5Test.load("http://www.slcore.com:201");
-//        binding.h5Test.load("http://www.slcore.com:201/upload_image.html");
-//    binding.h5Test.load("http://192.168.188.129:8020/worklinks/post_detail.html");
-//        File file = new File("/storage/emulated/0/Android/data/com.changshuo.ui/.bundle/bundledest/article_detail/index.html");
-//        String content = StorageUtils.readContent(file);
-//        binding.h5Test.loadData(content);
-//        binding.h5Test.load("http://sz.108sq.org:920/shuo/detail/267401");
-        String content = "<p>\n" +
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                //handler.cancel(); 默认的处理方式，WebView变成空白页
+//                        //接受证书
+                handler.proceed();
+                //handleMessage(Message msg); 其他处理
+            }
+
+        });
+        //binding.webWv.loadUrl("http://sz.108sq.org:920/shuo/detail/267401");
+        bindSetting();
+        String content = "<div style=\"overflow: auto;-webkit-overflow-scrolling:touch;width:100%;height:100%;\"><p>\n" +
                 "\n" +
                 "</p>\n" +
                 "<p style=\"text-align:center\">\n" +
@@ -128,7 +135,7 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
                 "<section style=\"max-width: 100%; color: rgb(51, 51, 51); border: 0px none;\" helvetica=\"\" pingfang=\"\" hiragino=\"\" sans=\"\" microsoft=\"\" yahei=\"\" letter-spacing:=\"\" line-height:=\"\" text-align:=\"\" white-space:=\"\" widows:=\"\" class=\"_135editor\" section=\"\" p=\"\" a=\"\" data-tcsay=\"img\" span=\"\" strong=\"\" img=\"\" src=\"http://photoshow.108sq.org:814/user/2019/0409/094247255171061433001758553.gif\" sq-imgid=\"150251\" alt=\"\" width=\"auto\" height=\"auto\" height:=\"\">\n" +
                 "   <section style=\"max-width: 100%; min-height: 40px;\">\n" +
                 "       <section style=\"margin-right: auto; margin-left: auto; max-width: 100%; width: 100%;\">\n" +
-                "           <table width=\"100%\">\n" +
+                "           <table width=\"666\">\n" +
                 "               <tbody style=\"max-width: 100%;\">\n" +
                 "                   <tr style=\"max-width: 100%;\" class=\"firstRow\">\n" +
                 "                       <td colspan=\"1\" rowspan=\"1\" style=\"padding-top: 0px; padding-bottom: 0px; padding-left: 10px; border-width: 0px 0px 0px 3px; border-top-style: none; border-right-style: none; border-bottom-style: none; border-color: #3e3e3e #3e3e3e #3e3e3e #ebedf4; max-width: 100%; border-radius: 0px;\">\n" +
@@ -366,93 +373,139 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
                 "<p>\n" +
                 "\n" +
                 "\n" +
-                "</p>\n" +
+                "</p></div>\n" +
                 "\n";
-        binding.h5Test.loadData(content);
+        loadData(content);
+//        binding.webWv.loadData(Html.fromHtml(content).toString(), "text/html", "UTF-8");
     }
 
-    @Override
-    public void onKeyListener(View view, int id) {
-        if (id == R.id.return_itv) {
-            binding.h5Test.getSelectText();
+    public void loadData(String htmlContent) {
+        try {
+            if (htmlContent.contains("<html>")) {
+                binding.webWv.loadDataWithBaseURL("", htmlContent, "text/html", "utf-8", "");
+            } else {
+                StringBuffer sb = new StringBuffer();
+                sb.append("<!DOCTYPE html>");
+                sb.append("<html>");
+                sb.append("<head>");
+                sb.append("<meta charset=\"utf-8\"/>");
+                sb.append("<meta content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;\" name=\"viewport\" />");
+                sb.append("<style type=\"text/css\">");
+                sb.append("body,div,ul,li,p,section,table,a {padding: 0;margin: 0;display: block;}");
+                sb.append("img{max-width:100% !important; width:auto; height:auto;}");
+//                sb.append("p,section,div,table");
+//                sb.append("p,section,div,table,body,span {\n" +
+//                        "" +
+//                        //"    overflow : hidden;\n" +
+//                        "    text-overflow: ellipsis;\n" +
+//                        "-o-text-overflow: ellipsis;" +
+//                        "    display: -webkit-box;\n" +
+//                        "    -webkit-line-clamp: *;\n" +
+//                        "    -webkit-box-orient: vertical;\n" +
+//                        "word-wrap:break-word;" +
+//                        "word-break:break-all;" +
+//                        "}");
+                sb.append("</style></head>");
+                sb.append("<body>");
+                sb.append(htmlContent);
+                sb.append("</body>");
+                sb.append("</html>");
+                sb.append("<script type=\"text/javascript\">\n" +
+                        "\twindow.onload = function() {\n" +
+                        "\t\t$_init_element_max_size();\n" +
+                        "\t};\n" +
+                        "\t$_init_element_max_size();\n" +
+                        "\n" +
+                        "\tfunction $_init_element_max_size() {\n" +
+                        "\t\t//取客户端最大宽度\n" +
+                        "\t\tvar maxwidth = document.body.clientWidth;\n" +
+                        "\t\t//需要处理元素集\n" +
+                        "\t\tvar elements = ['body', 'section', 'img', 'p', 'table', 'div'];\n" +
+                        "\t\t//此元素下偏移量减10\n" +
+                        "\t\tvar offsets = ['section'];\n" +
+                        "\t\tfor(var i in elements) {\n" +
+                        "\t\t\tif(!elements[i] || elements[i] == 'undefined') {\n" +
+                        "\t\t\t\tcontinue;\n" +
+                        "\t\t\t}\n" +
+                        "\t\t\tvar elementList = document.getElementsByTagName(elements[i]);\n" +
+                        "\t\t\tfor(var e in elementList) {\n" +
+                        "\t\t\t\tif(!elementList[e].style || elementList[e].style == 'undefined') {\n" +
+                        "\t\t\t\t\tcontinue;\n" +
+                        "\t\t\t\t}\n" +
+                        "\t\t\t\tif(offsets.indexOf(elements[i]) >= 0) {\n" +
+                        "\t\t\t\t\telementList[e].style.maxWidth = (maxwidth - 10) + \"px\";\n" +
+                        "\t\t\t\t} else {\n" +
+                        "\t\t\t\t\telementList[e].style.maxWidth = maxwidth + \"px\";\n" +
+                        "\t\t\t\t}\n" +
+                        "\t\t\t}\n" +
+                        "\t\t}\n" +
+                        "\t}\n" +
+                        "</script>");
+//                sb.append("<script type=\"text/javascript\">");
+//                sb.append("alert('4');window.onload = function() {alert(1);");
+//                sb.append("var maxwidth = document.body.clientWidth;");
+//                sb.append("var imgs = document.getElementsByTagName('img');");
+//                sb.append("for(var i in imgs) {");
+//                sb.append("imgs[i].style.width = maxwidth+'px';");
+//                sb.append("} alert(maxwidth); ");
+//                sb.append("var sections = document.getElementsByTagName('section');");
+//                sb.append("for(var i in sections) {");
+//                sb.append("sections[i].style.width = maxwidth+'px';");
+//                sb.append("}");
+//                sb.append(" var ps = document.getElementsByTagName('p');");
+//                sb.append("for(var i in ps) {");
+//                sb.append("ps[i].style.width = maxwidth+'px';");
+//                sb.append("}");
+//                sb.append(" var divs = document.getElementsByTagName('div');");
+//                sb.append("for(var i in divs) {");
+//                sb.append("divs[i].style.width = maxwidth+'px';");
+//                sb.append("}");
+//                sb.append(" var tables = document.getElementsByTagName('table');");
+//                sb.append("for(var i in tables) {alert(tables[i]);");
+//                sb.append("tables[i].style.width = maxwidth+'px';");
+//                sb.append("}");
+//                sb.append("document.getElementsByTagName('p');");
+//                sb.append("};</script>");
+                binding.webWv.loadDataWithBaseURL("", sb.toString(), "text/html", "utf-8", "");
+            }
+        } catch (Exception e) {
+            Logger.error(e);
         }
     }
 
-    public OnH5WebViewListener calls = new OnH5WebViewListener() {
-        @Override
-        public void onTitle(String title) {
-            binding.headTtv.setTitle(title);
+    private void bindSetting() {
+        WebSettings settings = binding.webWv.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        //是否可访问本地文件，默认值true
+        settings.setAllowFileAccess(true);
+        //NARROW_COLUMNS
+        if (Build.VERSION.SDK_INT >= 19) {
+            settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
         }
-
-        @android.webkit.JavascriptInterface
-        @JavascriptInterface
-        public String getToken() {
-
-            //这里获取native登录的令牌
-            return null;
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setUseWideViewPort(true);
+        settings.setSupportMultipleWindows(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setAppCacheEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setGeolocationEnabled(true);
+        settings.setAppCacheMaxSize(Long.MAX_VALUE);
+        settings.setPluginState(WebSettings.PluginState.ON_DEMAND);
+        settings.setDefaultZoom(WebSettings.ZoomDensity.MEDIUM);
+        settings.setDefaultTextEncodingName("utf-8");
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        //是否可访问Content Provider的资源，默认值true
+        settings.setAllowContentAccess(true);
+        //允许webview对文件的操作
+        if (Build.VERSION.SDK_INT >= 16) {
+            settings.setAllowUniversalAccessFromFileURLs(true);
+            settings.setAllowFileAccessFromFileURLs(true);
         }
-
-        @Override
-        public void addUserAgent(List<String> userAgents) {
-            super.addUserAgent(userAgents);
-        }
-
-        @Override
-        public boolean onUrlListener(String url) {
-            return super.onUrlListener(url);
-        }
-
-        @Override
-        public void onLoaded(WebView view, boolean success, int errorCode, String description, String url) {
-            super.onLoaded(view, success, errorCode, description, url);
-        }
-
-        @Override
-        public void getAPIMethod(String extras) {
-            super.getAPIMethod(extras);
-        }
-
-        @Override
-        public void getSelectText(String selectText) {
-            super.getSelectText(selectText);
-        }
-
-        @Override
-        public void nativeSchemeCall(String scheme) {
-            super.nativeSchemeCall(scheme);
-        }
-
-        @Override
-        public void download(String url, String name) {
-            super.download(url, name);
-        }
-
-        @Override
-        public void onCallTel(String tel) {
-            super.onCallTel(tel);
-        }
-
-        @Override
-        public void onCallSms(String sms) {
-            super.onCallSms(sms);
-        }
-
-        @Override
-        public boolean onJsConfirm(WebView view, String url, String message) {
-            return super.onJsConfirm(view, url, message);
-        }
-    };
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        //h5选择图片后回调并上传
-        binding.h5Test.onActivityResult(getActivity(), requestCode, resultCode, data);
-    }
-
-    @Override
-    public void openFileChooserImpl(ValueCallback<Uri> uploadMsg, ValueCallback<Uri[]> sdk5UploadMsg) {
-        //h5选择图片回调
-        binding.h5Test.selectLocalImages(getActivity());
+        settings.setBlockNetworkImage(false);
+        settings.setLoadsImagesAutomatically(true);
+        settings.setSavePassword(true);
     }
 }
