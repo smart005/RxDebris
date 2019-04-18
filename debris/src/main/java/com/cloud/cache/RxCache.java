@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.cloud.cache.daos.CacheDataItemDao;
 import com.cloud.cache.greens.DBManager;
+import com.cloud.cache.greens.DbHelper;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.ConvertUtils;
@@ -196,6 +197,8 @@ public class RxCache {
             QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
             QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like("%" + containsKey + "%"));
             List<CacheDataItem> list = where.list();
+            //关闭本次连接
+            DbHelper.getHelper().close();
             if (ObjectJudge.isNullOrEmpty(list)) {
                 //数据空
                 return new LinkedList<CacheDataItem>();
@@ -222,38 +225,42 @@ public class RxCache {
             HashSet<String> keys = new HashSet<String>();
             //将列表转为迭代方式处理,因为下面对列表循环的同时删除过期数据
             Iterator<CacheDataItem> iterator = list.iterator();
-            while (iterator.hasNext()) {
-                CacheDataItem next = iterator.next();
-                if (isLimitations) {
-                    //严格按照时间来限制
-                    if (next.getEffective() > 0) {
-                        if (next.getEffective() <= System.currentTimeMillis()) {
+            synchronized (iterator) {
+                while (iterator.hasNext()) {
+                    CacheDataItem next = iterator.next();
+                    if (isLimitations) {
+                        //严格按照时间来限制
+                        if (next.getEffective() > 0) {
+                            if (next.getEffective() <= System.currentTimeMillis()) {
+                                //移除当前数据
+                                keys.add(next.getKey());
+                                iterator.remove();
+                            }
+                        } else {
                             //移除当前数据
                             keys.add(next.getKey());
                             iterator.remove();
                         }
                     } else {
-                        //移除当前数据
-                        keys.add(next.getKey());
-                        iterator.remove();
-                    }
-                } else {
-                    //有效为0不做校验
-                    if (next.getEffective() > 0) {
-                        if (next.getEffective() <= System.currentTimeMillis()) {
-                            //移除当前数据
-                            keys.add(next.getKey());
-                            iterator.remove();
+                        //有效为0不做校验
+                        if (next.getEffective() > 0) {
+                            if (next.getEffective() <= System.currentTimeMillis()) {
+                                //移除当前数据
+                                keys.add(next.getKey());
+                                iterator.remove();
+                            }
                         }
                     }
                 }
             }
             //删除已失败数据
             if (!ObjectJudge.isNullOrEmpty(keys)) {
-                cacheDao.deleteByKeyInTx(keys);
+                CacheDataItemDao cacheDataItemDao = dbCacheDao.getCacheDataItemDao();
+                if (cacheDataItemDao != null) {
+                    cacheDataItemDao.deleteByKeyInTx(keys);
+                    DBManager.getInstance().close();
+                }
             }
-            //释放数据库
-            DBManager.getInstance().close();
             return list;
         } catch (Exception e) {
             Logger.error(e);
@@ -322,6 +329,7 @@ public class RxCache {
             CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
             if (cacheDao != null) {
                 cacheDao.deleteAll();
+                DbHelper.getHelper().close();
             }
         } catch (Exception e) {
             Logger.error(e);

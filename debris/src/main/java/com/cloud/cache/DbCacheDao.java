@@ -28,7 +28,11 @@ public class DbCacheDao {
         }
         SQLiteDatabase database = helper.getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(database);
-        return daoMaster.newSession();
+        DaoSession daoSession = daoMaster.newSession();
+        if (daoSession == null) {
+            helper.close();
+        }
+        return daoSession;
     }
 
     /**
@@ -56,7 +60,11 @@ public class DbCacheDao {
             return null;
         }
         OptionsItemDao.createTable(daoSession.getDatabase(), true);
-        return daoSession.getOptionsItemDao();
+        OptionsItemDao optionsItemDao = daoSession.getOptionsItemDao();
+        if (optionsItemDao == null) {
+            DbHelper.getHelper().close();
+        }
+        return optionsItemDao;
     }
 
     /**
@@ -70,7 +78,11 @@ public class DbCacheDao {
             return null;
         }
         StackInfoItemDao.createTable(daoSession.getDatabase(), true);
-        return daoSession.getStackInfoItemDao();
+        StackInfoItemDao stackInfoItemDao = daoSession.getStackInfoItemDao();
+        if (stackInfoItemDao == null) {
+            DbHelper.getHelper().close();
+        }
+        return stackInfoItemDao;
     }
 
     /**
@@ -84,6 +96,10 @@ public class DbCacheDao {
             return null;
         }
         PathCacheInfoItemDao.createTable(daoSession.getDatabase(), true);
-        return daoSession.getPathCacheInfoItemDao();
+        PathCacheInfoItemDao pathCacheInfoItemDao = daoSession.getPathCacheInfoItemDao();
+        if (pathCacheInfoItemDao == null) {
+            DbHelper.getHelper().close();
+        }
+        return pathCacheInfoItemDao;
     }
 }
