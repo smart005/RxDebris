@@ -3,9 +3,9 @@ package com.cloud.dialogs.options;
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
 
-import com.cloud.cache.DbCacheDao;
 import com.cloud.cache.daos.OptionsItemDao;
-import com.cloud.cache.greens.DBManager;
+import com.cloud.cache.entries.OptionsDataEntry;
+import com.cloud.cache.events.OnDataChainRunnable;
 import com.cloud.dialogs.options.beans.OptionsItem;
 import com.cloud.dialogs.options.enums.AddressLevel;
 import com.cloud.dialogs.options.events.OnImportCompleteListener;
@@ -16,7 +16,6 @@ import com.cloud.objects.utils.JsonUtils;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -112,25 +111,22 @@ public class AddressUtils extends OptionsUtils implements OnOptionsListener {
         if (ObjectJudge.isNullOrEmpty(optionsItems)) {
             return;
         }
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        OptionsItemDao optionsItemDao = dbCacheDao.getOptionsItemDao();
-        if (optionsItemDao != null) {
-            optionsItemDao.insertOrReplaceInTx(optionsItems);
-            DBManager.getInstance().close();
-        }
+        OptionsDataEntry optionsDataEntry = new OptionsDataEntry();
+        optionsDataEntry.insertOrReplace(optionsItems);
     }
 
     @Override
     public List<OptionsItem> getOptionsItems(String targetId, final String parentId) {
-        final List<OptionsItem> list = new ArrayList<OptionsItem>();
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        OptionsItemDao optionsItemDao = dbCacheDao.getOptionsItemDao();
-        if (optionsItemDao != null) {
-            QueryBuilder<OptionsItem> builder = optionsItemDao.queryBuilder();
-            builder.where(OptionsItemDao.Properties.ParentId.eq(parentId));
-            list.addAll(builder.build().list());
-            DBManager.getInstance().close();
-        }
-        return list;
+        OptionsDataEntry optionsDataEntry = new OptionsDataEntry();
+        List<OptionsItem> optionsList = optionsDataEntry.getOptionsList(new OnDataChainRunnable<List<OptionsItem>, OptionsItemDao>() {
+            @Override
+            public List<OptionsItem> run(OptionsItemDao optionsItemDao) {
+                QueryBuilder<OptionsItem> builder = optionsItemDao.queryBuilder();
+                builder.where(OptionsItemDao.Properties.ParentId.eq(parentId));
+                List<OptionsItem> items = builder.build().list();
+                return items;
+            }
+        });
+        return optionsList;
     }
 }
