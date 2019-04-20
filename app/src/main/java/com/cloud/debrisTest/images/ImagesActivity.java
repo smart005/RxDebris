@@ -54,8 +54,8 @@ public class ImagesActivity extends BaseFragmentActivity {
         GlideOptimize.with(this)
                 .load(url)
                 //可自定义宽度和高度，不设置默认取控件的宽高;
-//                .setWidth(100)
-//                .setHeight(200)
+                //.setWidth(100)
+                //.setHeight(200)
                 //glide图片加载完成之前的占位图片
                 //未设置时取RxImage.setDefImage()设置的默认图片
                 .setPlaceholder(R.drawable.def_image)
@@ -92,7 +92,7 @@ public class ImagesActivity extends BaseFragmentActivity {
         //文件类型
         GlideOptimize.with(this)
                 .load(url)
-                //将文件移动至此目录下
+                //将文件移动至此目录下,如果不设置则为glide缓存默认路径
                 .toMove(DirectoryNames.forum.name())
                 .into(new GFileCallback<File>() {
                     @Override
@@ -166,6 +166,8 @@ public class ImagesActivity extends BaseFragmentActivity {
         imageSelectDialog.withMaxSize(screenWidth, height);
         //设置裁剪宽高比
         imageSelectDialog.withAspect(345, 83);
+        //扩展数据，选择时传入可以回调中取出;
+        imageSelectDialog.setExtra(null);
         //显示图片选择
         imageSelectDialog.show(this);
     }
