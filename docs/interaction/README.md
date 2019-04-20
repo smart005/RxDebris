@@ -6,6 +6,6 @@ Handler是管理某个线程(也可能是进程)的消息队列，比如让Handl
 2. 利用ThreadLocal解决并发导致的通信问题；
 3. 利用AIDL+Handler解决服务、模块、进程或线程间有通信；
 
-[HandlerManager](handler-manager.md)
-[本地线程安全](local-thread.md)
-[进程间通信](process-commu.md)
+* [HandlerManager](handler-manager.md)
+* [本地线程安全](local-thread.md)
+* [进程间通信](process-commu.md)
