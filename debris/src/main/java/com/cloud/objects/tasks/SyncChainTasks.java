@@ -65,11 +65,16 @@ public class SyncChainTasks {
             return;
         }
         OnChainRunnable first = tasks.getFirst();
+        first.start();
         Object mret = first.run(param, extras);
+        first.finish();
         iterator.next();
         while (iterator.hasNext()) {
             OnChainRunnable next = iterator.next();
+            next.start();
             mret = next.run(mret, extras);
+            next.finish();
         }
+        tasks.clear();
     }
 }

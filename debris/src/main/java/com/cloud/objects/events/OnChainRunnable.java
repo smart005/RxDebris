@@ -8,7 +8,15 @@ package com.cloud.objects.events;
  * Modifier:
  * ModifyContent:
  */
-public interface OnChainRunnable<R, T> {
+public abstract class OnChainRunnable<R, T> {
 
-    public R run(T t, Object... extras);
+    public void start() {
+        //start
+    }
+
+    public abstract R run(T t, Object... extras);
+
+    public void finish() {
+        //finish
+    }
 }

@@ -1,5 +1,7 @@
 package com.cloud.cache;
 
+import com.cloud.objects.tasks.SyncChainTasks;
+
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
@@ -10,9 +12,6 @@ package com.cloud.cache;
  */
 public class DbConstraints {
 
+    private SyncChainTasks chainTasks = SyncChainTasks.getInstance();
 
-
-    public void build() {
-
-    }
 }

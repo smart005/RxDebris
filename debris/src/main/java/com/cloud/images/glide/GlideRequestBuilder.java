@@ -15,10 +15,8 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.transition.Transition;
-import com.cloud.cache.DbCacheDao;
 import com.cloud.cache.PathCacheInfoItem;
-import com.cloud.cache.daos.PathCacheInfoItemDao;
-import com.cloud.cache.greens.DBManager;
+import com.cloud.cache.entries.PathCacheDataEntry;
 import com.cloud.images.enums.CacheMode;
 import com.cloud.images.enums.GlideCallType;
 import com.cloud.images.enums.GlideRequestType;
@@ -521,18 +519,13 @@ public class GlideRequestBuilder {
             File targetFile = new File(targetDir, fileName);
             StorageUtils.copyFile(file, targetFile);
             //移动成功后file-originalUrl-targetFile关联
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            PathCacheInfoItemDao cacheInfoItemDao = dbCacheDao.getPathCacheInfoItemDao();
-            if (cacheInfoItemDao != null) {
-                PathCacheInfoItem cacheInfoItem = new PathCacheInfoItem();
-                cacheInfoItem.setUrl(originalUrl);
-                cacheInfoItem.setPath(file.getAbsolutePath());
-                cacheInfoItem.setTargetPath(targetFile.getAbsolutePath());
-                cacheInfoItem.setName(file.getName());
-                cacheInfoItemDao.insertOrReplaceInTx(cacheInfoItem);
-                //关闭链接
-                DBManager.getInstance().close();
-            }
+            PathCacheInfoItem cacheInfoItem = new PathCacheInfoItem();
+            cacheInfoItem.setUrl(originalUrl);
+            cacheInfoItem.setPath(file.getAbsolutePath());
+            cacheInfoItem.setTargetPath(targetFile.getAbsolutePath());
+            cacheInfoItem.setName(file.getName());
+            PathCacheDataEntry pathCacheDataEntry = new PathCacheDataEntry();
+            pathCacheDataEntry.insertOrReplace(cacheInfoItem);
             return targetFile;
         }
 

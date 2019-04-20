@@ -8,6 +8,6 @@ package com.cloud.objects.events;
  * Modifier:
  * ModifyContent:
  */
-public abstract class OnChainOutRunnable<R> implements OnChainRunnable<R, Void> {
+public abstract class OnChainOutRunnable<R> extends OnChainRunnable<R, Void> {
 
 }

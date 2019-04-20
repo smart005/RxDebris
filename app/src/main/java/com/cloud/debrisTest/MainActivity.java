@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.View;
 
+import com.cloud.cache.RxCache;
 import com.cloud.debris.BaseActivity;
 import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.debrisTest.databinding.MainViewBinding;
@@ -128,6 +129,9 @@ public class MainActivity extends BaseActivity {
                     }
                 })
                 .build(2, "参数");
+
+        RxCache.setCacheData("cache_key", "2222");
+        String data = RxCache.getCacheData("cache_key");
     }
 
     public void OnNetFrameClick(View view) {

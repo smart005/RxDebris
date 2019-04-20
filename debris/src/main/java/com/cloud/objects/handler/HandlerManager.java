@@ -20,8 +20,29 @@ public class HandlerManager {
     private ThreadLocal<Handler> handlerThreadLocal = new ThreadLocal<Handler>();
     private Object[] params;
 
-    private HandlerManager() {
-        Handler mainHandler = new Handler(Looper.getMainLooper()) {
+    private HandlerManager(Looper looper) {
+        builder(looper);
+    }
+
+    public static HandlerManager getInstance() {
+        return new HandlerManager(Looper.getMainLooper());
+    }
+
+    /**
+     * 获取handler构建对象
+     *
+     * @param looper 不传代表主线程
+     * @return HandlerManager
+     */
+    public static HandlerManager getBuilder(Looper looper) {
+        if (looper == null) {
+            looper = Looper.getMainLooper();
+        }
+        return new HandlerManager(looper);
+    }
+
+    private void builder(Looper looper) {
+        Handler mainHandler = new Handler(looper) {
             @Override
             public void handleMessage(Message msg) {
                 try {
@@ -40,10 +61,6 @@ public class HandlerManager {
             }
         };
         handlerThreadLocal.set(mainHandler);
-    }
-
-    public static HandlerManager getInstance() {
-        return new HandlerManager();
     }
 
     /**
