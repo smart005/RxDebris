@@ -23,6 +23,10 @@ Android Studio用户(目前暂不支持Eclipse用户)
 ><font color=gray size=3>目前只需要添加以下debris包即可，在[v3.x]将网络框架独立出来作为'com.cloud:debris-net:+'引用</font>
 
 ```java
+1.工程build.gradle中添加maven库地址
+maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/'}
+
+2.项目的build.gradle->dependencies{}引用以下版本
 api 'com.cloud:debris:1.0.83'
 ```
 文档
