@@ -9,9 +9,10 @@ import android.util.DisplayMetrics;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.cloud.cache.DbCacheDao;
 import com.cloud.cache.PathCacheInfoItem;
 import com.cloud.cache.daos.PathCacheInfoItemDao;
+import com.cloud.cache.entries.PathCacheDataEntry;
+import com.cloud.cache.events.OnDataChainRunnable;
 import com.cloud.objects.logs.Logger;
 
 import org.greenrobot.greendao.query.QueryBuilder;
@@ -102,22 +103,24 @@ public class GlideOptimize {
      * @param originalUrl 原url
      * @return 本地文件
      */
-    public File getLocalFile(String originalUrl) {
+    public File getLocalFile(final String originalUrl) {
         if (TextUtils.isEmpty(originalUrl)) {
             return null;
         }
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        PathCacheInfoItemDao cacheInfoItemDao = dbCacheDao.getPathCacheInfoItemDao();
-        if (cacheInfoItemDao == null) {
+        PathCacheDataEntry pathCacheDataEntry = new PathCacheDataEntry();
+        PathCacheInfoItem pathCacheInfo = pathCacheDataEntry.getPathCacheInfo(new OnDataChainRunnable<PathCacheInfoItem, PathCacheInfoItemDao>() {
+            @Override
+            public PathCacheInfoItem run(PathCacheInfoItemDao pathCacheInfoItemDao) {
+                QueryBuilder<PathCacheInfoItem> builder = pathCacheInfoItemDao.queryBuilder();
+                builder.where(PathCacheInfoItemDao.Properties.Url.eq(originalUrl));
+                PathCacheInfoItem unique = builder.unique();
+                return unique;
+            }
+        });
+        if (TextUtils.isEmpty(pathCacheInfo.getTargetPath())) {
             return null;
         }
-        QueryBuilder<PathCacheInfoItem> builder = cacheInfoItemDao.queryBuilder();
-        builder.where(PathCacheInfoItemDao.Properties.Url.eq(originalUrl));
-        PathCacheInfoItem unique = builder.unique();
-        if (unique == null) {
-            return null;
-        }
-        File file = new File(unique.getTargetPath());
+        File file = new File(pathCacheInfo.getTargetPath());
         if (!file.exists()) {
             return null;
         }
@@ -129,22 +132,24 @@ public class GlideOptimize {
      *
      * @param originalUrl 原文件对应的网络url
      */
-    public void removeFile(String originalUrl) {
+    public void removeFile(final String originalUrl) {
         if (TextUtils.isEmpty(originalUrl)) {
             return;
         }
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        PathCacheInfoItemDao cacheInfoItemDao = dbCacheDao.getPathCacheInfoItemDao();
-        if (cacheInfoItemDao == null) {
+        PathCacheDataEntry pathCacheDataEntry = new PathCacheDataEntry();
+        PathCacheInfoItem pathCacheInfo = pathCacheDataEntry.getPathCacheInfo(new OnDataChainRunnable<PathCacheInfoItem, PathCacheInfoItemDao>() {
+            @Override
+            public PathCacheInfoItem run(PathCacheInfoItemDao pathCacheInfoItemDao) {
+                QueryBuilder<PathCacheInfoItem> builder = pathCacheInfoItemDao.queryBuilder();
+                builder.where(PathCacheInfoItemDao.Properties.Url.eq(originalUrl));
+                PathCacheInfoItem unique = builder.unique();
+                return unique;
+            }
+        });
+        if (TextUtils.isEmpty(pathCacheInfo.getTargetPath())) {
             return;
         }
-        QueryBuilder<PathCacheInfoItem> builder = cacheInfoItemDao.queryBuilder();
-        builder.where(PathCacheInfoItemDao.Properties.Url.eq(originalUrl));
-        PathCacheInfoItem unique = builder.unique();
-        if (unique == null) {
-            return;
-        }
-        File file = new File(unique.getTargetPath());
+        File file = new File(pathCacheInfo.getTargetPath());
         //删除文件
         if (file.exists()) {
             boolean delete = file.delete();
@@ -153,6 +158,14 @@ public class GlideOptimize {
             }
         }
         //删除记录信息
-        cacheInfoItemDao.deleteByKeyInTx(unique.getUrl());
+        pathCacheDataEntry.execute(new OnDataChainRunnable<Void, PathCacheInfoItemDao>() {
+            @Override
+            public Void run(PathCacheInfoItemDao pathCacheInfoItemDao) {
+                QueryBuilder<PathCacheInfoItem> builder = pathCacheInfoItemDao.queryBuilder();
+                builder.where(PathCacheInfoItemDao.Properties.Url.eq(originalUrl));
+                builder.buildDelete();
+                return null;
+            }
+        });
     }
 }

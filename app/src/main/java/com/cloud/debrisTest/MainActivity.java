@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.View;
 
+import com.cloud.cache.RxCache;
 import com.cloud.debris.BaseActivity;
 import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.debrisTest.databinding.MainViewBinding;
@@ -15,10 +16,13 @@ import com.cloud.debrisTest.web.NKitActivity;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.TimingManager;
 import com.cloud.objects.beans.MapEntryItem;
+import com.cloud.objects.events.OnChainInputRunnable;
+import com.cloud.objects.events.OnChainRunnable;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.storage.DirectoryUtils;
+import com.cloud.objects.tasks.SyncChainTasks;
 import com.cloud.objects.utils.JsonUtils;
 
 import java.io.File;
@@ -80,6 +84,55 @@ public class MainActivity extends BaseActivity {
                 String dirJson = DirectoryUtils.getInstance().toString();
             }
         });
+
+        String json3 = " {\n" +
+                "                \"ID\": 0,\n" +
+                "                \"Style\": 1,\n" +
+                "                \"Weight\": 2,\n" +
+                "                \"Position\": 3,\n" +
+                "                \"Tag\": \"广告\",\n" +
+                "                \"Title\": \"daddy pig\",\n" +
+                "                \"Link\": \"https://10.10.56.21?fromapp108sq=news&fromapp108sqdata=3\",\n" +
+                "                \"AdId\": 168,\n" +
+                "                \"SiteID\": 28,\n" +
+                "                \"AdUnionAndroid\": \"1212\",\n" +
+                "                \"AdUnionIos\": \"12\",\n" +
+                "                \"ImagesField\": \"115479,/user/2018/0206/1007381968814054464815097.thumb.jpg,0,300*378\"\n" +
+                "            }";
+        ADItem adItem = JsonUtils.parseT(json3, ADItem.class);
+
+        SyncChainTasks.getInstance()
+                .addChain(new OnChainRunnable<Integer, Integer>() {
+                    @Override
+                    public Integer run(Integer integer, Object[] extras) {
+                        return integer + 2;
+                    }
+                })
+                .addChain(new OnChainRunnable<String, Integer>() {
+                    @Override
+                    public String run(Integer integer, Object[] extras) {
+                        return "params:" + integer;
+                    }
+                })
+                .addChain(new OnChainRunnable<ADItem, String>() {
+                    @Override
+                    public ADItem run(String s, Object[] extras) {
+                        ADItem item = new ADItem();
+                        item.setTitle(s);
+                        return item;
+                    }
+                })
+                .addChain(new OnChainInputRunnable<ADItem>() {
+                    @Override
+                    public Void run(ADItem adItem, Object[] extras) {
+
+                        return null;
+                    }
+                })
+                .build(2, "参数");
+
+        RxCache.setCacheData("cache_key", "2222");
+        String data = RxCache.getCacheData("cache_key");
     }
 
     public void OnNetFrameClick(View view) {

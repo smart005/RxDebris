@@ -3,7 +3,8 @@ package com.cloud.cache;
 import android.text.TextUtils;
 
 import com.cloud.cache.daos.CacheDataItemDao;
-import com.cloud.cache.greens.DBManager;
+import com.cloud.cache.entries.CacheDataEntry;
+import com.cloud.cache.events.OnDataChainRunnable;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.ConvertUtils;
@@ -81,13 +82,8 @@ public class RxCache {
                 dataItem.setKey(cacheKey);
                 setCacheValue(value, dataItem);
             }
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
-            if (cacheDao != null) {
-                cacheDao.insertOrReplace(dataItem);
-                //使用完后关闭database
-                DBManager.getInstance().close();
-            }
+            CacheDataEntry cacheDataEntry = new CacheDataEntry();
+            cacheDataEntry.insertOrReplace(dataItem);
         } catch (Exception e) {
             Logger.error(e);
         }
@@ -123,26 +119,21 @@ public class RxCache {
      * @param isLimitations true必须通过有效验证;false有效为0则不验证否则进行时效验证;
      * @return CacheDataItem
      */
-    public static CacheDataItem getBaseCacheData(String cacheKey, boolean isLimitations) {
+    public static CacheDataItem getBaseCacheData(final String cacheKey, boolean isLimitations) {
         try {
             if (TextUtils.isEmpty(cacheKey)) {
                 return null;
             }
-            CacheDataItem first = null;
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
-            if (cacheDao != null) {
-                QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
-                QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.eq(cacheKey));
-                QueryBuilder<CacheDataItem> limit = where.limit(1);
-                if (limit != null) {
-                    first = limit.unique();
+            CacheDataEntry cacheDataEntry = new CacheDataEntry();
+            CacheDataItem first = cacheDataEntry.getCacheData(new OnDataChainRunnable<CacheDataItem, CacheDataItemDao>() {
+                @Override
+                public CacheDataItem run(CacheDataItemDao cacheDataItemDao) {
+                    QueryBuilder<CacheDataItem> builder = cacheDataItemDao.queryBuilder();
+                    QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.eq(cacheKey));
+                    QueryBuilder<CacheDataItem> limit = where.limit(1);
+                    return limit.unique();
                 }
-                DBManager.getInstance().close();
-            }
-            if (first == null) {
-                return new CacheDataItem();
-            }
+            });
             if (isLimitations) {
                 if (first.getEffective() > 0) {
                     if (first.getEffective() > System.currentTimeMillis()) {
@@ -182,20 +173,20 @@ public class RxCache {
      * @param isLatestRecord 是否根据startTime取最新记录
      * @return List<CacheDataItem>
      */
-    public static List<CacheDataItem> getBaseCacheList(String containsKey, boolean isLimitations, boolean isLatestRecord) {
+    public static List<CacheDataItem> getBaseCacheList(final String containsKey, boolean isLimitations, boolean isLatestRecord) {
         try {
             if (TextUtils.isEmpty(containsKey)) {
                 return null;
             }
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
-            if (cacheDao == null) {
-                //如果数据对象为空则返回
-                return new LinkedList<CacheDataItem>();
-            }
-            QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
-            QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like("%" + containsKey + "%"));
-            List<CacheDataItem> list = where.list();
+            CacheDataEntry cacheDataEntry = new CacheDataEntry();
+            List<CacheDataItem> list = cacheDataEntry.getCacheList(new OnDataChainRunnable<List<CacheDataItem>, CacheDataItemDao>() {
+                @Override
+                public List<CacheDataItem> run(CacheDataItemDao cacheDataItemDao) {
+                    QueryBuilder<CacheDataItem> builder = cacheDataItemDao.queryBuilder();
+                    QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like("%" + containsKey + "%"));
+                    return where.list();
+                }
+            });
             if (ObjectJudge.isNullOrEmpty(list)) {
                 //数据空
                 return new LinkedList<CacheDataItem>();
@@ -222,38 +213,38 @@ public class RxCache {
             HashSet<String> keys = new HashSet<String>();
             //将列表转为迭代方式处理,因为下面对列表循环的同时删除过期数据
             Iterator<CacheDataItem> iterator = list.iterator();
-            while (iterator.hasNext()) {
-                CacheDataItem next = iterator.next();
-                if (isLimitations) {
-                    //严格按照时间来限制
-                    if (next.getEffective() > 0) {
-                        if (next.getEffective() <= System.currentTimeMillis()) {
+            synchronized (iterator) {
+                while (iterator.hasNext()) {
+                    CacheDataItem next = iterator.next();
+                    if (isLimitations) {
+                        //严格按照时间来限制
+                        if (next.getEffective() > 0) {
+                            if (next.getEffective() <= System.currentTimeMillis()) {
+                                //移除当前数据
+                                keys.add(next.getKey());
+                                iterator.remove();
+                            }
+                        } else {
                             //移除当前数据
                             keys.add(next.getKey());
                             iterator.remove();
                         }
                     } else {
-                        //移除当前数据
-                        keys.add(next.getKey());
-                        iterator.remove();
-                    }
-                } else {
-                    //有效为0不做校验
-                    if (next.getEffective() > 0) {
-                        if (next.getEffective() <= System.currentTimeMillis()) {
-                            //移除当前数据
-                            keys.add(next.getKey());
-                            iterator.remove();
+                        //有效为0不做校验
+                        if (next.getEffective() > 0) {
+                            if (next.getEffective() <= System.currentTimeMillis()) {
+                                //移除当前数据
+                                keys.add(next.getKey());
+                                iterator.remove();
+                            }
                         }
                     }
                 }
             }
             //删除已失败数据
             if (!ObjectJudge.isNullOrEmpty(keys)) {
-                cacheDao.deleteByKeyInTx(keys);
+                cacheDataEntry.delete(keys);
             }
-            //释放数据库
-            DBManager.getInstance().close();
             return list;
         } catch (Exception e) {
             Logger.error(e);
@@ -317,41 +308,34 @@ public class RxCache {
      * 清空所有缓存
      */
     public static void clear() {
-        try {
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
-            if (cacheDao != null) {
-                cacheDao.deleteAll();
-            }
-        } catch (Exception e) {
-            Logger.error(e);
-        }
+        CacheDataEntry cacheDataEntry = new CacheDataEntry();
+        cacheDataEntry.deleteAll();
     }
 
-    private static void clear(boolean isBlurClear, String containsKey) {
+    private static void clear(boolean isBlurClear, final String containsKey) {
         try {
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
-            if (cacheDao != null) {
-                if (isBlurClear) {
-                    QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
-                    QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like("%" + containsKey + "%"));
-                    List<CacheDataItem> dataItems = where.list();
-                    if (!ObjectJudge.isNullOrEmpty(dataItems)) {
-                        cacheDao.deleteInTx(dataItems);
+            if (isBlurClear) {
+                CacheDataEntry cacheDataEntry = new CacheDataEntry();
+                cacheDataEntry.deleteListInTx(new OnDataChainRunnable<List<CacheDataItem>, CacheDataItemDao>() {
+                    @Override
+                    public List<CacheDataItem> run(CacheDataItemDao cacheDataItemDao) {
+                        QueryBuilder<CacheDataItem> builder = cacheDataItemDao.queryBuilder();
+                        QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.like("%" + containsKey + "%"));
+                        List<CacheDataItem> dataItems = where.list();
+                        return dataItems;
                     }
-                } else {
-                    QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
-                    QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.eq(containsKey));
-                    QueryBuilder<CacheDataItem> limit = where.limit(1);
-                    if (limit != null) {
-                        CacheDataItem unique = limit.unique();
-                        if (unique == null) {
-                            cacheDao.delete(unique);
-                        }
+                });
+            } else {
+                CacheDataEntry cacheDataEntry = new CacheDataEntry();
+                cacheDataEntry.deleteListInTx(new OnDataChainRunnable<List<CacheDataItem>, CacheDataItemDao>() {
+                    @Override
+                    public List<CacheDataItem> run(CacheDataItemDao cacheDataItemDao) {
+                        QueryBuilder<CacheDataItem> builder = cacheDataItemDao.queryBuilder();
+                        QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.eq(containsKey));
+                        QueryBuilder<CacheDataItem> limit = where.limit(1);
+                        return limit.list();
                     }
-                }
-                DBManager.getInstance().close();
+                });
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -376,22 +360,18 @@ public class RxCache {
      * <p>
      * param cacheKey 缓存key
      */
-    public static void remove(String cacheKey) {
+    public static void remove(final String cacheKey) {
         try {
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            CacheDataItemDao cacheDao = dbCacheDao.getCacheDataItemDao();
-            if (cacheDao != null) {
-                QueryBuilder<CacheDataItem> builder = cacheDao.queryBuilder();
-                QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.eq(cacheKey));
-                QueryBuilder<CacheDataItem> limit = where.limit(1);
-                if (limit != null) {
-                    CacheDataItem unique = limit.unique();
-                    if (unique != null) {
-                        cacheDao.delete(unique);
-                    }
+            CacheDataEntry cacheDataEntry = new CacheDataEntry();
+            cacheDataEntry.deleteListInTx(new OnDataChainRunnable<List<CacheDataItem>, CacheDataItemDao>() {
+                @Override
+                public List<CacheDataItem> run(CacheDataItemDao cacheDataItemDao) {
+                    QueryBuilder<CacheDataItem> builder = cacheDataItemDao.queryBuilder();
+                    QueryBuilder<CacheDataItem> where = builder.where(CacheDataItemDao.Properties.Key.eq(cacheKey));
+                    QueryBuilder<CacheDataItem> limit = where.limit(1);
+                    return limit.list();
                 }
-                DBManager.getInstance().close();
-            }
+            });
         } catch (Exception e) {
             Logger.error(e);
         }

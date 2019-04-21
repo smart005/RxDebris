@@ -2,11 +2,12 @@ package com.cloud.nets;
 
 import android.text.TextUtils;
 
-import com.cloud.cache.DbCacheDao;
 import com.cloud.cache.StackInfoItem;
 import com.cloud.cache.daos.StackInfoItemDao;
-import com.cloud.cache.greens.DBManager;
+import com.cloud.cache.entries.StackDataEntry;
+import com.cloud.cache.events.OnDataChainRunnable;
 import com.cloud.nets.beans.RequestErrorInfo;
+import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.logs.CrashUtils;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.DeviceUtils;
@@ -55,13 +56,8 @@ public class RequestStacksInfo {
             stackInfoItem.setKey("PROGRAM_DEVICE_COMMON_INFO");
             stackInfoItem.setStack(join);
 
-            DbCacheDao dbCacheDao = new DbCacheDao();
-            StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-            if (cacheDao != null) {
-                cacheDao.insertOrReplace(stackInfoItem);
-                //使用完后关闭database
-                DBManager.getInstance().close();
-            }
+            StackDataEntry stackDataEntry = new StackDataEntry();
+            stackDataEntry.insertOrReplace(stackInfoItem);
         }
         return join;
     }
@@ -72,26 +68,22 @@ public class RequestStacksInfo {
      * @return 公共信息
      */
     public static String getCommonInfo() {
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao == null) {
-            String stackInfo = setCommonInfo(false);
-            return stackInfo;
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        StackInfoItem stackInfo = stackDataEntry.getStackInfo(new OnDataChainRunnable<StackInfoItem, StackInfoItemDao>() {
+            @Override
+            public StackInfoItem run(StackInfoItemDao stackInfoItemDao) {
+                QueryBuilder<StackInfoItem> builder = stackInfoItemDao.queryBuilder();
+                QueryBuilder<StackInfoItem> where = builder.where(StackInfoItemDao.Properties.Key.eq("PROGRAM_DEVICE_COMMON_INFO"));
+                QueryBuilder<StackInfoItem> limit = where.limit(1);
+                StackInfoItem unique = limit.unique();
+                return unique;
+            }
+        });
+        if (TextUtils.isEmpty(stackInfo.getStack())) {
+            return setCommonInfo(true);
+        } else {
+            return stackInfo.getStack();
         }
-        QueryBuilder<StackInfoItem> builder = cacheDao.queryBuilder();
-        QueryBuilder<StackInfoItem> where = builder.where(StackInfoItemDao.Properties.Key.eq("PROGRAM_DEVICE_COMMON_INFO"));
-        QueryBuilder<StackInfoItem> limit = where.limit(1);
-        if (limit == null) {
-            String stackInfo = setCommonInfo(true);
-            return stackInfo;
-        }
-        StackInfoItem unique = limit.unique();
-        if (unique == null) {
-            String stackInfo = setCommonInfo(true);
-            return stackInfo;
-        }
-        DBManager.getInstance().close();
-        return unique.getStack();
     }
 
     /**
@@ -108,13 +100,8 @@ public class RequestStacksInfo {
         stackInfoItem.setKey(getStackKey(prefixKey));
         stackInfoItem.setStack(CrashUtils.getCrashInfo(throwable));
 
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao != null) {
-            cacheDao.insertOrReplace(stackInfoItem);
-            //使用完后关闭database
-            DBManager.getInstance().close();
-        }
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        stackDataEntry.insertOrReplace(stackInfoItem);
     }
 
     /**
@@ -136,13 +123,8 @@ public class RequestStacksInfo {
         stackInfoItem.setUrl(url);
         stackInfoItem.setHeaders(JsonUtils.toJson(commonHeaders));
 
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao != null) {
-            cacheDao.insertOrReplace(stackInfoItem);
-            //使用完后关闭database
-            DBManager.getInstance().close();
-        }
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        stackDataEntry.insertOrReplace(stackInfoItem);
     }
 
     /**
@@ -164,13 +146,8 @@ public class RequestStacksInfo {
         stackInfoItem.setParams(JsonUtils.toJson(params));
         stackInfoItem.setMessage(message);
 
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao != null) {
-            cacheDao.insertOrReplace(stackInfoItem);
-            //使用完后关闭database
-            DBManager.getInstance().close();
-        }
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        stackDataEntry.insertOrReplace(stackInfoItem);
     }
 
     /**
@@ -190,13 +167,8 @@ public class RequestStacksInfo {
         stackInfoItem.setCode(code);
         stackInfoItem.setProtocol(protocol);
 
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao != null) {
-            cacheDao.insertOrReplace(stackInfoItem);
-            //使用完后关闭database
-            DBManager.getInstance().close();
-        }
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        stackDataEntry.insertOrReplace(stackInfoItem);
     }
 
     /**
@@ -206,7 +178,7 @@ public class RequestStacksInfo {
      * @param prefixKey 存储在数据库中键的前缀
      * @return RequestErrorInfo
      */
-    public static RequestErrorInfo getRequestErrorInfos(String prefixKey) {
+    public static RequestErrorInfo getRequestErrorInfos(final String prefixKey) {
         RequestErrorInfo errorInfo = new RequestErrorInfo();
         if (TextUtils.isEmpty(prefixKey)) {
             return errorInfo;
@@ -217,17 +189,23 @@ public class RequestStacksInfo {
         }
         //prefixKey-这里指调用方法的方法名
         stacks.add(prefixKey);
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao != null) {
-            QueryBuilder<StackInfoItem> builder = cacheDao.queryBuilder();
-            builder.where(StackInfoItemDao.Properties.Key.like("%" + prefixKey + "%"));
-            List<StackInfoItem> list = builder.list();
-            if (list != null) {
-                String chainKey = String.format("%s_CHAIN", prefixKey);
-                String pkey = String.format("%s_STATE_PROTOCOL", prefixKey);
-                String infoKey = String.format("%s_REQUEST_INFO", prefixKey);
-                Iterator<StackInfoItem> iterator = list.iterator();
+        //查询列表
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        List<StackInfoItem> stackList = stackDataEntry.getStackList(new OnDataChainRunnable<List<StackInfoItem>, StackInfoItemDao>() {
+            @Override
+            public List<StackInfoItem> run(StackInfoItemDao stackInfoItemDao) {
+                QueryBuilder<StackInfoItem> builder = stackInfoItemDao.queryBuilder();
+                builder.where(StackInfoItemDao.Properties.Key.like("%" + prefixKey + "%"));
+                List<StackInfoItem> list = builder.list();
+                return list;
+            }
+        });
+        if (!ObjectJudge.isNullOrEmpty(stackList)) {
+            String chainKey = String.format("%s_CHAIN", prefixKey);
+            String pkey = String.format("%s_STATE_PROTOCOL", prefixKey);
+            String infoKey = String.format("%s_REQUEST_INFO", prefixKey);
+            Iterator<StackInfoItem> iterator = stackList.iterator();
+            synchronized (iterator) {
                 while (iterator.hasNext()) {
                     StackInfoItem next = iterator.next();
                     if (next.getKey() == null) {
@@ -254,9 +232,15 @@ public class RequestStacksInfo {
                     }
                 }
             }
-            //删除所有符合条件数据
-            DeleteQuery<StackInfoItem> delete = builder.buildDelete();
-            delete.executeDeleteWithoutDetachingEntities();
+            stackDataEntry.deleteListInTx(new OnDataChainRunnable<List<StackInfoItem>, StackInfoItemDao>() {
+                @Override
+                public List<StackInfoItem> run(StackInfoItemDao stackInfoItemDao) {
+                    QueryBuilder<StackInfoItem> builder = stackInfoItemDao.queryBuilder();
+                    builder.where(StackInfoItemDao.Properties.Key.like("%" + prefixKey + "%"));
+                    List<StackInfoItem> list = builder.list();
+                    return list;
+                }
+            });
         }
         return errorInfo;
     }
@@ -266,28 +250,34 @@ public class RequestStacksInfo {
      *
      * @param prefixKey 存储在数据库中键的前缀
      */
-    public static void clearBusStacks(String prefixKey) {
+    public static void clearBusStacks(final String prefixKey) {
         if (TextUtils.isEmpty(prefixKey)) {
             return;
         }
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao != null) {
-            QueryBuilder<StackInfoItem> builder = cacheDao.queryBuilder();
-            QueryBuilder<StackInfoItem> where = builder.where(StackInfoItemDao.Properties.Key.like("%" + prefixKey + "%"));
-            DeleteQuery<StackInfoItem> delete = where.buildDelete();
-            delete.executeDeleteWithoutDetachingEntities();
-        }
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        stackDataEntry.execute(new OnDataChainRunnable<Void, StackInfoItemDao>() {
+            @Override
+            public Void run(StackInfoItemDao stackInfoItemDao) {
+                QueryBuilder<StackInfoItem> builder = stackInfoItemDao.queryBuilder();
+                QueryBuilder<StackInfoItem> where = builder.where(StackInfoItemDao.Properties.Key.like("%" + prefixKey + "%"));
+                DeleteQuery<StackInfoItem> delete = where.buildDelete();
+                delete.executeDeleteWithoutDetachingEntities();
+                return null;
+            }
+        });
     }
 
     /**
      * 清除所有数据(一般用于应用被卸载)
      */
     public static void clear() {
-        DbCacheDao dbCacheDao = new DbCacheDao();
-        StackInfoItemDao cacheDao = dbCacheDao.getStackInfoItemDao();
-        if (cacheDao != null) {
-            cacheDao.deleteAll();
-        }
+        StackDataEntry stackDataEntry = new StackDataEntry();
+        stackDataEntry.execute(new OnDataChainRunnable<Void, StackInfoItemDao>() {
+            @Override
+            public Void run(StackInfoItemDao stackInfoItemDao) {
+                stackInfoItemDao.deleteAll();
+                return null;
+            }
+        });
     }
 }

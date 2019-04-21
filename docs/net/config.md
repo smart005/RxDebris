@@ -1,4 +1,4 @@
-[返回目录](/dev_documents/docs/okrx-net-document-dir.md)
+[返回目录](/docs/okrx-net-document-dir.md)
 # OkRx网络(一)------配置
 #### 初始化配置
 ><font color=gray size=3>全局初始化最好在Application中完成,具体注释已在代码中描述.</font>

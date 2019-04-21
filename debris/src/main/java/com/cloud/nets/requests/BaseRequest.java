@@ -298,13 +298,15 @@ public class BaseRequest {
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             if (entry.getValue() instanceof Map) {
                 Map<String, Object> childMap = (Map) entry.getValue();
+                count += childMap.size() - 1;
                 for (Map.Entry<String, Object> childEntry : childMap.entrySet()) {
                     joinSingleParamForGet(builder, childEntry, index, count);
+                    index++;
                 }
             } else {
                 joinSingleParamForGet(builder, entry, index, count);
+                index++;
             }
-            index++;
         }
         //判断原url中是否包含?
         if (StringUtils.isContains(url, "?")) {

@@ -563,6 +563,21 @@ public class ObjectJudge {
     }
 
     /**
+     * 判断某项条件是否被枚举集合所包含
+     *
+     * @param condition   条件
+     * @param collections 枚举集合
+     * @return true-包含;false-不包含;
+     */
+    public static boolean isContains(int condition, Integer... collections) {
+        if (isNullOrEmpty(collections)) {
+            return false;
+        }
+        List<Integer> lst = Arrays.asList(collections);
+        return lst.contains(condition);
+    }
+
+    /**
      * 检测json字符串是否符合
      *
      * @param json json字符串

@@ -23,14 +23,19 @@ Android Studio用户(目前暂不支持Eclipse用户)
 ><font color=gray size=3>目前只需要添加以下debris包即可，在[v3.x]将网络框架独立出来作为'com.cloud:debris-net:+'引用</font>
 
 ```java
+1.工程build.gradle中添加maven库地址
+maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/'}
+
+2.项目的build.gradle->dependencies{}引用以下版本
 api 'com.cloud:debris:1.0.83'
 ```
 文档
 --
 ##### 网络框架文档始终与最新版本库保持一致，若具体写法与文档不一致请升级到最新版本.
-* [我是1.x文档，OkRx网络文档目录请点击这里](/dev_documents/docs/okrx-net-document-dir.md)
-* [我是1.x文档，OkRx网络文档目录请点击这里](/dev_documents/docs/okrx-net-document-dir.md)
-* [我是1.x文档，OkRx网络文档目录请点击这里](/dev_documents/docs/okrx-net-document-dir.md)
+***我是1.x文档，OkRx网络文档目录请点击这里***
+* [OkRx网络配置](config.md)
+* [接口定义](api.md)
+* [高级使用](senior.md)
 
 Licenses
 --

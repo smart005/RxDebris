@@ -55,6 +55,7 @@ public class GetService extends BaseOkrxService {
                 String url = "http://mtalksvc.sq108.net/api/AHome/GetRecommendInfor";
                 HashMap<String, String> map = new HashMap<>();
                 map.put("parame1", "123");
+                map.put("parame2", "456");
                 return getAPI.requestRecommandInfo(url, siteId, map, 3, CallStatus.PersistentIntervalCache);
             }
         });
