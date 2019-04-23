@@ -77,6 +77,8 @@ public abstract class BaseWebLoad extends WebView {
     private boolean isOverriedUrl = false;
     private ValueCallback<Uri> uploadMsg;
     private ValueCallback<Uri[]> sdk5UploadMsg;
+    //是否加载成功
+    private boolean isLoadSuccess = false;
 
     public BaseWebLoad(Context context) {
         super(context);
@@ -233,7 +235,11 @@ public abstract class BaseWebLoad extends WebView {
             @Override
             public boolean shouldOverrideUrlLoading(WebView webView, String url) {
                 isOverriedUrl = true;
-                return onOverrideUrlLoading(webView, url);
+                boolean b = onOverrideUrlLoading(webView, url);
+                if (!b) {
+                    isLoadSuccess = false;
+                }
+                return b;
             }
 
             @Override
@@ -267,6 +273,7 @@ public abstract class BaseWebLoad extends WebView {
                         //网上有些说重新调用loadUrl,但重新调用会有一定的性能问题
                         onOverrideUrlLoading(webView, url);
                     }
+                    isLoadSuccess = true;
                     onLoadFinished(webView, true, 0, "", url);
                 }
                 progressBar.setProgress(0);
@@ -812,5 +819,14 @@ public abstract class BaseWebLoad extends WebView {
                 imageSelectDialog.show(activity);
             }
         });
+    }
+
+    /**
+     * 是否加载成功
+     *
+     * @return true-页面已成功加载;反之false;
+     */
+    public boolean isLoadSuccess() {
+        return this.isLoadSuccess;
     }
 }

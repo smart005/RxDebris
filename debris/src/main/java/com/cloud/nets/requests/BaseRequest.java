@@ -310,9 +310,9 @@ public class BaseRequest {
         }
         //判断原url中是否包含?
         if (StringUtils.isContains(url, "?")) {
-            return String.format("%s&%s", url, builder.toString());
+            return String.format("%s&%s&time=%s", url, builder.toString(), System.currentTimeMillis());
         } else {
-            return String.format("%s?%s", url, builder.toString());
+            return String.format("%s?%s&time=%s", url, builder.toString(), System.currentTimeMillis());
         }
     }
 
