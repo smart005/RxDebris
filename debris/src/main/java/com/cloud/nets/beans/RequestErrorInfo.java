@@ -28,10 +28,6 @@ public class RequestErrorInfo {
      */
     private String params = "";
     /**
-     * 请求状态码
-     */
-    private int status = 0;
-    /**
      * 请求错误消息
      */
     private String message = "";
@@ -44,10 +40,6 @@ public class RequestErrorInfo {
      * 本次请求类型
      */
     private String requestType = "";
-    /**
-     * 本次请求协议
-     */
-    private String requestProtocol = "";
 
     public String getUrl() {
         return url;
@@ -81,14 +73,6 @@ public class RequestErrorInfo {
         this.params = params;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
     public String getMessage() {
         return message;
     }
@@ -114,13 +98,5 @@ public class RequestErrorInfo {
 
     public void setRequestType(String requestType) {
         this.requestType = requestType;
-    }
-
-    public String getRequestProtocol() {
-        return requestProtocol;
-    }
-
-    public void setRequestProtocol(String requestProtocol) {
-        this.requestProtocol = requestProtocol;
     }
 }

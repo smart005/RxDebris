@@ -3,7 +3,7 @@ package com.cloud.objects.utils;
 import com.cloud.objects.events.Action1;
 
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -24,7 +24,14 @@ public class ThreadPoolUtils {
     private static ThreadPoolUtils threadPoolUtils = null;
 
     public static ThreadPoolUtils getInstance() {
-        return threadPoolUtils == null ? threadPoolUtils = new ThreadPoolUtils() : threadPoolUtils;
+        if (threadPoolUtils == null) {
+            synchronized (ThreadPoolUtils.class) {
+                if (threadPoolUtils == null) {
+                    threadPoolUtils = new ThreadPoolUtils();
+                }
+            }
+        }
+        return threadPoolUtils;
     }
 
     private ThreadPoolUtils() {
@@ -176,7 +183,7 @@ public class ThreadPoolUtils {
 
 
         private QueueTasksBuilder() {
-            executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedTransferQueue<Runnable>(), new LinkedQueuePolicy());
+            executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), new LinkedQueuePolicy());
         }
 
         /**

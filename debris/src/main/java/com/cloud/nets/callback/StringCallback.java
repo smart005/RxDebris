@@ -2,7 +2,6 @@ package com.cloud.nets.callback;
 
 import android.text.TextUtils;
 
-import com.cloud.nets.RequestStacksInfo;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.enums.CallStatus;
@@ -12,7 +11,6 @@ import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.nets.requests.NetErrorWith;
 import com.cloud.objects.ObjectJudge;
-import com.cloud.objects.tasks.TaskManager;
 import com.cloud.objects.beans.TaskEntry;
 import com.cloud.objects.config.RxAndroid;
 import com.cloud.objects.enums.RequestState;
@@ -21,6 +19,7 @@ import com.cloud.objects.events.Action4;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.tasks.TaskManager;
 import com.cloud.objects.utils.JsonUtils;
 
 import java.io.IOException;
@@ -165,7 +164,7 @@ public abstract class StringCallback implements Callback {
                 completeAction.call(RequestState.Completed, ErrorType.none);
             }
             NetErrorWith netErrorWith = new NetErrorWith();
-            netErrorWith.call(requestMethodName, call, e, headers, params);
+            netErrorWith.call(call, e);
             return;
         }
         if (!call.isExecuted()) {
@@ -178,7 +177,7 @@ public abstract class StringCallback implements Callback {
                     completeAction.call(RequestState.Completed, ErrorType.none);
                 }
                 NetErrorWith netErrorWith = new NetErrorWith();
-                netErrorWith.call(requestMethodName, call, e, headers, params);
+                netErrorWith.call(call, e);
             }
             return;
         }
@@ -196,7 +195,7 @@ public abstract class StringCallback implements Callback {
             completeAction.call(RequestState.Completed, ErrorType.none);
         }
         NetErrorWith netErrorWith = new NetErrorWith();
-        netErrorWith.call(requestMethodName, call, e, headers, params);
+        netErrorWith.call(call, e);
     }
 
     private boolean failReConnect(Call call) {
@@ -272,7 +271,7 @@ public abstract class StringCallback implements Callback {
                 completeAction.call(RequestState.Completed, ErrorType.none);
             }
             //清除本次请求堆栈信息
-            RequestStacksInfo.clearBusStacks(requestMethodName);
+            //RequestStacksInfo.clearBusStacks(requestMethodName);
         }
     }
 

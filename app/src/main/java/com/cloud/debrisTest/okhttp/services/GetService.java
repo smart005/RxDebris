@@ -52,7 +52,7 @@ public class GetService extends BaseOkrxService {
         requestObject(IGetAPI.class, this, baseSubscriber, new Func2<RetrofitParams, IGetAPI, HashMap<String, Object>>() {
             @Override
             public RetrofitParams call(IGetAPI getAPI, HashMap<String, Object> params) {
-                String url = "http://mtalksvc.sq108.net/api/AHome/GetRecommendInfor";
+                String url = "http://sq108.net/api/AHome/GetRecommendInfor";
                 HashMap<String, String> map = new HashMap<>();
                 map.put("parame1", "123");
                 map.put("parame2", "456");
