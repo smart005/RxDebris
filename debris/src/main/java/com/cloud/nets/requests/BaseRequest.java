@@ -62,6 +62,8 @@ public class BaseRequest {
     private RetrofitParams retrofitParams;
     //是否取消间隔缓存回调
     private boolean isCancelIntervalCacheCall = false;
+    //内部处理后的参数
+    private HashMap<String, Object> internalProcessParams = new HashMap<String, Object>();
 
     public boolean isCancelIntervalCacheCall() {
         return isCancelIntervalCacheCall;
@@ -123,6 +125,20 @@ public class BaseRequest {
                 addRequestParams(builder, params, suffixParams);
             }
         }
+
+        HashMap<String, String> map = new HashMap<>();
+        //本次请求初始方法名
+        map.put("requestMethodName", retrofitParams.getInvokeMethodName());
+        //请求类型
+        map.put("requestType", requestType.name());
+        //请求url
+        map.put("requestUrl", url);
+        //请求头信息
+        map.put("requestHeaders", JsonUtils.toJson(headers));
+        //请求参数
+        map.put("requestParams", JsonUtils.toJson(internalProcessParams));
+        builder.tag(HashMap.class, map);
+
         return builder;
     }
 
@@ -180,6 +196,8 @@ public class BaseRequest {
                     String filename = String.format("%s.%s", GlobalUtils.getGuidNoConnect(), suffix);
                     //添加参数
                     requestBody.addFormDataPart(entry.getKey(), filename, body);
+                    //内部使用
+                    internalProcessParams.put(entry.getKey(), "stream");
                 } else if (validResult.fileParamKeys.contains(entry.getKey())) {
                     //以文件的形式上传文件
                     MediaType mediaType = MediaType.parse("multipart/form-data");
@@ -198,10 +216,17 @@ public class BaseRequest {
                     }
                     String filename = String.format("%s.%s", GlobalUtils.getGuidNoConnect(), suffix);
                     requestBody.addFormDataPart(entry.getKey(), filename, body);
+                    //内部使用
+                    internalProcessParams.put(entry.getKey(), "file");
                 } else if ((entry.getValue() instanceof List) || (entry.getValue() instanceof Map)) {
-                    requestBody.addFormDataPart(entry.getKey(), JsonUtils.toJson(entry.getValue()));
+                    String json = JsonUtils.toJson(entry.getValue());
+                    requestBody.addFormDataPart(entry.getKey(), json);
+                    //内部使用
+                    internalProcessParams.put(entry.getKey(), json);
                 } else {
-                    requestBody.addFormDataPart(entry.getKey(), entry.getValue() + "");
+                    requestBody.addFormDataPart(entry.getKey(), String.valueOf(entry.getValue()));
+                    //内部使用
+                    internalProcessParams.put(entry.getKey(), String.valueOf(entry.getValue()));
                 }
             }
             MultipartBody body = requestBody.build();
@@ -327,6 +352,8 @@ public class BaseRequest {
         builder.append("=");
         builder.append(value);
         builder.append((index + 1) < count ? "&" : "");
+        //内部使用
+        internalProcessParams.put(entry.getKey(), value);
     }
 
     protected String getAllParamsJoin(HashMap<String, String> headers, TreeMap<String, Object> params) {

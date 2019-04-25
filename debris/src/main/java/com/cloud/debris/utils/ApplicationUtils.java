@@ -29,7 +29,6 @@ public class ApplicationUtils {
         }
         Uri uri = Uri.parse(schemeUrl);
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        applicationContext.startActivity(intent);
         ComponentName componentName = intent.resolveActivity(applicationContext.getPackageManager());
         return componentName != null;
     }

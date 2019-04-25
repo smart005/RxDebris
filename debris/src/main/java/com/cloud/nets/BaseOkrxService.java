@@ -118,7 +118,7 @@ public class BaseOkrxService extends BaseService {
         String invokeMethodName = OkrxRequestValid.getInvokingMethodName();
         //开始验证并请求
         ObservableComponent<OkRxValidParam, Object> component = requestTask();
-        component.build(apiClass, server, baseSubscriber, decApiAction, params, invokeMethodName, new Exception());
+        component.build(apiClass, server, baseSubscriber, decApiAction, params, invokeMethodName);
     }
 
     private <I, S extends BaseService> ObservableComponent<OkRxValidParam, Object> requestTask() {
@@ -136,8 +136,8 @@ public class BaseOkrxService extends BaseService {
                     validParam.setReturnCodeFilter(codeCheck.getCodeFilter((S) params[1]));
                 }
                 //记录当前堆栈信息
-                Exception exception = (Exception) params[6];
-                RequestStacksInfo.setStack(validParam.getInvokeMethodName(), exception);
+                //Exception exception = (Exception) params[6];
+                //RequestStacksInfo.setStack(validParam.getInvokeMethodName(), exception);
                 return validParam;
             }
 

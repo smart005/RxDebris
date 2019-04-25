@@ -3,7 +3,6 @@ package com.cloud.nets.requests;
 import android.text.TextUtils;
 
 import com.cloud.cache.RxCache;
-import com.cloud.nets.RequestStacksInfo;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.beans.RetrofitParams;
@@ -97,7 +96,5 @@ public class OkRxHeadRequest extends BaseRequest {
         bindCookies(client, request.url());
         //请求网络
         client.newCall(request).enqueue(callback);
-        //记录请求时的堆栈信息
-        RequestStacksInfo.setStack(retrofitParams.getInvokeMethodName(), new Exception());
     }
 }

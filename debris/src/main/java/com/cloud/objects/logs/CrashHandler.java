@@ -39,7 +39,9 @@ public abstract class CrashHandler implements UncaughtExceptionHandler {
         mContext = ctx;
         apppackgename = packgename;
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(this);
+        if (mDefaultHandler == null) {
+            Thread.setDefaultUncaughtExceptionHandler(this);
+        }
     }
 
     /**

@@ -30,26 +30,20 @@ public class RequestRetryIntercepter implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Request request = null;
-        if (ObjectJudge.isNullOrEmpty(headers)) {
-            request = chain.request();
-        } else {
-            Request.Builder builder = chain.request().newBuilder();
+        Request request = chain.request();
+        if (!ObjectJudge.isNullOrEmpty(headers)) {
+            Request.Builder builder = request.newBuilder();
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 builder.removeHeader(entry.getKey());
                 builder.addHeader(entry.getKey(), entry.getValue());
             }
             request = builder.build();
         }
-        Object tag = request.tag();
-        RequestStacksInfo.setRequestChainInfo(tag, request.method(), request.url().toString(), headers);
         Response response = chain.proceed(request);
         while (!response.isSuccessful() && retryNum < maxRetry) {
             retryNum++;
             response = chain.proceed(request);
         }
-        //记录状态和协议
-        RequestStacksInfo.setRequestStateProtocol(tag, response.code(), response.protocol().toString());
         return response;
     }
 }

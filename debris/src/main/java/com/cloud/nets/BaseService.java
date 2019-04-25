@@ -132,7 +132,7 @@ public class BaseService {
                     returnCodeFilter = validParam.getReturnCodeFilter();
                 }
                 //记录当前线程调用的堆栈信息
-                RequestStacksInfo.setStack(validParam.getInvokeMethodName(), new Exception());
+                //RequestStacksInfo.setStack(validParam.getInvokeMethodName(), new Exception());
                 retrofitParams.setInvokeMethodName(validParam.getInvokeMethodName());
                 //请求api
                 reqQueueItemHashMap.put(apiRequestKey, new ReqQueueItem());
@@ -898,8 +898,8 @@ public class BaseService {
                 finishedRequest(ErrorType.businessProcess, baseSubscriber);
                 return;
             }
-            ScheduledThreadPoolExecutor executor = ThreadPoolUtils.getInstance().getMultiTaskExecutor();
-            ApiRequestRunnable<I, S> runnable = new ApiRequestRunnable<>(apiClass, server, baseSubscriber, validParam, urlAction, decApi, params, decApiAction, new Exception());
+            ScheduledThreadPoolExecutor executor = ThreadPoolUtils.getInstance().getMultiTaskExecutor(8);
+            ApiRequestRunnable<I, S> runnable = new ApiRequestRunnable<>(apiClass, server, baseSubscriber, validParam, urlAction, decApi, params, decApiAction);
             executor.schedule(runnable, 0, TimeUnit.SECONDS);
         } catch (Exception e) {
             finishedRequest(ErrorType.businessProcess, baseSubscriber);
@@ -916,7 +916,6 @@ public class BaseService {
         private I decApi;
         private HashMap<String, Object> params;
         private Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction;
-        private Exception exception = null;
 
         public ApiRequestRunnable(Class<I> apiClass,
                                   S server,
@@ -925,8 +924,7 @@ public class BaseService {
                                   Func2<String, S, Integer> urlAction,
                                   I decApi,
                                   HashMap<String, Object> params,
-                                  Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction,
-                                  Exception exception) {
+                                  Func2<RetrofitParams, I, HashMap<String, Object>> decApiAction) {
             this.apiClass = apiClass;
             this.server = server;
             this.baseSubscriber = baseSubscriber;
@@ -935,7 +933,6 @@ public class BaseService {
             this.decApi = decApi;
             this.params = params;
             this.decApiAction = decApiAction;
-            this.exception = exception;
         }
 
         @Override
@@ -956,7 +953,7 @@ public class BaseService {
                 return;
             }
             //记录之前main线程堆栈信息
-            RequestStacksInfo.setStack(validParam.getInvokeMethodName(), exception);
+            //RequestStacksInfo.setStack(validParam.getInvokeMethodName(), exception);
             apiRequest(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction);
         }
     }

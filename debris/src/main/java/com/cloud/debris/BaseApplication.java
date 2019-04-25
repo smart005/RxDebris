@@ -87,9 +87,6 @@ public abstract class BaseApplication extends Application implements OnApplicati
         super.onCreate();
         this.setOnApplicationLifecycle(this);
         registerActivityLifecycle();
-        if (onApplicationLifecycle != null) {
-            onApplicationLifecycle.onApplicationCreated();
-        }
         //最后初始化全局异常日志处理
         //便于记录日志记录与拦截
         CrashHandler crashHandler = new CrashHandler() {
@@ -101,6 +98,9 @@ public abstract class BaseApplication extends Application implements OnApplicati
             }
         };
         crashHandler.init(this, getPackageName());
+        if (onApplicationLifecycle != null) {
+            onApplicationLifecycle.onApplicationCreated();
+        }
     }
 
     @Override
