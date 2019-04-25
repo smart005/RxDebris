@@ -280,6 +280,7 @@ public abstract class StringCallback implements Callback {
         if (responseDataType == ResponseDataType.object) {
             //object\int\double\float\long\string
             responseData.setResponse(body.string());
+            body.close();
             //输出debug模式下日志
             outputLogForDebug(call, "");
             if (successAction == null) {
