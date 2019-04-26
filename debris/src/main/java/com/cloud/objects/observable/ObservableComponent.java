@@ -1,10 +1,13 @@
 package com.cloud.objects.observable;
 
+import com.cloud.objects.logs.Logger;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -17,7 +20,7 @@ import io.reactivex.schedulers.Schedulers;
  * ModifyContent:
  */
 public abstract class ObservableComponent<Param, Params> {
-    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    private static CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private Params[] params = null;
     private String key = "";
     private Object extras = null;
@@ -93,16 +96,18 @@ public abstract class ObservableComponent<Param, Params> {
                 e.onComplete();
             }
         });
-        DisposableObserver<Param> disposableObserver = new DisposableObserver<Param>() {
+        final DisposableObserver<Param> disposableObserver = new DisposableObserver<Param>() {
             @Override
             public void onNext(Param param) {
                 nextWith(param, ObservableComponent.this.params);
                 nextWith(param, key, ObservableComponent.this.params);
+                disposable(this);
             }
 
             @Override
             public void onError(Throwable e) {
                 completeWith(true, e, ObservableComponent.this.params);
+                disposable(this);
             }
 
             @Override
@@ -115,5 +120,17 @@ public abstract class ObservableComponent<Param, Params> {
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(disposableObserver);
         mCompositeDisposable.add(disposableObserver);
+    }
+
+    private void disposable(Disposable disposable) {
+        try {
+            if (disposable.isDisposed()) {
+                mCompositeDisposable.delete(disposable);
+            } else {
+                mCompositeDisposable.remove(disposable);
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 }

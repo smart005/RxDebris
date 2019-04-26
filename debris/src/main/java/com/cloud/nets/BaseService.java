@@ -41,7 +41,6 @@ import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.PathsUtils;
-import com.cloud.objects.utils.ThreadPoolUtils;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -51,8 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -898,9 +895,10 @@ public class BaseService {
                 finishedRequest(ErrorType.businessProcess, baseSubscriber);
                 return;
             }
-            ScheduledThreadPoolExecutor executor = ThreadPoolUtils.getInstance().getMultiTaskExecutor(8);
+//            ScheduledThreadPoolExecutor executor = ThreadPoolUtils.getInstance().getMultiTaskExecutor(8);
             ApiRequestRunnable<I, S> runnable = new ApiRequestRunnable<>(apiClass, server, baseSubscriber, validParam, urlAction, decApi, params, decApiAction);
-            executor.schedule(runnable, 0, TimeUnit.SECONDS);
+//            executor.schedule(runnable, 0, TimeUnit.SECONDS);
+            runnable.run();
         } catch (Exception e) {
             finishedRequest(ErrorType.businessProcess, baseSubscriber);
         }

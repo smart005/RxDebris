@@ -1,5 +1,6 @@
 package com.cloud.mixed.h5;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.cloud.debris.R;
+import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.dialogs.BaseMessageBox;
 import com.cloud.dialogs.enums.DialogButtonsEnum;
 import com.cloud.dialogs.enums.MsgBoxClickButtonEnum;
@@ -39,6 +41,7 @@ import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.PixelUtils;
 import com.cloud.objects.utils.ValidUtils;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tencent.smtt.export.external.interfaces.GeolocationPermissionsCallback;
 import com.tencent.smtt.export.external.interfaces.JsPromptResult;
 import com.tencent.smtt.export.external.interfaces.JsResult;
@@ -60,6 +63,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * @Author lijinghuan
@@ -462,7 +468,7 @@ public abstract class BaseWebLoad extends WebView {
         public boolean onItemClickListener(View v, MsgBoxClickButtonEnum mcbenum, String target, Object extraData) {
             if (TextUtils.equals(target, "ON_JS_CONFIRM_TARGET")) {
                 JsResult result = (JsResult) extraData;
-                if (result == null) {
+                if (result != null) {
                     if (mcbenum == MsgBoxClickButtonEnum.Confirm) {
                         result.confirm();
                     } else {
@@ -470,14 +476,10 @@ public abstract class BaseWebLoad extends WebView {
                     }
                 }
             } else if (TextUtils.equals(target, "ON_JS_PROMPT_TARGET")) {
-                if (extraData == null) {
-                    dismiss();
-                } else {
+                if (extraData != null) {
                     if (extraData instanceof Object[]) {
                         Object[] extras = (Object[]) extraData;
-                        if (extras == null || extras.length != 2) {
-                            dismiss();
-                        } else {
+                        if (extras != null && extras.length == 2) {
                             JsPromptResult promptResult = (JsPromptResult) extras[0];
                             String defaultText = String.valueOf(extras[1]);
                             if (promptResult != null && !TextUtils.isEmpty(defaultText)) {
@@ -486,23 +488,22 @@ public abstract class BaseWebLoad extends WebView {
                                 } else {
                                     promptResult.cancel();
                                 }
-                            } else {
-                                dismiss();
                             }
                         }
-                    } else {
-                        dismiss();
                     }
                 }
             } else if (TextUtils.equals(target, "ON_JS_ALERT_TARGET")) {
-                if (extraData == null) {
-                    dismiss();
-                } else {
+                if (extraData != null) {
                     JsResult result = (JsResult) extraData;
                     result.confirm();
                 }
-            } else {
-                dismiss();
+            } else if (TextUtils.equals(target, "album_permission")) {
+                if (mcbenum == MsgBoxClickButtonEnum.Confirm) {
+                    if (extraData instanceof Activity) {
+                        Activity activity = (Activity) extraData;
+                        RedirectUtils.startAppSettings(activity);
+                    }
+                }
             }
             return true;
         }
@@ -809,14 +810,33 @@ public abstract class BaseWebLoad extends WebView {
         HandlerManager.getInstance().post(new RunnableParamsN<Object>() {
             @Override
             public void run(Object... objects) {
-                //选择后图片最大压缩大小
-                imageSelectDialog.setMaxFileSize(1024);
-                //最多选择图片数量
-                imageSelectDialog.setMaxSelectNumber(1);
-                //是否显示拍照选项
-                imageSelectDialog.setShowTakingPictures(true);
-                //显示图片选择
-                imageSelectDialog.show(activity);
+                RxPermissions permissions = new RxPermissions(activity);
+                Disposable subscribe = permissions.request(Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Consumer<Boolean>() {
+                            @Override
+                            public void accept(Boolean success) {
+                                if (success) {
+                                    //选择后图片最大压缩大小
+                                    imageSelectDialog.setMaxFileSize(1024);
+                                    //最多选择图片数量
+                                    imageSelectDialog.setMaxSelectNumber(1);
+                                    //是否显示拍照选项
+                                    imageSelectDialog.setShowTakingPictures(true);
+                                    //显示图片选择
+                                    imageSelectDialog.show(activity);
+                                } else {
+                                    mbox.setShowTitle(false);
+                                    mbox.setShowClose(false);
+                                    mbox.setCancelable(false);
+                                    mbox.setContent("未打开相册和拍照权限,请跳转到应用详情页面打开权限.");
+                                    mbox.setTarget("album_permission", activity);
+                                    mbox.show(activity, DialogButtonsEnum.ConfirmCancel);
+                                    finishFileUpload();
+                                }
+                            }
+                        });
             }
         });
     }

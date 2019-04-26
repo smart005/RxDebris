@@ -368,7 +368,8 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
                 "\n" +
                 "</p>\n" +
                 "\n";
-        binding.h5Test.loadData(content);
+        //binding.h5Test.loadData(content);
+        binding.h5Test.load("http://client.jiankanglujing.com:8085/BB_ClientServices/MHtml/index.html#/");
     }
 
     @Override

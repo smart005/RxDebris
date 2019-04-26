@@ -32,9 +32,10 @@ public class RedirectUtils extends BaseRedirectUtils {
      * @param context 上下文
      */
     public static void startAppSettings(Context context) {
+        Context applicationContext = context.getApplicationContext();
         Intent intent = new Intent();
         intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+        Uri uri = Uri.fromParts("package", applicationContext.getPackageName(), null);
         intent.setData(uri);
         context.startActivity(intent);
     }

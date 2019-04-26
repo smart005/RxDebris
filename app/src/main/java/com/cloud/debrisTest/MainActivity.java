@@ -21,6 +21,7 @@ import com.cloud.objects.events.OnChainRunnable;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.observable.ObservableComponent;
 import com.cloud.objects.storage.DirectoryUtils;
 import com.cloud.objects.tasks.SyncChainTasks;
 import com.cloud.objects.utils.JsonUtils;
@@ -134,6 +135,13 @@ public class MainActivity extends BaseActivity {
         RxCache.setCacheData("cache_key", "2222");
         String data = RxCache.getCacheData("cache_key");
     }
+
+    private ObservableComponent component = new ObservableComponent() {
+        @Override
+        protected Object subscribeWith(Object[] objects) throws Exception {
+            return null;
+        }
+    };
 
     public void OnNetFrameClick(View view) {
         RedirectUtils.startActivity(this, OKHttpSimple.class,
