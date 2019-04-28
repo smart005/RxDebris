@@ -26,6 +26,8 @@ import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.ValidUtils;
 
+import org.json.JSONArray;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -172,8 +174,22 @@ public class ObjectJudge {
      * param list 列表集合
      * return
      */
-    public static Boolean isNullOrEmpty(List<?> list) {
+    public static boolean isNullOrEmpty(List<?> list) {
         if (list != null && !list.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 判断列表是否为空
+     *
+     * @param array JSONArray
+     * @return true-空或长度==0,otherwise false;
+     */
+    public static boolean isNullOrEmpty(JSONArray array) {
+        if (array != null && array.length() > 0) {
             return false;
         } else {
             return true;
@@ -589,11 +605,22 @@ public class ObjectJudge {
         }
         //判断是否为json格式{...}或[...]
         String regex = "^(\\{(.+)*\\})$|^(\\[(.+)*\\])$";
-        if (ValidUtils.valid(regex, json)) {
-            return true;
-        } else {
+        return ValidUtils.valid(regex, json);
+    }
+
+    /**
+     * 判断是否json数组
+     *
+     * @param json json字符串
+     * @return true-json array,otherwise false;
+     */
+    public static boolean isJsonArray(String json) {
+        if (ObjectJudge.isEmptyString(json)) {
             return false;
         }
+        //判断是否[]格式
+        String regex = "^(\\[(.+)*\\])$";
+        return ValidUtils.valid(regex, json);
     }
 
     /**

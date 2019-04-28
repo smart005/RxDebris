@@ -29,7 +29,7 @@ public class Info {
     private long RefreshUnixTime;
     private long RecommendTime;
     private String RecId;//大家在聊推荐信息的推荐ID(暂用于埋点)
-    @OriginalField(values = {"List", "InfoList"})
+    @OriginalField(values = {"List", "InfoList", "Result"})
     private String origMsg;
     private boolean IsRec;
     private int InfoStatus;

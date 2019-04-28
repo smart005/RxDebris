@@ -12,6 +12,9 @@ import android.view.View;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.logs.Logger;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -687,6 +690,25 @@ public class ConvertUtils {
             } catch (IOException e) {
                 Logger.error(e);
             }
+        }
+    }
+
+    /**
+     * 转换json字符串为JSONArray
+     *
+     * @param jsonArray json字符串
+     * @return JSONArray
+     */
+    public static JSONArray toJSONArray(String jsonArray) {
+        if (TextUtils.isEmpty(jsonArray) || !ObjectJudge.isJsonArray(jsonArray)) {
+            //json字符串为空或非json数组
+            return null;
+        }
+        try {
+            JSONArray array = new JSONArray(jsonArray);
+            return array;
+        } catch (JSONException e) {
+            return null;
         }
     }
 }

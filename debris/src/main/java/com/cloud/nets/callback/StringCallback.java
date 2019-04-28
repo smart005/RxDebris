@@ -137,7 +137,7 @@ public abstract class StringCallback implements Callback {
             }
         }
         //输出debug模式下日志
-        outputLogForDebug(call, e.getMessage());
+        outputLogForDebug(call, e.getMessage(), false);
         if (call.isCanceled()) {
             if (completeAction != null) {
                 //请求失败后是否重试
@@ -239,7 +239,7 @@ public abstract class StringCallback implements Callback {
                     completeAction.call(RequestState.Error, ErrorType.businessProcess);
                 }
                 //输出debug模式下日志
-                outputLogForDebug(call, String.format("protocol=%s;code=%s;message=%s;", response.protocol().toString(), response.code(), response.message()));
+                outputLogForDebug(call, String.format("protocol=%s;code=%s;message=%s;", response.protocol().toString(), response.code(), response.message()), OkRx.getInstance().isPrintDebugNetLog());
             } else {
                 ResponseBody body = response.body();
                 if (body == null) {
@@ -253,7 +253,7 @@ public abstract class StringCallback implements Callback {
                         completeAction.call(RequestState.Error, ErrorType.businessProcess);
                     }
                     //输出debug模式下日志
-                    outputLogForDebug(call, String.format("protocol=%s;code=%s;message=%s;", response.protocol().toString(), response.code(), response.message()));
+                    outputLogForDebug(call, String.format("protocol=%s;code=%s;message=%s;", response.protocol().toString(), response.code(), response.message()), true);
                 } else {
                     bindResponseData(call, body);
                 }
@@ -282,7 +282,7 @@ public abstract class StringCallback implements Callback {
             responseData.setResponse(body.string());
             body.close();
             //输出debug模式下日志
-            outputLogForDebug(call, "");
+            outputLogForDebug(call, "", OkRx.getInstance().isPrintDebugNetLog());
             if (successAction == null) {
                 return;
             }
@@ -325,13 +325,13 @@ public abstract class StringCallback implements Callback {
     }
 
     //输出debug模式下日志
-    private void outputLogForDebug(Call call, String message) {
+    private void outputLogForDebug(Call call, String message, boolean isPrintDebugNetLog) {
         if (call == null) {
             return;
         }
         //如果debug模式下打印日志
         RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
-        if (builder.isDebug() && OkRx.getInstance().isPrintDebugNetLog()) {
+        if (builder.isDebug() && isPrintDebugNetLog) {
             //获取url
             Request request = call.request();
             HttpUrl httpUrl = request.url();

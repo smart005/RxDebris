@@ -34,5 +34,5 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':debris')
-//    implementation 'com.cloud:debris:1.0.96'
+//    implementation 'com.cloud:debris:1.1.3'
 }

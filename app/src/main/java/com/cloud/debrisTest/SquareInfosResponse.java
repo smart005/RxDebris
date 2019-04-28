@@ -1,8 +1,6 @@
 package com.cloud.debrisTest;
 
 
-import com.cloud.nets.beans.BaseBean;
-
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
@@ -11,7 +9,7 @@ import com.cloud.nets.beans.BaseBean;
  * Modifier:
  * ModifyContent:
  */
-public class SquareInfosResponse extends BaseBean {
+public class SquareInfosResponse {
     /**
      * 广场数据
      */
