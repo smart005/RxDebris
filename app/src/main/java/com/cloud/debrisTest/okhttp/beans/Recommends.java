@@ -36,7 +36,7 @@ public class Recommends {
     private int InfoType;
     private boolean IsMoreImages;
     private int ID;
-    @OriginalField(value = "Recommends")
+    @OriginalField(values = {"Recommends", "Recommends2"})
     private String recommandJson;
 
     public int getSiteID() {

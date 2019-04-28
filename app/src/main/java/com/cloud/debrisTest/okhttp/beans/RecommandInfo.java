@@ -2,6 +2,7 @@ package com.cloud.debrisTest.okhttp.beans;
 
 import com.cloud.nets.beans.BaseBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,6 +18,8 @@ public class RecommandInfo extends BaseBean {
     private List<Slides> Slides;
     private List<Recommends> Recommends;
 
+    private List<Recommends> Recommends2;
+
     public List<Slides> getSlides() {
         return Slides;
     }
@@ -31,5 +34,16 @@ public class RecommandInfo extends BaseBean {
 
     public void setRecommends(List<Recommends> Recommends) {
         this.Recommends = Recommends;
+    }
+
+    public List<com.cloud.debrisTest.okhttp.beans.Recommends> getRecommends2() {
+        if (Recommends2 == null) {
+            return new ArrayList<>();
+        }
+        return Recommends2;
+    }
+
+    public void setRecommends2(List<com.cloud.debrisTest.okhttp.beans.Recommends> recommends2) {
+        Recommends2 = recommends2;
     }
 }

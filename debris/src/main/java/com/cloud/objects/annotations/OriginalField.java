@@ -24,5 +24,5 @@ public @interface OriginalField {
      *
      * @return 字段名
      */
-    String value();
+    String[] values();
 }

@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
 @BaseUrlTypeName(value = ServiceAPI.mtalksvc, contentType = RequestContentType.Json)
 public interface IGetAPI {
 
-//    @GET(value = "/AHome/GetRecommendInfor", isFailureRetry = true, isAssociatedAssignment = true)
+    //    @GET(value = "/AHome/GetRecommendInfor", isFailureRetry = true, isAssociatedAssignment = true)
     @BaseUrlTypeName(contentType = RequestContentType.Form)
-    @GET(value = "{url}", isFullUrl = true)
+    @GET(value = "{url}", isFullUrl = true, isAssociatedAssignment = true)
     @RequestTimeLimit(totalTime = "{requestTime}", unit = TimeUnit.SECONDS)
     @DataParam(RecommandInfo.class)
     RetrofitParams requestRecommandInfo(
