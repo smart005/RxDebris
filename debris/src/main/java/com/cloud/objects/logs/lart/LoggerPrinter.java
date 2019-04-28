@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.transform.OutputKeys;
@@ -27,14 +28,13 @@ import static com.cloud.objects.logs.lart.Logger.ERROR;
 import static com.cloud.objects.logs.lart.Logger.INFO;
 import static com.cloud.objects.logs.lart.Logger.VERBOSE;
 import static com.cloud.objects.logs.lart.Logger.WARN;
-import static com.cloud.objects.logs.lart.Utils.checkNotNull;
 
 class LoggerPrinter implements Printer {
 
     /**
      * It is used for json pretty print
      */
-    private static final int JSON_INDENT = 2;
+    private final int JSON_INDENT = 2;
 
     /**
      * Provides one-time used tag for the log message
@@ -150,22 +150,33 @@ class LoggerPrinter implements Printer {
         if (Utils.isEmpty(message)) {
             message = "Empty/NULL log message";
         }
-
-        for (LogAdapter adapter : logAdapters) {
-            if (adapter.isLoggable(priority, tag)) {
-                adapter.log(priority, tag, message);
+        synchronized (logAdapters) {
+            Iterator<LogAdapter> iterator = logAdapters.iterator();
+            while (iterator.hasNext()) {
+                LogAdapter next = iterator.next();
+                if (next.isLoggable(priority, tag)) {
+                    next.log(priority, tag, message);
+                }
+                iterator.remove();
             }
         }
     }
 
     @Override
     public void clearLogAdapters() {
-        logAdapters.clear();
+        synchronized (logAdapters) {
+            logAdapters.clear();
+        }
     }
 
     @Override
-    public void addAdapter(@NonNull LogAdapter adapter) {
-        logAdapters.add(checkNotNull(adapter));
+    public void addAdapter(LogAdapter adapter) {
+        if (adapter == null) {
+            return;
+        }
+        synchronized (logAdapters) {
+            logAdapters.add(adapter);
+        }
     }
 
     /**

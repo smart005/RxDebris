@@ -58,6 +58,8 @@ public class OkRx {
     private OnHeaderCookiesListener onHeaderCookiesListener = null;
     //跟踪日志是否带固件配置信息(默认false)
     private boolean isHasFirmwareConfigInformationForTraceLog = false;
+    //是否输出网络日志(只有在debug模式下才生效,默认false)
+    private boolean isPrintDebugNetLog = false;
 
     public static OkRx getInstance() {
         if (okRx == null) {
@@ -409,5 +411,30 @@ public class OkRx {
             this.isHasFirmwareConfigInformationForTraceLog = ObjectJudge.isTrue(o);
         }
         return this.isHasFirmwareConfigInformationForTraceLog;
+    }
+
+    /**
+     * 是否输出网络日志(只有在debug模式下才生效,默认false)
+     *
+     * @return true-输出debug模式下网络请求日志,false-不输出;
+     */
+    public boolean isPrintDebugNetLog() {
+        if (!isPrintDebugNetLog) {
+            Object printDebugNetLog = MemoryCache.getInstance().getSoftCache("$_PrintDebugNetLog");
+            isPrintDebugNetLog = ObjectJudge.isTrue(printDebugNetLog);
+        }
+        return isPrintDebugNetLog;
+    }
+
+    /**
+     * 设置debug模式网络日志是否输出
+     *
+     * @param printDebugNetLog true-输出debug模式下网络请求日志,false-不输出;
+     * @return OkRx
+     */
+    public OkRx setPrintDebugNetLog(boolean printDebugNetLog) {
+        isPrintDebugNetLog = printDebugNetLog;
+        MemoryCache.getInstance().setSoftCache("$_PrintDebugNetLog", printDebugNetLog);
+        return this;
     }
 }

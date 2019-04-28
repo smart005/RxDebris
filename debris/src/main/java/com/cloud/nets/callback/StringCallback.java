@@ -331,7 +331,7 @@ public abstract class StringCallback implements Callback {
         }
         //如果debug模式下打印日志
         RxAndroid.RxAndroidBuilder builder = RxAndroid.getInstance().getBuilder();
-        if (builder.isDebug()) {
+        if (builder.isDebug() && OkRx.getInstance().isPrintDebugNetLog()) {
             //获取url
             Request request = call.request();
             HttpUrl httpUrl = request.url();
