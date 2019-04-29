@@ -21,6 +21,7 @@ import com.cloud.objects.events.OnChainRunnable;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.mapper.UrlParamsEntry;
 import com.cloud.objects.observable.ObservableComponent;
 import com.cloud.objects.storage.DirectoryUtils;
 import com.cloud.objects.tasks.SyncChainTasks;
@@ -134,6 +135,11 @@ public class MainActivity extends BaseActivity {
 
         RxCache.setCacheData("cache_key", "2222");
         String data = RxCache.getCacheData("cache_key");
+
+        UrlParamsEntry urlParamsEntry = new UrlParamsEntry();
+        urlParamsEntry.mapper("http://image.baidu.com/search/detail?ct=503316480&z=0&ipn=d&word=图片&hs=0&pn=1&spn=0&di=176660&pi=0&rn=1&tn=baiduimagedetail&is=0%2C0&ie=utf-8&oe=utf-8&cl=2&lm=-1&cs=234634259%2C4236876085&os=54892700%2C159557102&simid=3579428015%2C308375459&adpicid=0&lpn=0&ln=30&fr=ala&fm=&sme=&cg=&bdtype=0&oriquery=&objurl=http%3A%2F%2Fpic15.nipic.com%2F20110628%2F1369025_192645024000_2.jpg&fromurl=ippr_z2C%24qAzdH3FAzdH3Fooo_z%26e3Bgtrtv_z%26e3Bv54AzdH3Ffi5oAzdH3F90088lb_z%26e3Bip4s&gsm=0&islist=&querylist=");
+        urlParamsEntry.getParams("word");
+        boolean containsKey = urlParamsEntry.containsKey("objurl");
     }
 
     private ObservableComponent component = new ObservableComponent() {

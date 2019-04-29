@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.cloud.debris.enums.StatisticalTypes;
 import com.cloud.debris.event.OnLifeCycleStatistical;
 import com.cloud.debris.event.OnSupperProperties;
+import com.cloud.ebus.EBus;
 
 /**
  * Author lijinghuan
@@ -23,6 +24,7 @@ public class BaseActivity extends Activity implements OnSupperProperties, OnLife
     protected void onCreate(Bundle savedInstanceState) {
         bundleData = new BundleData(getIntent());
         super.onCreate(savedInstanceState);
+        EBus.getInstance().registered(this);
     }
 
     @Override
@@ -32,6 +34,12 @@ public class BaseActivity extends Activity implements OnSupperProperties, OnLife
         } catch (Exception e) {
             SuperActivitySupport.callUpActivity(this);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EBus.getInstance().unregister(this);
     }
 
     @Override

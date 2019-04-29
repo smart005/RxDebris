@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.cloud.objects.mapper.UrlParamsEntry;
 import com.cloud.objects.utils.GlobalUtils;
 import com.tencent.smtt.sdk.WebView;
 
@@ -73,15 +74,12 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
         if (listener == null) {
             return false;
         }
-        HashMap<String, String> urlParams = GlobalUtils.getUrlParams(url);
-        if (urlParams.containsKey("scheme")) {
-            String schemeUrl = urlParams.get("scheme");
-            if (!TextUtils.isEmpty(schemeUrl)) {
-                listener.nativeSchemeCall(schemeUrl);
-                return true;
-            } else {
-                return listener.onUrlListener(url);
-            }
+        UrlParamsEntry urlParamsEntry = new UrlParamsEntry();
+        urlParamsEntry.mapper(url);
+        String scheme = urlParamsEntry.getParams("scheme");
+        if (!TextUtils.isEmpty(scheme)) {
+            listener.nativeSchemeCall(scheme);
+            return true;
         } else {
             return listener.onUrlListener(url);
         }
@@ -116,7 +114,7 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
     }
 
     private boolean callSms(String url) {
-        if (url.contains("sms:")||url.contains("smsto:")) {
+        if (url.contains("sms:") || url.contains("smsto:")) {
             L listener = getWebListener();
             if (listener != null) {
                 listener.onCallSms(url);

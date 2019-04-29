@@ -5,8 +5,10 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.View;
 
 import com.cloud.debris.event.OnSupperProperties;
+import com.cloud.ebus.EBus;
 
 /**
  * Author lijinghuan
@@ -39,6 +41,17 @@ public class BaseFragment extends Fragment implements OnSupperProperties {
         if (Build.VERSION.SDK_INT < 23) {
             onAttached(activity);
         }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        EBus.getInstance().registered(this);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        EBus.getInstance().unregister(this);
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import com.cloud.debris.enums.StatisticalTypes;
 import com.cloud.debris.event.OnLifeCycleStatistical;
 import com.cloud.debris.event.OnSupperProperties;
+import com.cloud.ebus.EBus;
 
 /**
  * Author lijinghuan
@@ -23,6 +24,7 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
     protected void onCreate(Bundle savedInstanceState) {
         bundleData = new BundleData(getIntent());
         super.onCreate(savedInstanceState);
+        EBus.getInstance().registered(this);
     }
 
     @Override
@@ -32,6 +34,12 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
         } catch (Exception e) {
             SuperActivitySupport.callUpActivity(this);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EBus.getInstance().unregister(this);
     }
 
     @Override

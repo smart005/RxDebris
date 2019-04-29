@@ -18,7 +18,18 @@ import java.util.regex.Pattern;
 public class ValidUtils {
 
     public static boolean valid(String pattern, String input) {
-        boolean flag = Pattern.matches(pattern, TextUtils.isEmpty(input) ? "" : input);
+        if (TextUtils.isEmpty(input)) {
+            return false;
+        }
+        boolean flag = false;
+        Pattern pat = Pattern.compile(pattern);
+        Matcher mat = pat.matcher(input);
+        while (mat.find()) {
+            flag = mat.groupCount() > 0;
+            if (flag) {
+                break;
+            }
+        }
         return flag;
     }
 

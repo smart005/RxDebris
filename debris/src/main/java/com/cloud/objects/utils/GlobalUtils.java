@@ -19,14 +19,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.cloud.objects.ObjectJudge;
-import com.cloud.objects.ObjectManager;
 import com.cloud.objects.enums.RuleParams;
 import com.cloud.objects.logs.Logger;
 
@@ -37,7 +33,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -383,27 +378,6 @@ public class GlobalUtils {
                 task.cancel(true);
             }
         }
-    }
-
-    public static HashMap<String, String> getUrlParams(String url) {
-        HashMap<String, String> hashMap = new HashMap<String, String>();
-        if (!TextUtils.isEmpty(url) && url.contains("?")) {
-            String paramString = url.substring(url.indexOf("?") + 1);
-            if (!TextUtils.isEmpty(paramString)) {
-                String[] params = paramString.split("&");
-                if (!ObjectJudge.isNullOrEmpty(params)) {
-                    for (String param : params) {
-                        if (!TextUtils.isEmpty(param)) {
-                            String[] itemlst = param.split("=");
-                            if (itemlst.length > 1) {
-                                hashMap.put(itemlst[0].trim(), itemlst[1].trim());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return hashMap;
     }
 
     /**

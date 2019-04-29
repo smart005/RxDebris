@@ -11,7 +11,7 @@ public class ToastUtils {
 
     private static Toast buildToast(Context context, CharSequence message, int duration, int yOffset) {
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, yOffset);
+        //toast.setGravity(Gravity.CENTER, 0, yOffset);
         return toast;
     }
 
