@@ -177,6 +177,6 @@ public class MainActivity extends BaseActivity {
     }
 
     public void OnToastClick(View view) {
-        ToastUtils.showWarning(this, "默认消息");
+        ToastUtils.show(this, "默认消息");
     }
 }
