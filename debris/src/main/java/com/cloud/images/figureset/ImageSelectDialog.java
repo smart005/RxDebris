@@ -281,13 +281,13 @@ public class ImageSelectDialog {
         if (intent.resolveActivity(activity.getPackageManager()) != null) {
             takingFile = getTempImageFile();
             if (takingFile == null) {
-                ToastUtils.showLong(activity, R.string.mis_error_image_not_exist);
+                ToastUtils.show(activity, R.string.mis_error_image_not_exist);
             } else {
                 intent.putExtra("output", Uri.fromFile(takingFile));
                 activity.startActivityForResult(intent, ONLY_TAKING_RESULT_CODE);
             }
         } else {
-            ToastUtils.showLong(activity, R.string.mis_msg_no_camera);
+            ToastUtils.show(activity, R.string.mis_msg_no_camera);
         }
     }
 

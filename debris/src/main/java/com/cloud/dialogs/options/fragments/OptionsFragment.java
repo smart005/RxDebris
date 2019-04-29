@@ -195,12 +195,12 @@ public class OptionsFragment extends BaseDialogPlugFragment<Object[], DialogPlus
                 OptionsItem optionsItem = map.get(item.getId());
                 if (optionsItem == null || TextUtils.isEmpty(optionsItem.getId())) {
                     map.put(item.getId(), new OptionsItem());
-                    ToastUtils.showLong(getContext(), item.getTip());
+                    ToastUtils.show(getContext(), item.getTip());
                     return false;
                 }
             } else {
                 map.put(item.getId(), new OptionsItem());
-                ToastUtils.showLong(getContext(), item.getTip());
+                ToastUtils.show(getContext(), item.getTip());
                 return false;
             }
         }

@@ -414,7 +414,7 @@ public class Logger {
      * @param json json内容
      */
     public static void json(String tag, @Nullable String json) {
-        if (logIntercept(tag, LogLevel.json, json, null, null)) {
+        if (logIntercept(tag, LogLevel.json, json, null, (Object) null)) {
             return;
         }
         printer(tag).json(json);
@@ -436,7 +436,7 @@ public class Logger {
      * @param xml xml内容
      */
     public static void xml(String tag, @Nullable String xml) {
-        if (logIntercept(tag, LogLevel.xml, xml, null, null)) {
+        if (logIntercept(tag, LogLevel.xml, xml, null, (Object) null)) {
             return;
         }
         printer(tag).xml(xml);

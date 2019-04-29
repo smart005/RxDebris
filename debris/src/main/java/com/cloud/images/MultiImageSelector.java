@@ -88,7 +88,7 @@ public class MultiImageSelector {
                         if (granted) {
                             activity.startActivityForResult(createIntent(activity), requestCode);
                         } else {
-                            ToastUtils.showLong(activity, "无摄像头权限,请转到设置页面开启.");
+                            ToastUtils.show(activity, "无摄像头权限,请转到设置页面开启.");
                         }
                     }
                 });
@@ -106,7 +106,7 @@ public class MultiImageSelector {
                         if (granted) {
                             fragment.startActivityForResult(createIntent(fragment.getContext()), requestCode);
                         } else {
-                            ToastUtils.showLong(fragment.getContext(), "无摄像头权限,请转到设置页面开启.");
+                            ToastUtils.show(fragment.getContext(), "无摄像头权限,请转到设置页面开启.");
                         }
                     }
                 });

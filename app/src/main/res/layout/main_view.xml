@@ -46,5 +46,12 @@
             android:layout_marginTop="@dimen/spacing_8"
             android:onClick="@{(view)->handler.OnImageFunctionClick(view)}"
             android:text="图片相关功能" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnToastClick(view)}"
+            android:text="Toast Message" />
     </LinearLayout>
 </layout>

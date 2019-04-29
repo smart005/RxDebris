@@ -13,6 +13,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Environment;
 import android.os.Looper;
+import android.support.annotation.CheckResult;
+import android.support.v4.app.NotificationManagerCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -308,6 +310,7 @@ public class ObjectJudge {
      * param object true或大于0都为真,否则为假
      * return
      */
+    @CheckResult
     public static boolean isTrue(Object object) {
         if (object == null) {
             return false;
@@ -421,6 +424,7 @@ public class ObjectJudge {
      *
      * @return
      */
+    @CheckResult
     public static boolean hasSDCard() {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return true;
@@ -436,6 +440,7 @@ public class ObjectJudge {
      * @param action  广播action
      * @return
      */
+    @CheckResult
     public static boolean isRegisterBroadcast(Context context, String action) {
         if (context == null || TextUtils.isEmpty(action)) {
             return false;
@@ -455,6 +460,7 @@ public class ObjectJudge {
      * @param <T>
      * @return
      */
+    @CheckResult
     public static <T> boolean isMatchPropertyValue(T t, String field, Object propertyValue) {
         if (t == null || TextUtils.isEmpty(field) || propertyValue == null) {
             return false;
@@ -483,6 +489,7 @@ public class ObjectJudge {
      * @param <T>
      * @return
      */
+    @CheckResult
     public static <T> boolean isMatchPropertyValues(T t, LinkedHashMap<String, String> fieldValues) {
         if (ObjectJudge.isNullOrEmpty(fieldValues)) {
             return false;
@@ -558,6 +565,7 @@ public class ObjectJudge {
      *
      * @return true-主线程;false-非主线程;
      */
+    @CheckResult
     public static boolean isMainThread() {
         return Looper.myLooper() == Looper.getMainLooper();
     }
@@ -569,6 +577,7 @@ public class ObjectJudge {
      * @param collections 枚举集合
      * @return true-包含;false-不包含;
      */
+    @CheckResult
     public static boolean isContains(String condition, String... collections) {
         if (TextUtils.isEmpty(condition) || isNullOrEmpty(collections)) {
             return false;
@@ -585,6 +594,7 @@ public class ObjectJudge {
      * @param collections 枚举集合
      * @return true-包含;false-不包含;
      */
+    @CheckResult
     public static boolean isContains(int condition, Integer... collections) {
         if (isNullOrEmpty(collections)) {
             return false;
@@ -599,6 +609,7 @@ public class ObjectJudge {
      * @param json json字符串
      * @return true-json;false-非json;
      */
+    @CheckResult
     public static boolean isJson(String json) {
         if (ObjectJudge.isEmptyString(json)) {
             return false;
@@ -614,6 +625,7 @@ public class ObjectJudge {
      * @param json json字符串
      * @return true-json array,otherwise false;
      */
+    @CheckResult
     public static boolean isJsonArray(String json) {
         if (ObjectJudge.isEmptyString(json)) {
             return false;
@@ -629,6 +641,7 @@ public class ObjectJudge {
      * @param json json字符串
      * @return true-空;false-非空;
      */
+    @CheckResult
     public static boolean isEmptyJson(String json) {
         if (ObjectJudge.isEmptyString(json)) {
             return true;
@@ -672,6 +685,7 @@ public class ObjectJudge {
      * @param jsonString json
      * @return true-包含;false-不包含;
      */
+    @CheckResult
     public static boolean isContainerJsonKey(String keyName, String jsonString) {
         return JsonUtils.containerKey(keyName, jsonString);
     }
@@ -683,6 +697,7 @@ public class ObjectJudge {
      * @param matchValue 被匹配的值
      * @return true-在匹配项中,反之不在;
      */
+    @CheckResult
     public static boolean isMatch(int[] array, int matchValue) {
         if (isNullOrEmpty(array)) {
             return false;
@@ -703,6 +718,7 @@ public class ObjectJudge {
      * @param matchValue 被匹配的值
      * @return true-在匹配项中,反之不在;
      */
+    @CheckResult
     public static boolean isMatch(String[] array, String matchValue) {
         if (isNullOrEmpty(array)) {
             return false;
@@ -722,6 +738,7 @@ public class ObjectJudge {
      * @param values 字符串数组
      * @return true-所有元素均不为空,反之false;
      */
+    @CheckResult
     public static boolean isEmpty(String... values) {
         if (isNullOrEmpty(values)) {
             return true;
@@ -732,5 +749,16 @@ public class ObjectJudge {
             }
         }
         return false;
+    }
+
+    /**
+     * 判断通知栏权限是否开启
+     *
+     * @param context 上下文
+     * @return true-开启;false-关闭;
+     */
+    @CheckResult
+    public static boolean isNotificationEnabled(Context context) {
+        return NotificationManagerCompat.from(context).areNotificationsEnabled();
     }
 }
