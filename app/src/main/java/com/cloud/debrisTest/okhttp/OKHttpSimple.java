@@ -15,6 +15,7 @@ import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.events.OnSuccessfulListener;
 import com.cloud.objects.TimingManager;
 import com.cloud.objects.injection.FieldInjections;
+import com.cloud.objects.observable.ObservableComponent;
 import com.cloud.objects.utils.JsonUtils;
 
 public class OKHttpSimple extends AppCompatActivity {
@@ -27,7 +28,16 @@ public class OKHttpSimple extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.okhttp_view);
         binding.setModel(new NetModel());
 
-//        getService.requestRecommandInfo(42, recommandListener);
+        ObservableComponent<Object, Object> component = new ObservableComponent<Object, Object>() {
+            @Override
+            protected Object subscribeWith(Object[] objects) throws Exception {
+                for (int i = 0; i < 1500; i++) {
+                    getService.requestRecommandInfo(42, recommandListener);
+                }
+                return null;
+            }
+        };
+        component.build();
 
 //        getService.requestUserList(new OnSuccessfulListener<String>() {
 //            @Override

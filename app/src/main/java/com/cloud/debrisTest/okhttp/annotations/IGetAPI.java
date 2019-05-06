@@ -32,7 +32,7 @@ public interface IGetAPI {
 
     //    @GET(value = "/AHome/GetRecommendInfor", isFailureRetry = true, isAssociatedAssignment = true)
     @BaseUrlTypeName(contentType = RequestContentType.Form)
-    @GET(value = "{url}", isFullUrl = true, isAssociatedAssignment = true)
+    @GET(value = "{url}", isFullUrl = true)
     @RequestTimeLimit(totalTime = "{requestTime}", unit = TimeUnit.SECONDS)
     @DataParam(RecommandInfo.class)
     RetrofitParams requestRecommandInfo(

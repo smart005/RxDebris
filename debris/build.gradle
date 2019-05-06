@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 28
@@ -44,24 +43,11 @@ android {
         }
     }
 }
-greendao {
-    schemaVersion 8
-    daoPackage 'com.cloud.cache.daos'
-    targetGenDir 'src/main/java/'
-}
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    //noinspection GradleDependency,GradleCompatible
-    api 'com.android.support:support-v4:27.1.1'
-    //noinspection GradleDependency,GradleCompatible
-    api 'com.android.support:appcompat-v7:27.1.1'
-    api 'com.google.code.gson:gson:2.8.5'
     //changshuo project use for aliyun log
     api 'com.alibaba:fastjson:1.2.46'
-    api 'io.reactivex.rxjava2:rxjava:2.2.7'
-    api 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    api 'org.greenrobot:greendao:3.2.2'
-    api 'org.greenrobot:greendao-generator:3.2.2'
+
     //https://github.com/tbruyelle/RxPermissions
     api 'com.github.tbruyelle:rxpermissions:0.10.2'
     api 'com.squareup.okhttp3:okhttp:3.12.1'
@@ -70,6 +56,8 @@ dependencies {
     //glide
     api 'com.github.bumptech.glide:glide:4.6.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    //libsdk
+    api('com.cloud:libsdk:1.0.3')
 }
 
 apply from: 'nexus-push.gradle'

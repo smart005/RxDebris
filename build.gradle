@@ -1,18 +1,17 @@
 buildscript {
     repositories {
         maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/' }
-        maven { url 'http://192.168.200.156:8081/repository/ch_android_library/' }
+        maven { url 'http://192.168.200.156:8081/repository/group-android/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath 'org.greenrobot:greendao-gradle-plugin:3.2.2'
     }
 }
 
 allprojects {
     repositories {
         maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/' }
-        maven { url 'http://192.168.200.156:8081/repository/ch_android_library/' }
+        maven { url 'http://192.168.200.156:8081/repository/group-android/' }
     }
 }
 
