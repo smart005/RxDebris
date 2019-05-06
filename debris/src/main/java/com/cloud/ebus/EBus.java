@@ -11,10 +11,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.events.Action3;
 import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.ThreadPoolUtils;
@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * Author lijinghuan
@@ -97,7 +98,8 @@ public class EBus {
             return;
         }
         Class<?> sub = subscriber.getClass();
-        ThreadPoolUtils.getInstance().singleTaskExecute(new UnRegisterRunable(sub));
+        UnRegisterRunable unRegisterRunable = new UnRegisterRunable(sub);
+        unRegisterRunable.run();
     }
 
     private class UnRegisterRunable implements Runnable {
@@ -261,7 +263,7 @@ public class EBus {
         if (TextUtils.isEmpty(receiveKey)) {
             return;
         }
-        ThreadPoolUtils.getInstance().singleTaskExecute(new SendPostRunable(context, processName, receiveKey, event, isProcessTask, total, postCount, sendCompletedAction));
+        ScheduledFuture<?> future = ThreadPoolUtils.getInstance().singleTaskExecute(new SendPostRunable(context, processName, receiveKey, event, isProcessTask, total, postCount, sendCompletedAction));
     }
 
     /**

@@ -16,6 +16,8 @@ import com.cloud.objects.enums.ResultState;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.observable.ObservableComponent;
+import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.ThreadPoolUtils;
 
@@ -143,12 +145,23 @@ public class BaseSubscriber<T, BaseT extends BaseService> {
         //如果isProcessNetResults==false则直接返回交由外面处理
         OkRxConfigParams okRxConfigParams = OkRx.getInstance().getOkRxConfigParams();
         if (okRxConfigParams.isProcessNetResults()) {
-            ScheduledThreadPoolExecutor multiTaskExecutor = getMultiTaskExecutor();
-            ThreadPoolUtils.getInstance().addTask(multiTaskExecutor, new ApiCallWith(t, dataType, requestStartTime, requestTotalTime));
+            component.build(t, dataType, requestStartTime, requestTotalTime);
         } else {
             successWith(t, ResultState.Success, dataType, requestStartTime, requestTotalTime);
         }
     }
+
+    private ObservableComponent<Object, Object> component = new ObservableComponent<Object, Object>() {
+        @Override
+        protected Object subscribeWith(Object[] params) {
+            T t = (T) params[0];
+            DataType dataType = (DataType) params[1];
+            long requestStartTime = ConvertUtils.toLong(params[2]);
+            long requestTotalTime = ConvertUtils.toLong(params[3]);
+            new ApiCallWith(t, dataType, requestStartTime, requestTotalTime);
+            return null;
+        }
+    };
 
     private class ResultParams {
         public T t;
