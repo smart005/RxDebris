@@ -16,8 +16,9 @@ import com.cloud.objects.events.Action3;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.observable.ObservableComponent;
+import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.JsonUtils;
-import com.cloud.objects.utils.ThreadPoolUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
 
 /**
  * Author lijinghuan
@@ -259,11 +259,26 @@ public class EBus {
      * @param sendCompletedAction 发送完成回调
      * @param event               事件参数(将作为接收方法传入)
      */
-    private void post(Context context, String processName, String receiveKey, boolean isProcessTask, int total, int postCount, Action3<Integer, Integer, Context> sendCompletedAction, Object... event) {
+    private void post(final Context context, final String processName, final String receiveKey, final boolean isProcessTask, final int total, final int postCount, final Action3<Integer, Integer, Context> sendCompletedAction, final Object... event) {
         if (TextUtils.isEmpty(receiveKey)) {
             return;
         }
-        ScheduledFuture<?> future = ThreadPoolUtils.getInstance().singleTaskExecute(new SendPostRunable(context, processName, receiveKey, event, isProcessTask, total, postCount, sendCompletedAction));
+        ObservableComponent component = new ObservableComponent() {
+            @Override
+            protected Object subscribeWith(Object[] params) {
+                SendPostRunable postRunable = new SendPostRunable((Context) params[0],
+                        String.valueOf(params[1]),
+                        String.valueOf(params[2]),
+                        (Object[]) params[3],
+                        ObjectJudge.isTrue(params[4]),
+                        ConvertUtils.toInt(params[5]),
+                        ConvertUtils.toInt(params[6]),
+                        sendCompletedAction);
+                postRunable.run();
+                return null;
+            }
+        };
+        component.build(context, processName, receiveKey, event, isProcessTask, total, postCount, sendCompletedAction);
     }
 
     /**

@@ -3,11 +3,9 @@ package com.cloud.images;
 import android.text.TextUtils;
 
 import com.cloud.cache.MemoryCache;
-import com.cloud.images.events.OnImageDirectoryListener;
 import com.cloud.images.glide.OnImageUrlCombinationListener;
 import com.cloud.objects.config.Recycling;
 import com.cloud.objects.events.OnRecyclingListener;
-import com.cloud.objects.storage.DirectoryUtils;
 import com.cloud.objects.storage.StorageUtils;
 
 import java.io.File;
@@ -78,19 +76,14 @@ public class RxImage implements OnRecyclingListener {
         }
 
         /**
-         * 设置图片目录
+         * 设置图片缓存目录名称
          *
-         * @param imageRootDir                图片根目录
-         * @param buildChildDirectoryListener 构建子目录事件
+         * @param imageRootDir 图片缓存目录名称
          * @return ImagesBuilder
          */
-        public ImagesBuilder setImageDirectories(String imageRootDir, OnImageDirectoryListener buildChildDirectoryListener) {
+        public ImagesBuilder setImageCacheDirName(String imageRootDir) {
             this.imageCacheDirName = imageRootDir;
             MemoryCache.getInstance().set("$_DebrisImageCacheDirName", imageCacheDirName);
-            if (buildChildDirectoryListener != null) {
-                DirectoryUtils directoryUtils = DirectoryUtils.getInstance();
-                buildChildDirectoryListener.onImageDirectoryBuild(directoryUtils.addDirectory(imageRootDir));
-            }
             return this;
         }
 

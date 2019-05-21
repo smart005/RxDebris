@@ -1,5 +1,6 @@
 package com.cloud.mixed.h5;
 
+import com.cloud.ebus.EBus;
 import com.tencent.smtt.sdk.WebView;
 
 /**
@@ -14,6 +15,8 @@ import com.tencent.smtt.sdk.WebView;
 public class JavascriptMethods {
 
     private JavascriptMethods methods = null;
+    //js方法检测当前重试次数
+    private int currJsFunCheckRetryCount = 0;
 
     public JavascriptMethods() {
         //default
@@ -22,6 +25,10 @@ public class JavascriptMethods {
     public JavascriptMethods(JavascriptMethods methods) {
         //methods为子类的超类对象
         this.methods = methods;
+    }
+
+    public void setCurrJsFunCheckRetryCount(int currJsFunCheckRetryCount) {
+        this.currJsFunCheckRetryCount = currJsFunCheckRetryCount;
     }
 
     /**
@@ -89,6 +96,31 @@ public class JavascriptMethods {
     }
 
     /**
+     * 检测js方法是否存在回调
+     *
+     * @param funName    js方法名
+     * @param isExist    true-存在;false-不存在;
+     * @param retryCount 重试次数
+     */
+    @android.webkit.JavascriptInterface
+    @JavascriptInterface
+    public void b20b390b1e974f4a92d54f0fb6c9d26f(String funName, boolean isExist, int retryCount) {
+        if (methods == null) {
+            return;
+        }
+        if (isExist) {
+            methods.onCheckJsFunctionCall(funName, true);
+        } else {
+            if (retryCount > 0 && currJsFunCheckRetryCount < retryCount) {
+                currJsFunCheckRetryCount++;
+                EBus.getInstance().post("js_function_check_1185193980", funName, currJsFunCheckRetryCount, retryCount);
+            } else {
+                methods.onCheckJsFunctionCall(funName, false);
+            }
+        }
+    }
+
+    /**
      * tel call
      *
      * @param tel web format (tel:xxxxxxxx)
@@ -116,5 +148,15 @@ public class JavascriptMethods {
      */
     public boolean onJsConfirm(WebView view, String url, String message) {
         return false;
+    }
+
+    /**
+     * 检测js方法是否存在回调
+     *
+     * @param funName js方法名
+     * @param isExist true-存在;false-不存在;
+     */
+    public void onCheckJsFunctionCall(String funName, boolean isExist) {
+
     }
 }

@@ -2,10 +2,12 @@ package com.cloud.images.figureset;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -28,6 +30,7 @@ import com.cloud.objects.utils.GlobalUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
@@ -386,7 +389,28 @@ public class ImageSelectDialog {
             if (data == null) {
                 return;
             }
-            final List<String> paths = data.getStringArrayListExtra(MultiImageSelectorActivity.EXTRA_RESULT);
+            List<String> paths = new LinkedList<String>();
+            if (Build.VERSION.SDK_INT >= 5.0) {
+                String dataString = data.getDataString();
+                if (TextUtils.isEmpty(dataString)) {
+                    ClipData clipData = data.getClipData();
+                    if (clipData == null) {
+                        paths = data.getStringArrayListExtra(MultiImageSelectorActivity.EXTRA_RESULT);
+                    } else {
+                        for (int i = 0; i < clipData.getItemCount(); i++) {
+                            ClipData.Item item = clipData.getItemAt(i);
+                            paths.add(item.getUri().getPath());
+                        }
+                    }
+                } else {
+                    Uri[] results = new Uri[]{Uri.parse(dataString)};
+                    for (Uri result : results) {
+                        paths.add(result.getPath());
+                    }
+                }
+            } else {
+                paths = data.getStringArrayListExtra(MultiImageSelectorActivity.EXTRA_RESULT);
+            }
             if (ObjectJudge.isNullOrEmpty(paths)) {
                 mhandler.obtainMessage(PROCESS_COMPLETED_WITH, null).sendToTarget();
             } else {

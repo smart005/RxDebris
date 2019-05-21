@@ -2,6 +2,9 @@ package com.cloud.debris;
 
 import android.app.Activity;
 
+import com.cloud.cache.DerivedCache;
+import com.cloud.objects.beans.MapEntryItem;
+
 import java.lang.reflect.Field;
 
 /**
@@ -30,6 +33,22 @@ class SuperActivitySupport {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 是否主activity(默认为false)
+     *
+     * @param cls            当前处理类
+     * @param isMainActivity true-主activity;false-非主页;
+     */
+    public static void setMainActivity(Class cls, boolean isMainActivity) {
+        if (isMainActivity) {
+            DerivedCache.getInstance().put("20882af386ee4fb1b052f8d701527402",
+                    new MapEntryItem("isLaunch", true),
+                    new MapEntryItem("pageName", cls.getSimpleName()));
+        } else {
+            DerivedCache.getInstance().clear("20882af386ee4fb1b052f8d701527402");
         }
     }
 }

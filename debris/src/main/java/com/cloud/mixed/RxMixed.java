@@ -1,13 +1,19 @@
 package com.cloud.mixed;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
 import com.cloud.cache.MemoryCache;
-import com.cloud.mixed.h5.OnH5ImageSelectedListener;
+import com.cloud.mixed.h5.events.OnH5ImageSelectedListener;
 import com.cloud.mixed.h5.OnH5WebViewListener;
 import com.cloud.objects.events.OnRecyclingListener;
-import com.tencent.smtt.sdk.CookieSyncManager;
+import com.tencent.smtt.export.external.TbsCoreSettings;
 import com.tencent.smtt.sdk.QbSdk;
+
+import java.util.HashMap;
 
 /**
  * Author lijinghuan
@@ -75,30 +81,32 @@ public class RxMixed implements OnRecyclingListener {
      *
      * @param applicationContext 应用程序上下文
      */
-    public void build(final Context applicationContext) {
-        QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
-
-            @Override
-            public void onViewInitFinished(boolean flag) {
-                //x5內核初始化完成的回调，为true表示x5内核加载成功，否则表示x5内核加载失败，会自动切换到系统内核。
-                isInitedX5 = flag;
-                if (flag) {
-                    CookieSyncManager.createInstance(applicationContext);
-                    CookieSyncManager.getInstance().sync();
-                } else {
-                    android.webkit.CookieSyncManager.createInstance(applicationContext);
-                    android.webkit.CookieSyncManager.getInstance().sync();
-                }
-            }
-
-            @Override
-            public void onCoreInitFinished() {
-
-            }
-        };
-        //x5内核初始化接口
-        QbSdk.initX5Environment(applicationContext, cb);
+    public void build(Context applicationContext) {
+        //设置x5内核
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put(TbsCoreSettings.TBS_SETTINGS_USE_SPEEDY_CLASSLOADER, true);
+        QbSdk.initTbsSettings(map);
+        //启动x5预加载服务
+        Intent intent = new Intent(applicationContext, PreLoadX5Service.class);
+        applicationContext.startService(intent);
+        applicationContext.bindService(intent, x5Connection, Context.BIND_AUTO_CREATE);
     }
+
+    private ServiceConnection x5Connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            if (binder instanceof PreLoadX5Service.PreLoadX5Binder) {
+                PreLoadX5Service.PreLoadX5Binder x5Binder = (PreLoadX5Service.PreLoadX5Binder) binder;
+                final PreLoadX5Service service = x5Binder.getService();
+                isInitedX5 = service.isInitedX5();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     /**
      * 获取h5选择native图片监听

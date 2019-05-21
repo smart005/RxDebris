@@ -1,7 +1,5 @@
 package com.cloud.mixed.h5;
 
-import com.tencent.smtt.sdk.WebView;
-
 import java.util.List;
 
 /**
@@ -32,7 +30,7 @@ public class OnH5WebViewListener extends JavascriptMethods {
     }
 
     //webview加载完成后回调
-    public void onLoaded(WebView view, boolean success, int errorCode, String description, String url) {
+    public void onLoaded(boolean success, int errorCode, String description, String url) {
         //load completed h5加载完成后回调
     }
 }

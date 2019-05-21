@@ -1,24 +1,24 @@
 package com.cloud.mixed.h5;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.Window;
+import android.webkit.ValueCallback;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -30,10 +30,16 @@ import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.dialogs.BaseMessageBox;
 import com.cloud.dialogs.enums.DialogButtonsEnum;
 import com.cloud.dialogs.enums.MsgBoxClickButtonEnum;
+import com.cloud.ebus.EBus;
 import com.cloud.images.beans.SelectImageProperties;
 import com.cloud.images.figureset.ImageSelectDialog;
 import com.cloud.mixed.RxMixed;
+import com.cloud.mixed.h5.events.OnFinishOrGoBackListener;
+import com.cloud.mixed.h5.events.OnH5ImageSelectedListener;
+import com.cloud.mixed.h5.events.OnWebViewListener;
+import com.cloud.mixed.h5.events.OnWebViewPartCycle;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.ObjectManager;
 import com.cloud.objects.enums.RuleParams;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
@@ -42,23 +48,11 @@ import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.PixelUtils;
 import com.cloud.objects.utils.ValidUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
-import com.tencent.smtt.export.external.interfaces.GeolocationPermissionsCallback;
 import com.tencent.smtt.export.external.interfaces.JsPromptResult;
 import com.tencent.smtt.export.external.interfaces.JsResult;
-import com.tencent.smtt.export.external.interfaces.SslError;
-import com.tencent.smtt.export.external.interfaces.SslErrorHandler;
-import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
-import com.tencent.smtt.sdk.CookieSyncManager;
-import com.tencent.smtt.sdk.DownloadListener;
-import com.tencent.smtt.sdk.ValueCallback;
-import com.tencent.smtt.sdk.WebChromeClient;
-import com.tencent.smtt.sdk.WebSettings;
-import com.tencent.smtt.sdk.WebView;
-import com.tencent.smtt.sdk.WebViewClient;
 
 import java.io.File;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -75,7 +69,7 @@ import io.reactivex.functions.Consumer;
  * @Modifier:
  * @ModifyContent:
  */
-public abstract class BaseWebLoad extends WebView {
+public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewListener {
 
     private ProgressBar progressBar = null;
     private boolean isParseError = false;
@@ -85,19 +79,20 @@ public abstract class BaseWebLoad extends WebView {
     private ValueCallback<Uri[]> sdk5UploadMsg;
     //是否加载成功
     private boolean isLoadSuccess = false;
-
-    public BaseWebLoad(Context context) {
-        super(context);
-        onPreCreated(context);
-        init();
-        initListener();
-    }
+    //是否x5浏览器
+    private boolean isX5 = true;
+    private OnWebViewPartCycle onWebViewPartCycle;
+    private X5Webview x5Webview;
+    private WKWebview webview;
 
     public BaseWebLoad(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.H5WebView);
+        isX5 = a.getBoolean(R.styleable.H5WebView_wv_isX5, true);
+        a.recycle();
         onPreCreated(context);
         init();
-        initListener();
+        EBus.getInstance().registered(this);
     }
 
     /**
@@ -123,17 +118,29 @@ public abstract class BaseWebLoad extends WebView {
         Window window = activity.getWindow();
         if (window != null) {
             window.setFormat(PixelFormat.TRANSLUCENT);
-            if (Build.VERSION.SDK_INT >= 11) {
-                window.setFlags(
-                        android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                        android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                );
-            }
+            window.setFlags(
+                    android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                    android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+            );
         }
     }
 
     private void init() {
         try {
+            OnH5WebViewListener webListener = getWebListener();
+            RelativeLayout.LayoutParams wvparam = new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+            //添加webview
+            if (isX5) {
+                X5Webview webview = new X5Webview(getContext(), webListener, this);
+                this.onWebViewPartCycle = webview;
+                this.x5Webview = webview;
+                this.addView(webview, wvparam);
+            } else {
+                WKWebview webview = new WKWebview(getContext(), webListener, this);
+                this.onWebViewPartCycle = webview;
+                this.webview = webview;
+                this.addView(webview, wvparam);
+            }
             RelativeLayout.LayoutParams vparam = new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, PixelUtils.dip2px(getContext(), 3));
             progressBar = new ProgressBar(getContext());
             progressBar.setMax(100);
@@ -145,274 +152,183 @@ public abstract class BaseWebLoad extends WebView {
             Drawable mdrawable = progressBar.getResources().getDrawable(R.drawable.cl_progressbar_style);
             progressBar.setProgressDrawable(mdrawable);
             this.addView(progressBar);
-            initSetting();
-            //设置当前webview和父容器的layerType解决页面加载空白
-            this.setLayerType(LAYER_TYPE_SOFTWARE, null);
-            ViewParent parent = this.getParent();
-            if (parent != null && parent instanceof ViewGroup) {
-                ViewGroup group = (ViewGroup) parent;
-                group.setLayerType(LAYER_TYPE_HARDWARE, null);
-            }
+            //设置当前容器硬件加速
+            this.setLayerType(LAYER_TYPE_HARDWARE, null);
         } catch (Exception e) {
             Logger.error(e);
         }
     }
 
-    private void initSetting() {
-        try {
-            this.requestFocus();
-            this.setVerticalScrollbarOverlay(false);
-            this.setHorizontalScrollbarOverlay(false);
-            this.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
-            this.removeJavascriptInterface("searchBoxJavaBridge_");
-            this.removeJavascriptInterface("accessibilityTra");
-            this.removeJavascriptInterface("accessibility");
+    @Override
+    public boolean shouldOverrideUrlLoading(Object view, String url) {
+        isOverriedUrl = true;
+        View webView = isX5 ? ((com.tencent.smtt.sdk.WebView) view) : ((android.webkit.WebView) view);
+        boolean b = onOverrideUrlLoading(webView, url);
+        if (!b) {
+            isLoadSuccess = false;
+        }
+        return b;
+    }
 
-            WebSettings settings = this.getSettings();
-            if (settings != null) {
-                settings.setJavaScriptEnabled(true);
-                settings.setJavaScriptCanOpenWindowsAutomatically(true);
-                //是否可访问本地文件，默认值true
-                settings.setAllowFileAccess(true);
-                //NARROW_COLUMNS
-                settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-                settings.setSupportZoom(true);
-                settings.setBuiltInZoomControls(true);
-                settings.setUseWideViewPort(true);
-                settings.setSupportMultipleWindows(true);
-                settings.setLoadWithOverviewMode(true);
-                settings.setAppCacheEnabled(true);
-                settings.setDatabaseEnabled(true);
-                settings.setDomStorageEnabled(true);
-                settings.setGeolocationEnabled(true);
-                settings.setAppCacheMaxSize(Long.MAX_VALUE);
-                settings.setPluginState(WebSettings.PluginState.ON_DEMAND);
-                settings.setDefaultZoom(WebSettings.ZoomDensity.MEDIUM);
-                settings.setDefaultTextEncodingName("utf-8");
-                settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-                //是否可访问Content Provider的资源，默认值true
-                settings.setAllowContentAccess(true);
-                //允许webview对文件的操作
-                settings.setAllowUniversalAccessFromFileURLs(true);
-                settings.setAllowFileAccessFromFileURLs(true);
-                File database = this.getContext().getDir("database", Context.MODE_PRIVATE);
-                if (database != null) {
-                    settings.setDatabasePath(database.getPath());
-                }
-                File geolocation = this.getContext().getDir("geolocation", Context.MODE_APPEND);
-                if (geolocation != null) {
-                    settings.setGeolocationDatabasePath(geolocation.getPath());
-                }
-                File appcache = this.getContext().getDir("appcache", Context.MODE_PRIVATE);
-                if (appcache != null) {
-                    settings.setAppCachePath(appcache.getPath());
-                }
-                settings.setBlockNetworkImage(false);
-                settings.setLoadsImagesAutomatically(true);
-                settings.setSavePassword(true);
-                //add new user agent
-                OnH5WebViewListener webListener = getWebListener();
-                if (webListener != null) {
-                    List<String> userAgents = new ArrayList<String>();
-                    webListener.addUserAgent(userAgents);
-                    //重新设置user agent
-                    if (!ObjectJudge.isNullOrEmpty(userAgents)) {
-                        String join = ConvertUtils.toJoin(userAgents, ";");
-                        String agentString = settings.getUserAgentString();
-                        settings.setUserAgent(String.format("%s;%s", join, agentString));
-                    }
-                }
-            }
-            if (RxMixed.getInstance().isInitedX5()) {
-                CookieSyncManager.createInstance(getContext());
-                CookieSyncManager.getInstance().sync();
+    @Override
+    public boolean shouldOverrideUrlLoading(Object view, Object webResourceRequest) {
+        //7.0以上执行
+        isOverriedUrl = true;
+        View webView = isX5 ? ((com.tencent.smtt.sdk.WebView) view) : ((android.webkit.WebView) view);
+        String url;
+        if (isX5) {
+            com.tencent.smtt.export.external.interfaces.WebResourceRequest request = (com.tencent.smtt.export.external.interfaces.WebResourceRequest) webResourceRequest;
+            url = request.getUrl().toString();
+        } else {
+            if (android.os.Build.VERSION.SDK_INT >= 21) {
+                android.webkit.WebResourceRequest request = (android.webkit.WebResourceRequest) webResourceRequest;
+                url = request.getUrl().toString();
             } else {
-                android.webkit.CookieSyncManager.createInstance(getContext());
-                android.webkit.CookieSyncManager.getInstance().sync();
+                url = ((android.webkit.WebView) view).getUrl();
             }
-            this.setClickable(true);
-        } catch (Exception e) {
-            Logger.error(e);
         }
+        return onOverrideUrlLoading(webView, url);
     }
 
-    private void initListener() {
-        this.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView webView, String url) {
-                isOverriedUrl = true;
-                boolean b = onOverrideUrlLoading(webView, url);
-                if (!b) {
-                    isLoadSuccess = false;
-                }
-                return b;
-            }
+    @Override
+    public void onReceivedError(Object view, int errorCode, String description, String failingUrl) {
+        isParseError = true;
+        onLoadFinished(false, errorCode, description, failingUrl);
+    }
 
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView webView, WebResourceRequest webResourceRequest) {
-                //7.0以上执行
-                isOverriedUrl = true;
-                return onOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
-            }
+    @Override
+    public void onPageStarted(Object view, String url, Bitmap favicon) {
+        progressBar.setVisibility(VISIBLE);
+    }
 
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                isParseError = true;
-                onLoadFinished(view, false, errorCode, description, failingUrl);
+    @Override
+    public void onPageFinished(Object view, String url) {
+        if (!isParseError) {
+            View webView = isX5 ? ((com.tencent.smtt.sdk.WebView) view) : ((android.webkit.WebView) view);
+            if (!isOverriedUrl) {
+                //解决首次加载时shouldOverrideUrlLoading不回调
+                //网上有些说重新调用loadUrl,但重新调用会有一定的性能问题
+                onOverrideUrlLoading(webView, url);
             }
+            isLoadSuccess = true;
+            onLoadFinished(true, 0, "", url);
+        }
+        progressBar.setProgress(0);
+        progressBar.setVisibility(GONE);
+    }
 
-            @Override
-            public void onReceivedSslError(WebView webView, SslErrorHandler sslErrorHandler, SslError sslError) {
-                sslErrorHandler.proceed();
-            }
+    @Override
+    public boolean onJsConfirm(Object view, String url, String message, Object result) {
+        mbox.setContentGravity(Gravity.LEFT);
+        mbox.setContent(message);
+        mbox.setShowTitle(false);
+        mbox.setTarget("ON_JS_CONFIRM_TARGET", result);
+        mbox.show(getContext(), DialogButtonsEnum.ConfirmCancel);
+        return true;
+    }
 
-            @Override
-            public void onPageStarted(WebView webView, String url, Bitmap favicon) {
-                progressBar.setVisibility(VISIBLE);
-            }
+    private View createPromptEditView(Context context, String defaultText) {
+        LinearLayout ll = new LinearLayout(context);
+        LinearLayout.LayoutParams llparam = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                PixelUtils.dip2px(context, 32));
+        EditText editText = new EditText(context);
+        editText.setLayoutParams(llparam);
+        editText.setPadding(2, 1, 2, 1);
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        editText.setTextColor(Color.parseColor("#323232"));
+        editText.setHintTextColor(Color.parseColor("#999999"));
+        editText.setText(defaultText);
+        ll.addView(editText);
+        return ll;
+    }
 
-            @Override
-            public void onPageFinished(WebView webView, String url) {
-                if (!isParseError) {
-                    if (!isOverriedUrl) {
-                        //解决首次加载时shouldOverrideUrlLoading不回调
-                        //网上有些说重新调用loadUrl,但重新调用会有一定的性能问题
-                        onOverrideUrlLoading(webView, url);
-                    }
-                    isLoadSuccess = true;
-                    onLoadFinished(webView, true, 0, "", url);
-                }
-                progressBar.setProgress(0);
-                progressBar.setVisibility(GONE);
-            }
-        });
-        this.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+    @Override
+    public boolean onJsPrompt(Object view, String url, String message, String defaultValue, Object result) {
+        mbox.setContentGravity(Gravity.LEFT);
+        mbox.setShowTitle(true);
+        mbox.setTitle(message);
+        mbox.setContentView(createPromptEditView(getContext(), defaultValue));
+        Object[] extras = {result, defaultValue};
+        mbox.setTarget("ON_JS_PROMPT_TARGET", extras);
+        mbox.show(getContext(), DialogButtonsEnum.ConfirmCancel);
+        return true;
+    }
 
-                mbox.setContentGravity(Gravity.LEFT);
-                mbox.setContent(message);
-                mbox.setShowTitle(false);
-                mbox.setTarget("ON_JS_CONFIRM_TARGET", result);
-                mbox.show(view.getContext(), DialogButtonsEnum.ConfirmCancel);
-                return true;
-            }
+    @Override
+    public boolean onJsAlert(Object view, String url, String message, Object result) {
+        mbox.setContentGravity(Gravity.CENTER);
+        mbox.setContent(message);
+        mbox.setShowTitle(false);
+        mbox.setTarget("ON_JS_ALERT_TARGET", result);
+        mbox.show(getContext(), DialogButtonsEnum.Confirm);
+        return true;
+    }
 
-            private View createPromptEditView(Context context, String defaultText) {
-                LinearLayout ll = new LinearLayout(context);
-                LinearLayout.LayoutParams llparam = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                        PixelUtils.dip2px(context, 32));
-                EditText editText = new EditText(context);
-                editText.setLayoutParams(llparam);
-                editText.setPadding(2, 1, 2, 1);
-                editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-                editText.setTextColor(Color.parseColor("#323232"));
-                editText.setHintTextColor(Color.parseColor("#999999"));
-                editText.setText(defaultText);
-                ll.addView(editText);
-                return ll;
-            }
+    @Override
+    public void onProgressChanged(Object view, int newProgress) {
+        progressBar.setProgress(newProgress);
+        progressBar.postInvalidate();
+    }
 
-            @Override
-            public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-                mbox.setContentGravity(Gravity.LEFT);
-                mbox.setShowTitle(true);
-                mbox.setTitle(message);
-                mbox.setContentView(createPromptEditView(view.getContext(), defaultValue));
-                Object[] extras = {result, defaultValue};
-                mbox.setTarget("ON_JS_PROMPT_TARGET", extras);
-                mbox.show(view.getContext(), DialogButtonsEnum.ConfirmCancel);
-                return true;
-            }
+    @Override
+    public void onReceivedTitle(Object view, String title) {
+        BaseWebLoad.this.onReceivedTitle(title);
+    }
 
-            @Override
-            public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                mbox.setContentGravity(Gravity.CENTER);
-                mbox.setContent(message);
-                mbox.setShowTitle(false);
-                mbox.setTarget("ON_JS_ALERT_TARGET", result);
-                mbox.show(view.getContext(), DialogButtonsEnum.Confirm);
-                result.cancel();
-                return true;
-            }
+    @Override
+    public void openFileChooser(android.webkit.ValueCallback<Uri> uploadMsg) {
+        if (BaseWebLoad.this.uploadMsg != null) {
+            finishFileUpload();
+        }
+        BaseWebLoad.this.uploadMsg = uploadMsg;
+        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+        if (selectedListener == null) {
+            finishFileUpload();
+            return;
+        }
+        selectedListener.openFileChooserImpl(uploadMsg, null);
+    }
 
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                progressBar.setProgress(newProgress);
-                progressBar.postInvalidate();
-            }
+    @Override
+    public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
+        if (BaseWebLoad.this.uploadMsg != null) {
+            finishFileUpload();
+        }
+        BaseWebLoad.this.uploadMsg = uploadMsg;
+        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+        if (selectedListener == null) {
+            finishFileUpload();
+            return;
+        }
+        selectedListener.openFileChooserImpl(uploadMsg, null);
+    }
 
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                BaseWebLoad.this.onReceivedTitle(title);
-            }
+    @Override
+    public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType, String capture) {
+        if (BaseWebLoad.this.sdk5UploadMsg != null || BaseWebLoad.this.uploadMsg != null) {
+            finishFileUpload();
+        }
+        BaseWebLoad.this.uploadMsg = valueCallback;
+        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+        if (selectedListener == null) {
+            //监听null时结束上传
+            finishFileUpload();
+            return;
+        }
+        selectedListener.openFileChooserImpl(valueCallback, null);
+    }
 
-            @Override
-            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissionsCallback callback) {
-                callback.invoke(origin, true, false);
-            }
-
-            //扩展浏览器上传文件
-            //3.0++版本
-            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-                if (BaseWebLoad.this.uploadMsg != null) {
-                    finishFileUpload();
-                }
-                BaseWebLoad.this.uploadMsg = uploadMsg;
-                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                if (selectedListener == null) {
-                    finishFileUpload();
-                    return;
-                }
-                selectedListener.openFileChooserImpl(uploadMsg, null);
-            }
-
-            //3.0--版本
-            public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-                if (BaseWebLoad.this.uploadMsg != null) {
-                    finishFileUpload();
-                }
-                BaseWebLoad.this.uploadMsg = uploadMsg;
-                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                if (selectedListener == null) {
-                    finishFileUpload();
-                    return;
-                }
-                selectedListener.openFileChooserImpl(uploadMsg, null);
-            }
-
-            public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType, String capture) {
-                if (BaseWebLoad.this.sdk5UploadMsg != null || BaseWebLoad.this.uploadMsg != null) {
-                    finishFileUpload();
-                }
-                BaseWebLoad.this.uploadMsg = valueCallback;
-                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                if (selectedListener == null) {
-                    //监听null时结束上传
-                    finishFileUpload();
-                    return;
-                }
-                selectedListener.openFileChooserImpl(valueCallback, null);
-            }
-
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> uploadMsg, WebChromeClient.FileChooserParams fileChooserParams) {
-                if (BaseWebLoad.this.uploadMsg != null || BaseWebLoad.this.sdk5UploadMsg != null) {
-                    finishFileUpload();
-                }
-                BaseWebLoad.this.sdk5UploadMsg = uploadMsg;
-                OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-                if (selectedListener != null) {
-                    selectedListener.openFileChooserImpl(null, uploadMsg);
-                }
-                return true;
-            }
-        });
-        this.setDownloadListener(new DownloadListener() {
-            @Override
-            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long size) {
-
-            }
-        });
+    @Override
+    public boolean onShowFileChooser(Object view, ValueCallback<Uri[]> uploadMsg, Object fileChooserParams) {
+        if (BaseWebLoad.this.uploadMsg != null || BaseWebLoad.this.sdk5UploadMsg != null) {
+            finishFileUpload();
+        }
+        BaseWebLoad.this.sdk5UploadMsg = uploadMsg;
+        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
+        if (selectedListener != null) {
+            selectedListener.openFileChooserImpl(null, uploadMsg);
+        }
+        return true;
     }
 
     /**
@@ -428,19 +344,20 @@ public abstract class BaseWebLoad extends WebView {
         try {
             //7.0之前手机只能逐张上传图片
             SelectImageProperties properties = selectImageProperties.get(0);
-            Uri uri = Uri.parse(properties.getImagePath());
+            File file = new File(properties.getImagePath());
+            Uri uri = Uri.fromFile(file);
             if (uploadMsg != null) {
                 uploadMsg.onReceiveValue(uri);
                 uploadMsg = null;
                 //回调function $_cl_upload_native_file(path){}js方法方便h5处理
-                this.loadUrl("javascript:window.cl_upload_native_file('" + properties.getImagePath() + "');");
+                //this.loadUrl("javascript:window.cl_upload_native_file('" + properties.getImagePath() + "');");
             } else if (sdk5UploadMsg != null) {
                 Uri[] uris = new Uri[1];
                 uris[0] = uri;
                 sdk5UploadMsg.onReceiveValue(uris);
                 sdk5UploadMsg = null;
                 //回调function $_cl_upload_native_file(path){}js方法方便h5处理
-                this.loadUrl("javascript:window.cl_upload_native_file('" + properties.getImagePath() + "');");
+                //this.loadUrl("javascript:window.cl_upload_native_file('" + properties.getImagePath() + "');");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -514,7 +431,10 @@ public abstract class BaseWebLoad extends WebView {
      */
     public void onDestroy() {
         mbox.dismiss();
-        this.destroy();
+        if (onWebViewPartCycle != null) {
+            onWebViewPartCycle.onDestory();
+        }
+        EBus.getInstance().unregister(this);
     }
 
     /**
@@ -529,24 +449,23 @@ public abstract class BaseWebLoad extends WebView {
     /**
      * 对WebViewClient的onOverrideUrlLoading进行重写
      *
-     * @param webView 当前webview对象
-     * @param url     要加载的url
+     * @param view 当前webview对象
+     * @param url  要加载的url
      * @return
      */
-    protected boolean onOverrideUrlLoading(WebView webView, String url) {
+    protected boolean onOverrideUrlLoading(View view, String url) {
         return false;
     }
 
     /**
      * webview加载完成后回调
      *
-     * @param webView     当前webview对象
      * @param success     true-加载成功;false-加载失败;
      * @param errorCode   success=false时返回的错误码
      * @param description success=false时返回的错误信息
      * @param failingUrl  success=false时加载失败的url
      */
-    protected void onLoadFinished(WebView webView, boolean success, int errorCode, String description, String failingUrl) {
+    protected void onLoadFinished(boolean success, int errorCode, String description, String failingUrl) {
 
     }
 
@@ -594,7 +513,11 @@ public abstract class BaseWebLoad extends WebView {
                 }
             }
             if (!TextUtils.isEmpty(data)) {
-                this.postUrl(url, data.getBytes());
+                if (isX5) {
+                    x5Webview.postUrl(url, data.getBytes());
+                } else {
+                    webview.postUrl(url, data.getBytes());
+                }
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -625,9 +548,17 @@ public abstract class BaseWebLoad extends WebView {
             }
             Map<String, String> headersdata = getExtraHeaders(extraHeaders);
             if (headersdata == null) {
-                super.loadDataWithBaseURL(url, "", "text/html", "utf-8", "");
+                if (isX5) {
+                    x5Webview.loadDataWithBaseURL(url, "", "text/html", "utf-8", "");
+                } else {
+                    webview.loadDataWithBaseURL(url, "", "text/html", "utf-8", "");
+                }
             } else {
-                super.loadUrl(url, headersdata);
+                if (isX5) {
+                    x5Webview.loadUrl(url, headersdata);
+                } else {
+                    webview.loadUrl(url, headersdata);
+                }
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -640,7 +571,11 @@ public abstract class BaseWebLoad extends WebView {
      * @param url 完整url
      */
     public void load(String url) {
-        loadUrl(url, null);
+        if (isX5) {
+            x5Webview.loadUrl(url, null);
+        } else {
+            webview.loadUrl(url, null);
+        }
     }
 
     /**
@@ -652,7 +587,11 @@ public abstract class BaseWebLoad extends WebView {
         try {
             isParseError = false;
             if (htmlContent.contains("<html>")) {
-                super.loadDataWithBaseURL("", htmlContent, "text/html", "utf-8", "");
+                if (isX5) {
+                    x5Webview.loadDataWithBaseURL("", htmlContent, "text/html", "utf-8", "");
+                } else {
+                    webview.loadDataWithBaseURL("", htmlContent, "text/html", "utf-8", "");
+                }
             } else {
                 StringBuffer sb = new StringBuffer();
                 sb.append("<!DOCTYPE html>");
@@ -679,7 +618,11 @@ public abstract class BaseWebLoad extends WebView {
                 sb.append("sections[i].style.width = maxwidth+'px';");
                 sb.append("}");
                 sb.append("document.body.style.width=maxwidth;};</script>");
-                super.loadDataWithBaseURL("", sb.toString(), "text/html", "utf-8", "");
+                if (isX5) {
+                    x5Webview.loadDataWithBaseURL("", sb.toString(), "text/html", "utf-8", "");
+                } else {
+                    webview.loadDataWithBaseURL("", sb.toString(), "text/html", "utf-8", "");
+                }
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -698,9 +641,13 @@ public abstract class BaseWebLoad extends WebView {
             if (flag) {
                 activity.finish();
             } else {
-                boolean canGoBack = this.canGoBack();
+                boolean canGoBack = isX5 ? x5Webview.canGoBack() : webview.canGoBack();
                 if (canGoBack) {
-                    this.goBack();
+                    if (isX5) {
+                        x5Webview.goBack();
+                    } else {
+                        webview.goBack();
+                    }
                     if (finishOrGoBackListener != null) {
                         finishOrGoBackListener.onFinishOrGoBack(canGoBack);
                     }
@@ -774,7 +721,12 @@ public abstract class BaseWebLoad extends WebView {
      * 获取选择的文本
      */
     public void getSelectText() {
-        this.loadUrl("javascript:window.cl_cloud_group_jsm.getSelectText(window.getSelection?window.getSelection().toString():document.selection.createRange().text);");
+        String script = "javascript:window.cl_cloud_group_jsm.getSelectText(window.getSelection?window.getSelection().toString():document.selection.createRange().text);";
+        if (isX5) {
+            x5Webview.loadUrl(script);
+        } else {
+            webview.loadUrl(script);
+        }
     }
 
     /**
@@ -791,6 +743,14 @@ public abstract class BaseWebLoad extends WebView {
             //结束后需要重置上传，否则h5调用native回调只能执行一次
             finishFileUpload();
         }
+//        try {
+//            Uri[] uris = new Uri[1];
+//            uris[0] = data.getData();
+//            sdk5UploadMsg.onReceiveValue(uris);
+//            sdk5UploadMsg = null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         imageSelectDialog.onActivityResult(activity, requestCode, resultCode, data);
     }
 
@@ -819,7 +779,9 @@ public abstract class BaseWebLoad extends WebView {
                             public void accept(Boolean success) {
                                 if (success) {
                                     //选择后图片最大压缩大小
-                                    imageSelectDialog.setMaxFileSize(1024);
+                                    imageSelectDialog.setMaxFileSize(98);
+                                    imageSelectDialog.setMaxImageWidth(ObjectManager.getScreenWidth(activity));
+                                    imageSelectDialog.setMaxImageHeight(ObjectManager.getScreenHeight(activity));
                                     //最多选择图片数量
                                     imageSelectDialog.setMaxSelectNumber(1);
                                     //是否显示拍照选项
@@ -848,5 +810,14 @@ public abstract class BaseWebLoad extends WebView {
      */
     public boolean isLoadSuccess() {
         return this.isLoadSuccess;
+    }
+
+    @SuppressLint("JavascriptInterface")
+    protected void addJavascriptInterface(Object javascriptObject, String javascriptInterfaceName) {
+        if (isX5) {
+            x5Webview.addJavascriptInterface(javascriptObject, javascriptInterfaceName);
+        } else {
+            webview.addJavascriptInterface(javascriptObject, javascriptInterfaceName);
+        }
     }
 }

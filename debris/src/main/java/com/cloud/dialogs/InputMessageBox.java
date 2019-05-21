@@ -21,12 +21,12 @@ import com.cloud.dialogs.enums.MsgBoxClickButtonEnum;
  */
 public class InputMessageBox {
 
-    public void onMessageCall(String text, MsgBoxClickButtonEnum mcbenum) {
-
+    public boolean onMessageCall(String text, MsgBoxClickButtonEnum mcbenum, Object extras) {
+        return true;
     }
 
-    public void onMessageCall(String text, String cmdid) {
-
+    public boolean onMessageCall(String text, String cmdid, Object extras) {
+        return true;
     }
 
     class InputMessageBoxView {
@@ -46,7 +46,8 @@ public class InputMessageBox {
                       String title,
                       String content,
                       DialogButtonsEnum btnsenum,
-                      CmdItem[] cmds) {
+                      CmdItem[] cmds,
+                      Object extras) {
         BaseMessageBox messageBox = new BaseMessageBox() {
             @Override
             public boolean onItemClickListener(View v, MsgBoxClickButtonEnum mcbenum, String target, Object extraData) {
@@ -56,7 +57,7 @@ public class InputMessageBox {
                         return true;
                     }
                     String text = editText.getText().toString().trim();
-                    onMessageCall(text, mcbenum);
+                    return onMessageCall(text, mcbenum, editText.getTag());
                 }
                 return super.onItemClickListener(v, mcbenum, target, extraData);
             }
@@ -69,7 +70,7 @@ public class InputMessageBox {
                         return true;
                     }
                     String text = editText.getText().toString().trim();
-                    onMessageCall(text, cmdid);
+                    return onMessageCall(text, cmdid, editText.getTag());
                 }
                 return super.onItemClickListener(v, cmdid, target, extraData);
             }
@@ -82,6 +83,7 @@ public class InputMessageBox {
         boxView.messageTv.setText(content);
         messageBox.setContentView(boxView.contentView);
         messageBox.setButtons(cmds);
+        boxView.messageEt.setTag(extras);
         messageBox.setTarget("cl_input_message_dialog", boxView.messageEt);
         messageBox.show(context, btnsenum);
     }
@@ -93,9 +95,35 @@ public class InputMessageBox {
      * @param title    标题
      * @param content  内容
      * @param btnsenum 除DialogButtonsEnum.Custom外
+     * @param extras   扩展参数
+     */
+    public void show(Context context, String title, String content, DialogButtonsEnum btnsenum, Object extras) {
+        this.show(context, title, content, btnsenum, null, extras);
+    }
+
+    /**
+     * 显示带输入消息提示框
+     *
+     * @param context
+     * @param title    标题
+     * @param content  内容
+     * @param btnsenum 除DialogButtonsEnum.Custom外
      */
     public void show(Context context, String title, String content, DialogButtonsEnum btnsenum) {
-        this.show(context, title, content, btnsenum, null);
+        show(context, title, content, btnsenum, null);
+    }
+
+    /**
+     * 显示带输入消息提示框
+     *
+     * @param context
+     * @param title   标题
+     * @param content 内容
+     * @param cmds    自定义按钮
+     * @param extras  扩展参数
+     */
+    public void show(Context context, String title, String content, CmdItem[] cmds, Object extras) {
+        this.show(context, title, content, DialogButtonsEnum.Custom, cmds, extras);
     }
 
     /**
@@ -107,6 +135,6 @@ public class InputMessageBox {
      * @param cmds    自定义按钮
      */
     public void show(Context context, String title, String content, CmdItem[] cmds) {
-        this.show(context, title, content, DialogButtonsEnum.Custom, cmds);
+        show(context, title, content, cmds, null);
     }
 }

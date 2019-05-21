@@ -1,4 +1,4 @@
-package com.cloud.mixed.h5;
+package com.cloud.mixed.h5.events;
 
 /**
  * @Author lijinghuan

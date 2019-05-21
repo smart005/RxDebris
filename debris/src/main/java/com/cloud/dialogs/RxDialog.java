@@ -47,8 +47,8 @@ public class RxDialog implements OnRecyclingListener {
         public int getLoadingIcon() {
             if (loadingIcon == 0) {
                 HashMap<String, Object> map = softConfig.get();
-                if (map != null && map.containsKey("LOADING_ICON")) {
-                    return (int) map.get("LOADING_ICON");
+                if (map != null && map.containsKey("$_LOADING_ICON")) {
+                    return (int) map.get("$_LOADING_ICON");
                 }
             }
             return loadingIcon;
@@ -57,7 +57,7 @@ public class RxDialog implements OnRecyclingListener {
         public RxDialogConfigBuilder setLoadingIcon(int loadingIcon) {
             this.loadingIcon = loadingIcon;
             HashMap<String, Object> map = softConfig.get();
-            map.put("LOADING_ICON", loadingIcon);
+            map.put("$_LOADING_ICON", loadingIcon);
             return this;
         }
     }

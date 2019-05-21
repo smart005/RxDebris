@@ -9,7 +9,6 @@ import android.view.View;
 
 import com.cloud.objects.mapper.UrlParamsEntry;
 import com.cloud.objects.utils.GlobalUtils;
-import com.tencent.smtt.sdk.WebView;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -70,6 +69,9 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
     }
 
     private boolean interceptEffectiveScheme(String url) {
+        if (TextUtils.equals(url, "about:blank")) {
+            return true;
+        }
         L listener = getWebListener();
         if (listener == null) {
             return false;
@@ -125,7 +127,7 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
     }
 
     @Override
-    protected boolean onOverrideUrlLoading(WebView view, String url) {
+    protected boolean onOverrideUrlLoading(View view, String url) {
         if (TextUtils.isEmpty(url)) {
             return false;
         }

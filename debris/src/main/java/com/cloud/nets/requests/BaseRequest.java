@@ -364,18 +364,22 @@ public class BaseRequest {
                 builder.append(String.format("_%s_%s", entry.getKey(), entry.getValue()));
             }
         }
-        //拼接headers
-        if (!ObjectJudge.isNullOrEmpty(headers)) {
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
-                builder.append(String.format("_%s_%s", entry.getKey(), entry.getValue()));
+        RetrofitParams retrofitParams = getRetrofitParams();
+        if (retrofitParams.isTokenValid()) {
+            //只有需要用户登录的接口拼接身份数据
+            //拼接headers
+            if (!ObjectJudge.isNullOrEmpty(headers)) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    builder.append(String.format("_%s_%s", entry.getKey(), entry.getValue()));
+                }
             }
-        }
-        //拼接cookies参数
-        OnHeaderCookiesListener cookiesListener = OkRx.getInstance().getOnHeaderCookiesListener();
-        Map<String, String> map = cookiesListener.onCookiesCall();
-        if (!ObjectJudge.isNullOrEmpty(map)) {
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                builder.append(String.format("_%s_%s", entry.getKey(), entry.getValue()));
+            //拼接cookies参数
+            OnHeaderCookiesListener cookiesListener = OkRx.getInstance().getOnHeaderCookiesListener();
+            Map<String, String> map = cookiesListener.onCookiesCall();
+            if (!ObjectJudge.isNullOrEmpty(map)) {
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    builder.append(String.format("_%s_%s", entry.getKey(), entry.getValue()));
+                }
             }
         }
         return builder.toString();
@@ -484,7 +488,7 @@ public class BaseRequest {
         //WeakCache
         if (callStatus != CallStatus.OnlyNet) {
             String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
-            CacheDataItem dataItem = RxCache.getBaseCacheData(ckey, true);
+            CacheDataItem dataItem = RxCache.getBaseCacheData(String.valueOf(ckey.hashCode()), true);
             if (successAction != null && dataItem != null) {
                 ResponseData responseData = new ResponseData();
                 responseData.setResponseDataType(ResponseDataType.object);

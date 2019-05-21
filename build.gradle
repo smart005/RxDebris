@@ -2,9 +2,10 @@ buildscript {
     repositories {
         maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/' }
         maven { url 'http://192.168.200.156:8081/repository/group-android/' }
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
+        classpath 'com.android.tools.build:gradle:3.4.1'
     }
 }
 

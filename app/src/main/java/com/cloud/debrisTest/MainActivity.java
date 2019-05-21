@@ -14,6 +14,8 @@ import com.cloud.debrisTest.web.H5Test;
 import com.cloud.debrisTest.web.LayoutAdapterActivity;
 import com.cloud.debrisTest.web.NKitActivity;
 import com.cloud.dialogs.toasty.ToastUtils;
+import com.cloud.ebus.EBus;
+import com.cloud.ebus.SubscribeEBus;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.TimingManager;
 import com.cloud.objects.beans.MapEntryItem;
@@ -141,6 +143,18 @@ public class MainActivity extends BaseActivity {
         urlParamsEntry.mapper("http://image.baidu.com/search/detail?ct=503316480&z=0&ipn=d&word=图片&hs=0&pn=1&spn=0&di=176660&pi=0&rn=1&tn=baiduimagedetail&is=0%2C0&ie=utf-8&oe=utf-8&cl=2&lm=-1&cs=234634259%2C4236876085&os=54892700%2C159557102&simid=3579428015%2C308375459&adpicid=0&lpn=0&ln=30&fr=ala&fm=&sme=&cg=&bdtype=0&oriquery=&objurl=http%3A%2F%2Fpic15.nipic.com%2F20110628%2F1369025_192645024000_2.jpg&fromurl=ippr_z2C%24qAzdH3FAzdH3Fooo_z%26e3Bgtrtv_z%26e3Bv54AzdH3Ffi5oAzdH3F90088lb_z%26e3Bip4s&gsm=0&islist=&querylist=");
         urlParamsEntry.getParams("word");
         boolean containsKey = urlParamsEntry.containsKey("objurl");
+
+        EBus.getInstance().post("msg_key", "111", "222");
+
+        String jsoncheck="{\n" +
+                "  \"Message\": \"\",\n" +
+                "  \"State\": 1,\n" +
+                "  \"Result\": {\n" +
+                "    \"IsNewReg\": true,\n" +
+                "    \"UserName\": \"風殇\"\n" +
+                "  }\n" +
+                "}";
+        boolean check = ObjectJudge.isJson(jsoncheck);
     }
 
     private ObservableComponent component = new ObservableComponent() {
@@ -149,6 +163,11 @@ public class MainActivity extends BaseActivity {
             return null;
         }
     };
+
+    @SubscribeEBus(receiveKey = "msg_key")
+    public void onEbusEvent(String test, String str) {
+
+    }
 
     public void OnNetFrameClick(View view) {
         RedirectUtils.startActivity(this, OKHttpSimple.class,

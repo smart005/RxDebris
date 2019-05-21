@@ -140,6 +140,10 @@ public class RetrofitParams {
      * 关联赋值
      */
     private boolean isAssociatedAssignment = false;
+    /**
+     * 是否需要token验证
+     */
+    private boolean isTokenValid = false;
 
     public RequestType getRequestType() {
         return requestType;
@@ -401,5 +405,13 @@ public class RetrofitParams {
 
     public void setAssociatedAssignment(boolean associatedAssignment) {
         isAssociatedAssignment = associatedAssignment;
+    }
+
+    public boolean isTokenValid() {
+        return isTokenValid;
+    }
+
+    public void setTokenValid(boolean tokenValid) {
+        isTokenValid = tokenValid;
     }
 }

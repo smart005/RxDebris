@@ -13,7 +13,7 @@ import android.support.annotation.CheckResult;
  */
 public class ToastConfig {
     private Typeface typeface;
-    private int textSize = 16;
+    private int textSize = 13;
     private boolean tintIcon = true;
     private boolean allowQueue = true;
     private static ToastConfig toastConfig;
@@ -39,7 +39,7 @@ public class ToastConfig {
      */
     public void reset() {
         typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL);
-        textSize = 16;
+        textSize = 13;
         tintIcon = true;
         allowQueue = true;
     }

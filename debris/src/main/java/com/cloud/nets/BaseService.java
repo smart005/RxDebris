@@ -950,6 +950,8 @@ public class BaseService {
                 finishedRequest(ErrorType.businessProcess, baseSubscriber);
                 return;
             }
+            ApiCheckAnnotation apiCheckAnnotation = validParam.getApiCheckAnnotation();
+            retrofitParams.setTokenValid(apiCheckAnnotation.isTokenValid());
             //记录之前main线程堆栈信息
             //RequestStacksInfo.setStack(validParam.getInvokeMethodName(), exception);
             apiRequest(apiClass, server, baseSubscriber, validParam, retrofitParams, urlAction);

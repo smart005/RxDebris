@@ -1,12 +1,16 @@
 package com.cloud.debris;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
 import com.cloud.debris.enums.StatisticalTypes;
+import com.cloud.debris.event.OnActivityStatesLisstener;
 import com.cloud.debris.event.OnLifeCycleStatistical;
-import com.cloud.debris.event.OnSupperProperties;
 import com.cloud.ebus.EBus;
+import com.cloud.launchs.utils.ActivityUtils;
+import com.cloud.objects.bases.BundleData;
+import com.cloud.objects.events.OnSupperProperties;
 
 /**
  * Author lijinghuan
@@ -16,7 +20,8 @@ import com.cloud.ebus.EBus;
  * Modifier:
  * ModifyContent:
  */
-public class BaseFragmentActivity extends FragmentActivity implements OnSupperProperties, OnLifeCycleStatistical {
+public class BaseFragmentActivity extends FragmentActivity implements OnSupperProperties,
+        OnActivityStatesLisstener, OnLifeCycleStatistical {
 
     private BundleData bundleData = null;
 
@@ -189,5 +194,15 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
     @Override
     public String getClassAction() {
         return bundleData.getClassAction(this.getClass());
+    }
+
+    @Override
+    public void setMainActivity(boolean isMainActivity) {
+        SuperActivitySupport.setMainActivity(this.getClass(), isMainActivity);
+    }
+
+    @Override
+    public boolean isDestroyed(Activity activity) {
+        return ActivityUtils.isDestroyed(activity);
     }
 }

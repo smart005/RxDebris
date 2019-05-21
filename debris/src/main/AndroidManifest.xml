@@ -26,6 +26,11 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
     <!--kill process 权限-->
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <!-- 硬件加速对X5视频播放非常重要，建议开启 -->
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.READ_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <application>
         <service
             android:name="com.cloud.ebus.EBusService"
@@ -34,6 +39,11 @@
                 <action android:name="com.cloud.ebus.ebusProcessDataService" />
             </intent-filter>
         </service>
+        <service
+            android:name="com.tencent.smtt.export.external.DexClassLoaderProviderService"
+            android:label="dexopt"
+            android:process=":dexopt" />
+        <service android:name="com.cloud.mixed.PreLoadX5Service" />
 
         <activity
             android:name="com.cloud.images.MultiImageSelectorActivity"
@@ -47,5 +57,16 @@
         <meta-data
             android:name="com.cloud.images.glide.GlideConfiguration"
             android:value="GlideModule" />
+        <!-- 解决 Android N 7.0 上 报错：android.os.FileUriExposedException -->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>

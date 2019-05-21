@@ -17,6 +17,7 @@
             android:id="@+id/h5_test"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="none" />
+            android:scrollbars="none"
+            app:wv_isX5="true" />
     </LinearLayout>
 </layout>

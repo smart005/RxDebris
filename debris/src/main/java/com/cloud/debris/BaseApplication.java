@@ -8,6 +8,8 @@ import android.os.Bundle;
 
 import com.cloud.debris.event.OnActivityCycleStatusCall;
 import com.cloud.debris.event.OnApplicationLifecycle;
+import com.cloud.launchs.LauncherState;
+import com.cloud.launchs.utils.ActivityUtils;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.logs.CrashHandler;
 
@@ -101,6 +103,8 @@ public abstract class BaseApplication extends Application implements OnApplicati
         if (onApplicationLifecycle != null) {
             onApplicationLifecycle.onApplicationCreated();
         }
+        LauncherState launcherState = new LauncherState();
+        launcherState.onLauncher(this);
     }
 
     @Override
@@ -139,6 +143,8 @@ public abstract class BaseApplication extends Application implements OnApplicati
                 if (onApplicationLifecycle != null) {
                     onApplicationLifecycle.onActivityCreated(activity, savedInstanceState);
                 }
+                //记录活动名称
+                ActivityUtils.getInstance().put(activity.getClass().getName());
             }
 
             @Override
@@ -221,6 +227,8 @@ public abstract class BaseApplication extends Application implements OnApplicati
                 if (onApplicationLifecycle != null) {
                     onApplicationLifecycle.onActivityDestroyed(activity);
                 }
+                //移除活动名称
+                ActivityUtils.getInstance().remove(activity.getClass().getName());
             }
         });
     }

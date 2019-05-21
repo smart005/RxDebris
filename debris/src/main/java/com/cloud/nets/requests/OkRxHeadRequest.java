@@ -78,7 +78,7 @@ public class OkRxHeadRequest extends BaseRequest {
                 CallStatus callStatus = retrofitParams.getCallStatus();
                 if (callStatus != CallStatus.OnlyNet && !TextUtils.isEmpty(retrofitParams.getCacheKey())) {
                     String ckey = String.format("%s%s", retrofitParams.getCacheKey(), getAllParamsJoin(headers, retrofitParams.getParams()));
-                    RxCache.setBaseCacheData(ckey, responseData.getResponse(), retrofitParams.getCacheTime(), TimeUnit.MILLISECONDS, retrofitParams.getIntervalCacheTime());
+                    RxCache.setBaseCacheData(String.valueOf(ckey.hashCode()), responseData.getResponse(), retrofitParams.getCacheTime(), TimeUnit.MILLISECONDS, retrofitParams.getIntervalCacheTime());
                 }
             }
         };

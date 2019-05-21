@@ -1,8 +1,7 @@
-package com.cloud.mixed.h5;
+package com.cloud.mixed.h5.events;
 
 import android.net.Uri;
-
-import com.tencent.smtt.sdk.ValueCallback;
+import android.webkit.ValueCallback;
 
 /**
  * Author lijinghuan
