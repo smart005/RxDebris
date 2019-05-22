@@ -25,11 +25,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import com.cloud.coms.dialogs.BaseMessageBox;
+import com.cloud.coms.dialogs.enums.DialogButtonsEnum;
+import com.cloud.coms.dialogs.enums.MsgBoxClickButtonEnum;
 import com.cloud.debris.R;
 import com.cloud.debris.bundle.RedirectUtils;
-import com.cloud.dialogs.BaseMessageBox;
-import com.cloud.dialogs.enums.DialogButtonsEnum;
-import com.cloud.dialogs.enums.MsgBoxClickButtonEnum;
 import com.cloud.ebus.EBus;
 import com.cloud.images.beans.SelectImageProperties;
 import com.cloud.images.figureset.ImageSelectDialog;

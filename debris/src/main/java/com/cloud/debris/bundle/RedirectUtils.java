@@ -9,7 +9,7 @@ import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
-import com.cloud.dialogs.toasty.ToastUtils;
+import com.cloud.toasty.ToastUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import io.reactivex.disposables.Disposable;

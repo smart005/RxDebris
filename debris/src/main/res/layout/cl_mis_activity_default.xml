@@ -8,7 +8,7 @@
         android:background="#181819"
         android:orientation="vertical">
 
-        <com.cloud.components.themes.TextThemeView
+        <com.cloud.coms.themes.TextThemeView
             android:id="@+id/head_ttv"
             android:layout_width="match_parent"
             android:layout_height="46dp"

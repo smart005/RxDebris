@@ -12,10 +12,10 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.cloud.coms.dialogs.LoadingDialog;
+import com.cloud.coms.dialogs.plugs.DialogPlus;
+import com.cloud.coms.dialogs.progress.DonutProgress;
 import com.cloud.debris.R;
-import com.cloud.dialogs.LoadingDialog;
-import com.cloud.dialogs.plugs.DialogPlus;
-import com.cloud.dialogs.progress.DonutProgress;
 import com.cloud.objects.ObjectJudge;
 
 import java.io.File;

@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.cloud.components.themes.TextThemeView
+        <com.cloud.coms.themes.TextThemeView
             android:id="@+id/head_ttv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

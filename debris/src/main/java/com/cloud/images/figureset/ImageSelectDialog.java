@@ -15,7 +15,7 @@ import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
 import com.cloud.debris.R;
-import com.cloud.dialogs.toasty.ToastUtils;
+import com.cloud.toasty.ToastUtils;
 import com.cloud.images.MultiImageSelector;
 import com.cloud.images.MultiImageSelectorActivity;
 import com.cloud.images.RxImage;

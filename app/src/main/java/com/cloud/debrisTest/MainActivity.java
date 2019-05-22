@@ -13,7 +13,7 @@ import com.cloud.debrisTest.okhttp.OKHttpSimple;
 import com.cloud.debrisTest.web.H5Test;
 import com.cloud.debrisTest.web.LayoutAdapterActivity;
 import com.cloud.debrisTest.web.NKitActivity;
-import com.cloud.dialogs.toasty.ToastUtils;
+import com.cloud.toasty.ToastUtils;
 import com.cloud.ebus.EBus;
 import com.cloud.ebus.SubscribeEBus;
 import com.cloud.objects.ObjectJudge;
