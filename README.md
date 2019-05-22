@@ -11,6 +11,8 @@
     * [Handler、AIDL](/docs/interaction/README.md)
 * [适配](/docs/adapter/README.md)(编辑中)
 * 基础组件
+    * 各种Dialog使用文档
+        * [Message Dialog](/docs/coms/dialogs.md)
     * [日期选择器](/docs/coms/date_picker.md)
     * [列表控件(使用场景及效果预览)]()[编辑中]
         * [LinearListView]()
