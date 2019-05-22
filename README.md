@@ -10,7 +10,8 @@
 * 性能与效率
     * [Handler、AIDL](/docs/interaction/README.md)
 * [适配](/docs/adapter/README.md)(编辑中)
-* 控件
+* 基础组件
+    * [日期选择器](/docs/coms/date_picker.md)
     * [列表控件(使用场景及效果预览)]()[编辑中]
         * [LinearListView]()
         * [XRefreshListView]()
