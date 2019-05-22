@@ -25,10 +25,26 @@ public void setDefaultDate(int year, int month, int day)
 /**
  * 设置默认显示日期
  *
+ * @param year  年
+ * @param month 月
+ */
+public void setDefaultDate(int year, int month)
+
+/**
+ * 设置默认显示日期
+ *
  * @param timeMillis 毫秒时间截
  */
 public void setDefaultDate(long timeMillis)
 
+/**
+ * 显示日期窗口
+ *
+ * @param context 上下文
+ * @param hasDays 是否包含天选项
+ */
+public void show(Context context, boolean hasDays)
+    
 /**
  * 显示日期窗口
  *
