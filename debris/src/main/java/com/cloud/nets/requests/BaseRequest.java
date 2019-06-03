@@ -13,6 +13,7 @@ import com.cloud.nets.enums.DataType;
 import com.cloud.nets.enums.ErrorType;
 import com.cloud.nets.enums.ResponseDataType;
 import com.cloud.nets.events.OnHeaderCookiesListener;
+import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
@@ -28,6 +29,8 @@ import com.cloud.objects.utils.ValidUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -103,6 +106,16 @@ public class BaseRequest {
         this.requestContentType = requestContentType;
     }
 
+    //解决地址中含有特殊字符的情况
+    private URL toURL(String url) {
+        try {
+            URL murl = new URL(url);
+            return murl;
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
     protected Request.Builder getBuilder(String url,
                                          HashMap<String, String> headers,
                                          TreeMap<String, Object> params,
@@ -111,7 +124,17 @@ public class BaseRequest {
         if (requestType == RequestType.GET) {
             url = addGetRequestParams(url, params);
         }
-        builder.url(url);
+        OkRxConfigParams configParams = OkRx.getInstance().getOkRxConfigParams();
+        if (configParams != null && !TextUtils.isEmpty(configParams.getUrlValidationRules())) {
+            if (!ValidUtils.valid(configParams.getUrlValidationRules(), url)) {
+                return null;
+            }
+        }
+        URL murl = toURL(url);
+        if (murl == null) {
+            return null;
+        }
+        builder.url(murl);
         if (!ObjectJudge.isNullOrEmpty(headers)) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 builder.removeHeader(entry.getKey());

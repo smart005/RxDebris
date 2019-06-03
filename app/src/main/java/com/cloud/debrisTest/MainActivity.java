@@ -109,19 +109,19 @@ public class MainActivity extends BaseActivity {
         SyncChainTasks.getInstance()
                 .addChain(new OnChainRunnable<Integer, Integer>() {
                     @Override
-                    public Integer run(Integer integer, Object[] extras) {
+                    public Integer run(Integer integer, Object extras) {
                         return integer + 2;
                     }
                 })
                 .addChain(new OnChainRunnable<String, Integer>() {
                     @Override
-                    public String run(Integer integer, Object[] extras) {
+                    public String run(Integer integer, Object extras) {
                         return "params:" + integer;
                     }
                 })
                 .addChain(new OnChainRunnable<ADItem, String>() {
                     @Override
-                    public ADItem run(String s, Object[] extras) {
+                    public ADItem run(String s, Object extras) {
                         ADItem item = new ADItem();
                         item.setTitle(s);
                         return item;
@@ -129,7 +129,7 @@ public class MainActivity extends BaseActivity {
                 })
                 .addChain(new OnChainInputRunnable<ADItem>() {
                     @Override
-                    public Void run(ADItem adItem, Object[] extras) {
+                    public Void run(ADItem adItem, Object extras) {
 
                         return null;
                     }

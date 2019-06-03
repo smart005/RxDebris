@@ -46,6 +46,10 @@ public class OkRxDownloadFileRequest extends BaseRequest {
         }
         setRequestType(RequestType.GET);
         Request.Builder builder = getBuilder(url, headers, params, null).get();
+        if (builder == null) {
+            completeAction.call(RequestState.Completed);
+            return;
+        }
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
         //绑定cookies

@@ -135,7 +135,12 @@ public class BaseOkrxService extends BaseService {
                     ReturnCodeCheck codeCheck = new ReturnCodeCheck();
                     validParam.setReturnCodeFilter(codeCheck.getCodeFilter((S) params[1]));
                 }
-                apiRequest(validParam, (Class<I>) params[0], (S) params[1], (BaseSubscriber) params[2], (Func2<RetrofitParams, I, HashMap<String, Object>>) params[3], (HashMap<String, Object>) params[4]);
+                apiRequest(validParam,
+                        (Class<I>) params[0],
+                        (S) params[1],
+                        (BaseSubscriber) params[2],
+                        (Func2<RetrofitParams, I, HashMap<String, Object>>) params[3],
+                        (HashMap<String, Object>) params[4]);
                 return validParam;
             }
 

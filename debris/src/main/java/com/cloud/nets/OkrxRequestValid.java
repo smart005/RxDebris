@@ -9,7 +9,6 @@ import com.cloud.nets.enums.TokenLocation;
 import com.cloud.nets.events.OnHeaderCookiesListener;
 import com.cloud.nets.properties.OkRxConfigParams;
 import com.cloud.nets.properties.OkRxValidParam;
-import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.utils.ConvertUtils;
 
 import java.lang.reflect.Method;
@@ -163,7 +162,8 @@ public class OkrxRequestValid {
     public static String getInvokingMethodName() {
         Thread currentThread = Thread.currentThread();
         StackTraceElement[] stacks = currentThread.getStackTrace();
-        if (ObjectJudge.isNullOrEmpty(stacks)) {
+        int length = stacks.length;
+        if (length == 0) {
             return "";
         }
         String[] fms = {"getThreadStackTrace", "getStackTrace", "getInvokingMethodName", "check", "requestObject"};

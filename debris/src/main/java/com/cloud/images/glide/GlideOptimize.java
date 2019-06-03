@@ -108,7 +108,7 @@ public class GlideOptimize {
             return null;
         }
         PathCacheDataEntry pathCacheDataEntry = new PathCacheDataEntry();
-        PathCacheInfoItem pathCacheInfo = pathCacheDataEntry.getPathCacheInfo(new OnDataChainRunnable<PathCacheInfoItem, PathCacheInfoItemDao>() {
+        PathCacheInfoItem pathCacheInfo = pathCacheDataEntry.getInfo(new OnDataChainRunnable<PathCacheInfoItem, PathCacheInfoItemDao, Object>() {
             @Override
             public PathCacheInfoItem run(PathCacheInfoItemDao pathCacheInfoItemDao) {
                 QueryBuilder<PathCacheInfoItem> builder = pathCacheInfoItemDao.queryBuilder();
@@ -137,7 +137,7 @@ public class GlideOptimize {
             return;
         }
         PathCacheDataEntry pathCacheDataEntry = new PathCacheDataEntry();
-        PathCacheInfoItem pathCacheInfo = pathCacheDataEntry.getPathCacheInfo(new OnDataChainRunnable<PathCacheInfoItem, PathCacheInfoItemDao>() {
+        PathCacheInfoItem pathCacheInfo = pathCacheDataEntry.getInfo(new OnDataChainRunnable<PathCacheInfoItem, PathCacheInfoItemDao, Object>() {
             @Override
             public PathCacheInfoItem run(PathCacheInfoItemDao pathCacheInfoItemDao) {
                 QueryBuilder<PathCacheInfoItem> builder = pathCacheInfoItemDao.queryBuilder();
@@ -158,7 +158,7 @@ public class GlideOptimize {
             }
         }
         //删除记录信息
-        pathCacheDataEntry.execute(new OnDataChainRunnable<Void, PathCacheInfoItemDao>() {
+        pathCacheDataEntry.execute(new OnDataChainRunnable<Void, PathCacheInfoItemDao, Object>() {
             @Override
             public Void run(PathCacheInfoItemDao pathCacheInfoItemDao) {
                 QueryBuilder<PathCacheInfoItem> builder = pathCacheInfoItemDao.queryBuilder();

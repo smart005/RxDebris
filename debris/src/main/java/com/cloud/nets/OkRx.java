@@ -60,6 +60,8 @@ public class OkRx {
     private boolean isHasFirmwareConfigInformationForTraceLog = false;
     //是否输出网络日志(只有在debug模式下才生效,默认false)
     private boolean isPrintDebugNetLog = false;
+    //ok http client
+    private OkHttpClient httpClient;
 
     public static OkRx getInstance() {
         if (okRx == null) {
@@ -131,8 +133,7 @@ public class OkRx {
     //构建相关配置
     public void build() {
         //缓存okRxConfigParams参数
-        OkHttpClient client = newHttpClient(okRxConfigParams);
-        MemoryCache.getInstance().setSoftCache(OkRxKeys.okhttpClientKey, client);
+        httpClient = newHttpClient(okRxConfigParams);
     }
 
     /**
@@ -166,30 +167,18 @@ public class OkRx {
     /**
      * 获取http client对象
      *
-     * @param isNewConnect 是否重新创建连接
-     * @return OkHttpClient
-     */
-    public OkHttpClient getOkHttpClient(boolean isNewConnect) {
-        if (!isNewConnect) {
-            Object objectValue = MemoryCache.getInstance().getSoftCache(OkRxKeys.okhttpClientKey);
-            if ((objectValue instanceof OkHttpClient)) {
-                OkHttpClient httpClient = (OkHttpClient) objectValue;
-                return httpClient;
-            }
-        }
-        OkRxConfigParams configParams = getOkRxConfigParams();
-        OkHttpClient client = newHttpClient(configParams);
-        MemoryCache.getInstance().setSoftCache(OkRxKeys.okhttpClientKey, client);
-        return client;
-    }
-
-    /**
-     * 获取http client对象
-     *
      * @return OkHttpClient
      */
     public OkHttpClient getOkHttpClient() {
-        return getOkHttpClient(false);
+        if (httpClient == null) {
+            synchronized (OkHttpClient.class) {
+                if (httpClient == null) {
+                    OkRxConfigParams configParams = getOkRxConfigParams();
+                    httpClient = newHttpClient(configParams);
+                }
+            }
+        }
+        return httpClient;
     }
 
     /**

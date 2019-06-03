@@ -46,6 +46,10 @@ public class OkRxConfigParams {
      * token配置(用于接口请求验证)
      */
     private TokenProperties tokenConfig = null;
+    /**
+     * url验证规则(网络请求时,如果此规则不为空则url需要符合此规则)
+     */
+    private String urlValidationRules = "";
 
     public long getConnectTimeout() {
         return connectTimeout;
@@ -159,5 +163,13 @@ public class OkRxConfigParams {
 
     public void setTokenConfig(TokenProperties tokenConfig) {
         this.tokenConfig = tokenConfig;
+    }
+
+    public String getUrlValidationRules() {
+        return urlValidationRules == null ? "" : urlValidationRules;
+    }
+
+    public void setUrlValidationRules(String urlValidationRules) {
+        this.urlValidationRules = urlValidationRules;
     }
 }

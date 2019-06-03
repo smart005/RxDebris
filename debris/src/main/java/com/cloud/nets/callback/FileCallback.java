@@ -74,7 +74,7 @@ public class FileCallback implements Callback {
             }
             domainList.add(host);
             //如果连接已经被取消时则重新建立
-            OkHttpClient client = OkRx.getInstance().getOkHttpClient(true);
+            OkHttpClient client = OkRx.getInstance().getOkHttpClient();
             //创建新请求
             Call clone = call.clone();
             client.newCall(clone.request()).enqueue(this);

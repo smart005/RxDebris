@@ -128,7 +128,8 @@ public class EBus {
 
     private void getRegisteredAnnons(Class<?> cls, Object subscriber, List<SubscribeEBus> subscribeEBuses) {
         Method[] methods = cls.getMethods();
-        if (ObjectJudge.isNullOrEmpty(methods)) {
+        int length = methods.length;
+        if (length == 0) {
             return;
         }
         HashMap<String, EBusItem> map = null;

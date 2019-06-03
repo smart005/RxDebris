@@ -33,4 +33,9 @@ public class OnH5WebViewListener extends JavascriptMethods {
     public void onLoaded(boolean success, int errorCode, String description, String url) {
         //load completed h5加载完成后回调
     }
+
+    //setting相关配置修饰
+    public void onSettingModified(Object settings, boolean isX5) {
+
+    }
 }

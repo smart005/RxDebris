@@ -70,6 +70,10 @@ public class OkRxPostRequest extends BaseRequest {
 
         setRequestType(RequestType.POST);
         Request.Builder builder = getBuilder(url, headers, retrofitParams.getParams(), retrofitParams.getFileSuffixParams());
+        if (builder == null) {
+            completeAction.call(RequestState.Completed, ErrorType.businessProcess);
+            return;
+        }
         Request request = builder.build();
         OkHttpClient client = OkRx.getInstance().getOkHttpClient();
         StringCallback callback = new StringCallback(successAction, completeAction, printLogAction, reqQueueItemHashMap, apiRequestKey, apiUnique) {
