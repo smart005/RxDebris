@@ -8,10 +8,4 @@
     <color name="color_d50000">#d50000</color>
     <color name="color_388e3c">#388e3c</color>
     <color name="color_ffa900">#ffa900</color>
-
-    <color name="mis_actionbar_color">#21282C</color>
-    <color name="crop_selector_pressed">#1a000000</color>
-    <color name="crop_selector_focused">#77000000</color>
-    <color name="crop_button_bar">#f3f3f3</color>
-    <color name="crop_button_text">#666666</color>
 </resources>

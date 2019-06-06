@@ -743,14 +743,6 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             //结束后需要重置上传，否则h5调用native回调只能执行一次
             finishFileUpload();
         }
-//        try {
-//            Uri[] uris = new Uri[1];
-//            uris[0] = data.getData();
-//            sdk5UploadMsg.onReceiveValue(uris);
-//            sdk5UploadMsg = null;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         imageSelectDialog.onActivityResult(activity, requestCode, resultCode, data);
     }
 

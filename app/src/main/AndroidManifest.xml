@@ -25,14 +25,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".okhttp.OKHttpSimple"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".web.H5Test"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".images.ImagesActivity"
-            android:screenOrientation="portrait" />
+
         <activity
             android:name=".web.NKitActivity"
             android:screenOrientation="portrait" />

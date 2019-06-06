@@ -5,8 +5,6 @@ import com.cloud.cache.daos.StackInfoItemDao;
 import com.cloud.cache.greens.DBManager;
 import com.cloud.cache.greens.OnDatabasePathListener;
 import com.cloud.debris.BaseApplication;
-import com.cloud.debrisTest.images.ImageSuffixCombination;
-import com.cloud.images.RxImage;
 import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
 import com.cloud.nets.beans.RequestErrorInfo;
@@ -146,11 +144,6 @@ public class TestApplication extends BaseApplication {
                 .build();
         //x5内核
         RxMixed.getInstance().build(this);
-        //图片配置
-        RxImage.getInstance().getBuilder()
-                //用于glide请求远程图片时追加第三方优化后缀(如阿里、七牛等)
-                .setOnImageUrlCombinationListener(new ImageSuffixCombination())
-                .setImageCacheDirName("images");
     }
 
     @Override

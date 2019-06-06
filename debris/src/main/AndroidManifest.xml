@@ -38,19 +38,6 @@
             android:label="dexopt"
             android:process=":dexopt" />
         <service android:name="com.cloud.mixed.PreLoadX5Service" />
-
-        <activity
-            android:name="com.cloud.images.MultiImageSelectorActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name="com.cloud.images.cropimage.CropImageActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
-        <meta-data
-            android:name="com.cloud.images.glide.GlideConfiguration"
-            android:value="GlideModule" />
         <!-- 解决 Android N 7.0 上 报错：android.os.FileUriExposedException -->
         <provider
             android:name="android.support.v4.content.FileProvider"

@@ -8,17 +8,13 @@ import com.cloud.cache.RxCache;
 import com.cloud.debris.BaseActivity;
 import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.debrisTest.databinding.MainViewBinding;
-import com.cloud.debrisTest.images.ImagesActivity;
-import com.cloud.debrisTest.okhttp.OKHttpSimple;
 import com.cloud.debrisTest.web.H5Test;
 import com.cloud.debrisTest.web.LayoutAdapterActivity;
 import com.cloud.debrisTest.web.NKitActivity;
-import com.cloud.toasty.ToastUtils;
 import com.cloud.ebus.EBus;
 import com.cloud.ebus.SubscribeEBus;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.TimingManager;
-import com.cloud.objects.beans.MapEntryItem;
 import com.cloud.objects.events.OnChainInputRunnable;
 import com.cloud.objects.events.OnChainRunnable;
 import com.cloud.objects.events.RunnableParamsN;
@@ -29,6 +25,7 @@ import com.cloud.objects.observable.ObservableComponent;
 import com.cloud.objects.storage.DirectoryUtils;
 import com.cloud.objects.tasks.SyncChainTasks;
 import com.cloud.objects.utils.JsonUtils;
+import com.cloud.toasty.ToastUtils;
 
 import java.io.File;
 
@@ -169,25 +166,12 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    public void OnNetFrameClick(View view) {
-        RedirectUtils.startActivity(this, OKHttpSimple.class,
-                new MapEntryItem<>("key1", "1111"),
-                new MapEntryItem<>("key2", null),
-                new MapEntryItem<>("key3", ""),
-                new MapEntryItem<>("key4", 2),
-                new MapEntryItem<>("key5", null));
-    }
-
     public void OnH5Click(View view) {
         RedirectUtils.startActivity(this, H5Test.class);
     }
 
     public void OnAndroidWebkitClick(View view) {
         RedirectUtils.startActivity(this, NKitActivity.class);
-    }
-
-    public void OnImageFunctionClick(View view) {
-        RedirectUtils.startActivity(this, ImagesActivity.class);
     }
 
     public void OnWebviewLayoutAdapterClick(View view) {
