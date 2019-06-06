@@ -52,7 +52,6 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     //changshuo project use for aliyun log
     api 'com.alibaba:fastjson:1.2.46'
-    api 'com.squareup.okhttp3:okhttp:3.12.1'
     //腾讯浏览器
     api 'com.cloud:tbs:4.3.0'
     //glide

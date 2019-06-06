@@ -107,8 +107,18 @@ public class BaseRequest {
     }
 
     //解决地址中含有特殊字符的情况
-    private URL toURL(String url) {
+    private URL toURLValid(String url) {
         try {
+            if (url == null) {
+                return null;
+            }
+            url = url.replaceAll("\"", "");
+            OkRxConfigParams configParams = OkRx.getInstance().getOkRxConfigParams();
+            if (configParams != null && !TextUtils.isEmpty(configParams.getUrlValidationRules())) {
+                if (!ValidUtils.valid(configParams.getUrlValidationRules(), url)) {
+                    return null;
+                }
+            }
             URL murl = new URL(url);
             return murl;
         } catch (MalformedURLException e) {
@@ -124,13 +134,7 @@ public class BaseRequest {
         if (requestType == RequestType.GET) {
             url = addGetRequestParams(url, params);
         }
-        OkRxConfigParams configParams = OkRx.getInstance().getOkRxConfigParams();
-        if (configParams != null && !TextUtils.isEmpty(configParams.getUrlValidationRules())) {
-            if (!ValidUtils.valid(configParams.getUrlValidationRules(), url)) {
-                return null;
-            }
-        }
-        URL murl = toURL(url);
+        URL murl = toURLValid(url);
         if (murl == null) {
             return null;
         }
