@@ -22,7 +22,7 @@
 <font size=2>下图为图标组成形式:</font>
 </font>
 
-![](assets/15607080790764.jpg)
+![](assets/2018030520555291.gif)
 
 * 图标周边为纯色适配
     * <font color=red>
