@@ -13,7 +13,7 @@
 <font size=2>XH DPI ( Extra-high density screen, 320 DPI )，其图标大小为 96 x 96 px</font></br>
 <font size=2>XXH DPI( xx-high density screen, 480 DPI )，其图标大小为144 x 144 px</font></br>
 <font size=2>XXXH DPI( xxx-high density screen, 640 DPI )，其图标大小为192 x 192 px </font></br>
-2. 从api>=17开始新增mipmap,与drawable目录区别
+2. 从api>=17开始新增mipmap,与drawable目录区别</br>
 参考链接:[<font color=#1515D1>官网mipmap与drawable区别</font>](https://www.jianshu.com/p/3b984405ad66)
 根据[<font color=#1515D1>mipmap纹理及缩放特性</font>](https://www.jianshu.com/p/65376d181323)除对app启动图放在mipmap外，若对其它图片速度和显示要求比较高的(如app tab icon,...)也可放在mipmap下;
 
