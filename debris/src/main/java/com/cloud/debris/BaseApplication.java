@@ -87,6 +87,9 @@ public abstract class BaseApplication extends Application implements OnApplicati
     @Override
     public void onCreate() {
         super.onCreate();
+        LauncherState launcherState = new LauncherState();
+        launcherState.onLauncher(this);
+
         this.setOnApplicationLifecycle(this);
         registerActivityLifecycle();
         //最后初始化全局异常日志处理
@@ -103,8 +106,6 @@ public abstract class BaseApplication extends Application implements OnApplicati
         if (onApplicationLifecycle != null) {
             onApplicationLifecycle.onApplicationCreated();
         }
-        LauncherState launcherState = new LauncherState();
-        launcherState.onLauncher(this);
     }
 
     @Override

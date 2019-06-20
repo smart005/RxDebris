@@ -34,6 +34,7 @@ public class RedirectUtils extends BaseRedirectUtils {
     public static void startAppSettings(Context context) {
         Context applicationContext = context.getApplicationContext();
         Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         Uri uri = Uri.fromParts("package", applicationContext.getPackageName(), null);
         intent.setData(uri);

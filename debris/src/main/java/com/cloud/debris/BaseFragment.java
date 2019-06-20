@@ -10,6 +10,7 @@ import android.view.View;
 import com.cloud.ebus.EBus;
 import com.cloud.objects.bases.BundleData;
 import com.cloud.objects.events.OnSupperProperties;
+import com.cloud.objects.utils.GlobalUtils;
 
 /**
  * Author lijinghuan
@@ -22,6 +23,8 @@ import com.cloud.objects.events.OnSupperProperties;
 public class BaseFragment extends Fragment implements OnSupperProperties {
 
     private BundleData bundleData = null;
+    //页面标识
+    private String $_page_code;
 
     protected void onAttached(Context context) {
         //fragment第一个生命周期
@@ -46,13 +49,14 @@ public class BaseFragment extends Fragment implements OnSupperProperties {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        EBus.getInstance().registered(this);
+        $_page_code = GlobalUtils.getNewGuid();
+        EBus.getInstance().registered(this, $_page_code);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        EBus.getInstance().unregister(this);
+        EBus.getInstance().unregister(this, $_page_code);
     }
 
     @Override
