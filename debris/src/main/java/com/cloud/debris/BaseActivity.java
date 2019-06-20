@@ -10,6 +10,7 @@ import com.cloud.ebus.EBus;
 import com.cloud.launchs.utils.ActivityUtils;
 import com.cloud.objects.bases.BundleData;
 import com.cloud.objects.events.OnSupperProperties;
+import com.cloud.objects.utils.GlobalUtils;
 
 /**
  * Author lijinghuan
@@ -23,12 +24,15 @@ public class BaseActivity extends Activity implements OnSupperProperties,
         OnActivityStatesLisstener, OnLifeCycleStatistical {
 
     private BundleData bundleData = null;
+    //页面标识
+    private String $_page_code;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         bundleData = new BundleData(getIntent());
         super.onCreate(savedInstanceState);
-        EBus.getInstance().registered(this);
+        $_page_code = GlobalUtils.getNewGuid();
+        EBus.getInstance().registered(this, $_page_code);
     }
 
     @Override
@@ -43,7 +47,7 @@ public class BaseActivity extends Activity implements OnSupperProperties,
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EBus.getInstance().unregister(this);
+        EBus.getInstance().unregister(this, $_page_code);
     }
 
     @Override

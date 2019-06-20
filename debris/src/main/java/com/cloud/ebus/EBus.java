@@ -55,31 +55,43 @@ public class EBus {
      * 注册EBus订阅
      *
      * @param subscriber 适用于类、Activity、Fragment等
+     * @param unique     subMethods存储时className+unique作为key保存
      */
-    public void registered(Object subscriber) {
+    public void registered(Object subscriber, String unique) {
         if (subscriber == null) {
             return;
         }
         Class<?> sub = subscriber.getClass();
-        RegisterRunable runable = new RegisterRunable(sub, subscriber);
+        RegisterRunable runable = new RegisterRunable(sub, subscriber, unique);
         runable.run();
+    }
+
+    /**
+     * 注册EBus订阅
+     *
+     * @param subscriber 适用于类、Activity、Fragment等
+     */
+    public void registered(Object subscriber) {
+        registered(subscriber, "");
     }
 
     private class RegisterRunable implements Runnable {
 
         private Class<?> cls = null;
         private Object subscriber = null;
+        private String unique;
 
-        public RegisterRunable(Class<?> cls, Object subscriber) {
+        public RegisterRunable(Class<?> cls, Object subscriber, String unique) {
             this.cls = cls;
             this.subscriber = subscriber;
+            this.unique = unique;
         }
 
         @Override
         public void run() {
             try {
                 List<SubscribeEBus> subscribeEBuses = new ArrayList<SubscribeEBus>();
-                getRegisteredAnnons(cls, subscriber, subscribeEBuses);
+                getRegisteredAnnons(cls, subscriber, subscribeEBuses, unique);
                 //
             } catch (Exception e) {
                 Logger.error(e);
@@ -89,32 +101,45 @@ public class EBus {
 
     /**
      * 反注册EBus订阅
+     * (一般在onDestory中调用,必须与注册成对调用)
+     *
+     * @param subscriber 适用于类、Activity、Fragment等
+     * @param unique     subMethods存储时className+unique作为key保存
+     */
+    public void unregister(Object subscriber, String unique) {
+        if (subscriber == null) {
+            return;
+        }
+        Class<?> sub = subscriber.getClass();
+        UnRegisterRunable unRegisterRunable = new UnRegisterRunable(sub, unique);
+        unRegisterRunable.run();
+    }
+
+    /**
+     * 反注册EBus订阅
      * (一般在onDestory中调用)
      *
      * @param subscriber 适用于类、Activity、Fragment等
      */
     public void unregister(Object subscriber) {
-        if (subscriber == null) {
-            return;
-        }
-        Class<?> sub = subscriber.getClass();
-        UnRegisterRunable unRegisterRunable = new UnRegisterRunable(sub);
-        unRegisterRunable.run();
+        unregister(subscriber, "");
     }
 
     private class UnRegisterRunable implements Runnable {
 
         private Class<?> cls = null;
+        private String unique;
 
-        public UnRegisterRunable(Class<?> cls) {
+        public UnRegisterRunable(Class<?> cls, String unique) {
             this.cls = cls;
+            this.unique = unique;
         }
 
         @Override
         public void run() {
             try {
                 //移除集合中数据
-                String className = cls.getName();
+                String className = cls.getName() + unique;
                 if (subMethods.containsKey(className)) {
                     subMethods.remove(className);
                 }
@@ -126,14 +151,14 @@ public class EBus {
         }
     }
 
-    private void getRegisteredAnnons(Class<?> cls, Object subscriber, List<SubscribeEBus> subscribeEBuses) {
+    private void getRegisteredAnnons(Class<?> cls, Object subscriber, List<SubscribeEBus> subscribeEBuses, String unique) {
         Method[] methods = cls.getMethods();
         int length = methods.length;
         if (length == 0) {
             return;
         }
         HashMap<String, EBusItem> map = null;
-        String clsName = cls.getName();
+        String clsName = cls.getName() + unique;
         if (subMethods.containsKey(clsName)) {
             map = subMethods.get(clsName);
         }
