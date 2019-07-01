@@ -14,7 +14,6 @@
     <uses-permission android:name="android.hardware.camera" />
     <!--打电话权限-->
     <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <!--短信权限-->
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />

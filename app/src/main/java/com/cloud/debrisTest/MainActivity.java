@@ -14,12 +14,12 @@ import com.cloud.debrisTest.web.NKitActivity;
 import com.cloud.ebus.EBus;
 import com.cloud.ebus.SubscribeEBus;
 import com.cloud.objects.ObjectJudge;
-import com.cloud.objects.TimingManager;
 import com.cloud.objects.events.OnChainInputRunnable;
 import com.cloud.objects.events.OnChainRunnable;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
+import com.cloud.objects.manager.TimingManager;
 import com.cloud.objects.mapper.UrlParamsEntry;
 import com.cloud.objects.observable.ObservableComponent;
 import com.cloud.objects.storage.DirectoryUtils;
@@ -143,7 +143,7 @@ public class MainActivity extends BaseActivity {
 
         EBus.getInstance().post("msg_key", "111", "222");
 
-        String jsoncheck="{\n" +
+        String jsoncheck = "{\n" +
                 "  \"Message\": \"\",\n" +
                 "  \"State\": 1,\n" +
                 "  \"Result\": {\n" +
@@ -179,6 +179,10 @@ public class MainActivity extends BaseActivity {
     }
 
     public void OnToastClick(View view) {
-        ToastUtils.show(this, "默认消息");
+        ToastUtils.show("默认消息");
+    }
+
+    public void OnPreviewImageClick(View view) {
+        RedirectUtils.startActivity(this, PreviewImageActivity.class);
     }
 }

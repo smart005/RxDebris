@@ -87,7 +87,7 @@ public abstract class BaseApplication extends Application implements OnApplicati
     @Override
     public void onCreate() {
         super.onCreate();
-        LauncherState launcherState = new LauncherState();
+        LauncherState launcherState = LauncherState.getInstance();
         launcherState.onLauncher(this);
 
         this.setOnApplicationLifecycle(this);
@@ -146,6 +146,9 @@ public abstract class BaseApplication extends Application implements OnApplicati
                 }
                 //记录活动名称
                 ActivityUtils.getInstance().put(activity.getClass().getName());
+                //维护activity队列
+                LauncherState.getInstance().onActivityCreated(activity, savedInstanceState);
+                SuperActivitySupport.removeGlobalFloatViews(activity);
             }
 
             @Override
@@ -230,6 +233,8 @@ public abstract class BaseApplication extends Application implements OnApplicati
                 }
                 //移除活动名称
                 ActivityUtils.getInstance().remove(activity.getClass().getName());
+                //移出activity队列
+                LauncherState.getInstance().onActivityDestroyed(activity);
             }
         });
     }

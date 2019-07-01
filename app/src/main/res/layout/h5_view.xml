@@ -7,11 +7,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.cloud.coms.themes.TextThemeView
+        <com.cloud.coms.themes.ThemeTextView
             android:id="@+id/head_ttv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:ttv_leftView="@layout/cl_return_view" />
+            app:ttv_leftViewText="&#xe612;" />
 
         <com.cloud.mixed.h5.H5WebView
             android:id="@+id/h5_test"

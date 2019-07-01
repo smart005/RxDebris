@@ -7,7 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.ValueCallback;
 
-import com.cloud.coms.themes.OnThemeViewKeyListener;
+import com.cloud.coms.events.OnThemeViewClickListener;
+import com.cloud.coms.themes.ActionType;
 import com.cloud.debris.BaseFragmentActivity;
 import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.H5ViewBinding;
@@ -26,7 +27,7 @@ import java.util.List;
  * Modifier:
  * ModifyContent:
  */
-public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListener, OnH5ImageSelectedListener {
+public class H5Test extends BaseFragmentActivity implements OnThemeViewClickListener, OnH5ImageSelectedListener {
 
     private H5ViewBinding binding;
 
@@ -38,7 +39,7 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
         binding = DataBindingUtil.setContentView(this, R.layout.h5_view);
 
         RxMixed.getInstance().setOnH5ImageSelectedListener(this);
-        binding.headTtv.setOnThemeViewKeyListener(this);
+        binding.headTtv.setOnThemeViewClickListener(this);
 
         binding.h5Test.bindInterface("netcloud");
 //        binding.h5Test.load("http://www.slcore.com:201");
@@ -53,9 +54,9 @@ public class H5Test extends BaseFragmentActivity implements OnThemeViewKeyListen
     }
 
     @Override
-    public void onKeyListener(View view, int id) {
-        if (id == R.id.return_itv) {
-            binding.h5Test.getSelectText();
+    public void onThemeViewClick(View view, int id, ActionType actionType) {
+        if (actionType == ActionType.leftView) {
+
         }
     }
 

@@ -50,13 +50,11 @@ android {
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    //changshuo project use for aliyun log
-    api 'com.alibaba:fastjson:1.2.46'
     api 'com.cloud:tbs:4.3.0'
-    api 'com.cloud:libsdk:1.0.84'
-    api 'com.cloud:coms:1.0.13'
-    api 'com.cloud:images:1.0.6'
-    api 'com.cloud:nets:1.0.6'
+    api 'com.cloud:libsdk:1.0.95'
+    api 'com.cloud:coms:1.0.48'
+    api 'com.cloud:images:1.0.15'
+    api 'com.cloud:nets:1.0.8'
 }
 
 apply from: 'nexus-push.gradle'

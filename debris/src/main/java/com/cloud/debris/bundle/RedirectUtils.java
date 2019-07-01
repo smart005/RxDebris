@@ -67,7 +67,7 @@ public class RedirectUtils extends BaseRedirectUtils {
                             }
                             activity.startActivity(intent);
                         } else {
-                            ToastUtils.show(activity, "拨打电话权限未开启,请转到设置页面开启.");
+                            ToastUtils.show("拨打电话权限未开启,请转到设置页面开启.");
                         }
                     }
                 });
@@ -99,7 +99,7 @@ public class RedirectUtils extends BaseRedirectUtils {
                             }
                             activity.startActivity(intent);
                         } else {
-                            ToastUtils.show(activity, "发送短信权限未开启,请转到设置页面开启.");
+                            ToastUtils.show("发送短信权限未开启,请转到设置页面开启.");
                         }
                     }
                 });

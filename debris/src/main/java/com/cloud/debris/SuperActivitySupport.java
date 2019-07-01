@@ -3,7 +3,9 @@ package com.cloud.debris;
 import android.app.Activity;
 
 import com.cloud.cache.DerivedCache;
+import com.cloud.coms.dialogs.BaseFloatViewDialog;
 import com.cloud.objects.beans.MapEntryItem;
+import com.cloud.objects.utils.SharedPrefUtils;
 
 import java.lang.reflect.Field;
 
@@ -49,6 +51,18 @@ class SuperActivitySupport {
                     new MapEntryItem("pageName", cls.getSimpleName()));
         } else {
             DerivedCache.getInstance().clear("20882af386ee4fb1b052f8d701527402");
+        }
+    }
+
+    /**
+     * 启动时移除全局浮动视图
+     *
+     * @param activity activity
+     */
+    public static void removeGlobalFloatViews(Activity activity) {
+        boolean state = SharedPrefUtils.getPrefBoolean(activity, "$_global_float_dialog_destoryed");
+        if (state) {
+            BaseFloatViewDialog.removeFloatViewForActivity(activity, R.id.cl_tip_view_rl);
         }
     }
 }
