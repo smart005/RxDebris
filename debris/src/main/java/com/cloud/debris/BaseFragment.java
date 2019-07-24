@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
@@ -11,6 +12,8 @@ import com.cloud.ebus.EBus;
 import com.cloud.objects.bases.BundleData;
 import com.cloud.objects.events.OnSupperProperties;
 import com.cloud.objects.utils.GlobalUtils;
+
+import java.util.ArrayList;
 
 /**
  * Author lijinghuan
@@ -187,6 +190,16 @@ public class BaseFragment extends Fragment implements OnSupperProperties {
     @Override
     public <T> T getParcelableBundle(String key) {
         return bundleData.getParcelableBundle(key);
+    }
+
+    @Override
+    public Parcelable[] getParcelableArrayBundle(String key) {
+        return bundleData.getParcelableArrayBundle(key);
+    }
+
+    @Override
+    public <T extends Parcelable> ArrayList<T> getParcelableArrayListBundle(String key) {
+        return bundleData.getParcelableArrayListBundle(key);
     }
 
     @Override

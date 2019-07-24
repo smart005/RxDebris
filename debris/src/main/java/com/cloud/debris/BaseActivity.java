@@ -2,6 +2,7 @@ package com.cloud.debris;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Parcelable;
 
 import com.cloud.debris.enums.StatisticalTypes;
 import com.cloud.debris.event.OnActivityStatesLisstener;
@@ -11,6 +12,8 @@ import com.cloud.launchs.utils.ActivityUtils;
 import com.cloud.objects.bases.BundleData;
 import com.cloud.objects.events.OnSupperProperties;
 import com.cloud.objects.utils.GlobalUtils;
+
+import java.util.ArrayList;
 
 /**
  * Author lijinghuan
@@ -178,6 +181,16 @@ public class BaseActivity extends Activity implements OnSupperProperties,
     @Override
     public <T> T getParcelableBundle(String key) {
         return bundleData.getParcelableBundle(key);
+    }
+
+    @Override
+    public Parcelable[] getParcelableArrayBundle(String key) {
+        return bundleData.getParcelableArrayBundle(key);
+    }
+
+    @Override
+    public <T extends Parcelable> ArrayList<T> getParcelableArrayListBundle(String key) {
+        return bundleData.getParcelableArrayListBundle(key);
     }
 
     @Override

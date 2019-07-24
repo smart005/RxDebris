@@ -1,6 +1,5 @@
 package com.cloud.mixed.h5;
 
-import android.content.Context;
 import android.text.TextUtils;
 
 import com.cloud.mixed.h5.beans.APIReturnResult;
@@ -40,7 +39,6 @@ public class H5InteractionAPIUtils {
     /**
      * H5请求api接口方法
      *
-     * @param context
      * @param baseUrl 请求api的基地址
      * @param extras  {"apiName":"login",
      *                "target":"返回时带回去",
@@ -49,14 +47,14 @@ public class H5InteractionAPIUtils {
      *                {"fieldName":"password","fieldValue":"123456"}]}
      * @param headers 请求头
      */
-    public static void getAPIMethod(Context context,
-                                    String baseUrl,
+    public static void getAPIMethod(String baseUrl,
                                     String extras,
                                     HashMap<String, String> headers,
                                     RequestContentType requestContentType,
-                                    final Func2<Object, APIRequestState, APIReturnResult> callback) {
+                                    final Func2<Object, APIRequestState, APIReturnResult> callback,
+                                    String userClass) {
         try {
-            if (context == null || TextUtils.isEmpty(extras)) {
+            if (TextUtils.isEmpty(extras)) {
                 return;
             }
             final H5GetAPIMethodArgsBean h5GetAPIMethodArgsBean = JsonUtils.parseT(extras, H5GetAPIMethodArgsBean.class);
@@ -76,19 +74,19 @@ public class H5InteractionAPIUtils {
             String target = h5GetAPIMethodArgsBean.getTarget();
             switch (h5GetAPIMethodArgsBean.getReqType().trim().toLowerCase()) {
                 case "get":
-                    getRequest(context, url, headers, params, target, callback);
+                    getRequest(url, headers, params, target, callback, userClass);
                     break;
                 case "post":
-                    postRequest(context, url, headers, params, target, requestContentType, callback);
+                    postRequest(url, headers, params, target, requestContentType, callback, userClass);
                     break;
                 case "put":
-                    putRequest(context, url, headers, params, target, requestContentType, callback);
+                    putRequest(url, headers, params, target, requestContentType, callback, userClass);
                     break;
                 case "patch":
-                    patchRequest(context, url, headers, params, target, requestContentType, callback);
+                    patchRequest(url, headers, params, target, requestContentType, callback, userClass);
                     break;
                 case "delete":
-                    deleteRequest(context, url, headers, params, target, requestContentType, callback);
+                    deleteRequest(url, headers, params, target, requestContentType, callback, userClass);
                     break;
             }
         } catch (Exception e) {
@@ -96,13 +94,13 @@ public class H5InteractionAPIUtils {
         }
     }
 
-    private static void deleteRequest(Context context,
-                                      String url,
+    private static void deleteRequest(String url,
                                       HashMap<String, String> headers,
                                       HashMap<String, Object> params,
                                       final String target,
                                       RequestContentType requestContentType,
-                                      final Func2<Object, APIRequestState, APIReturnResult> callback) {
+                                      final Func2<Object, APIRequestState, APIReturnResult> callback,
+                                      String userClass) {
         RetrofitParams retrofitParams = new RetrofitParams();
         TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
@@ -133,16 +131,18 @@ public class H5InteractionAPIUtils {
                     }
                 },
                 null,
-                "", null);
+                "",
+                null,
+                userClass);
     }
 
-    private static void patchRequest(Context context,
-                                     String url,
+    private static void patchRequest(String url,
                                      HashMap<String, String> headers,
                                      HashMap<String, Object> params,
                                      final String target,
                                      RequestContentType requestContentType,
-                                     final Func2<Object, APIRequestState, APIReturnResult> callback) {
+                                     final Func2<Object, APIRequestState, APIReturnResult> callback,
+                                     String userClass) {
         RetrofitParams retrofitParams = new RetrofitParams();
         TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
@@ -171,16 +171,18 @@ public class H5InteractionAPIUtils {
                     }
                 },
                 null,
-                "", null);
+                "",
+                null,
+                userClass);
     }
 
-    private static void putRequest(Context context,
-                                   String url,
+    private static void putRequest(String url,
                                    HashMap<String, String> headers,
                                    HashMap<String, Object> params,
                                    final String target,
                                    RequestContentType requestContentType,
-                                   final Func2<Object, APIRequestState, APIReturnResult> callback) {
+                                   final Func2<Object, APIRequestState, APIReturnResult> callback,
+                                   String userClass) {
         RetrofitParams retrofitParams = new RetrofitParams();
         TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
@@ -211,16 +213,17 @@ public class H5InteractionAPIUtils {
                 },
                 null,
                 "",
-                null);
+                null,
+                userClass);
     }
 
-    private static void postRequest(Context context,
-                                    String url,
+    private static void postRequest(String url,
                                     HashMap<String, String> headers,
                                     HashMap<String, Object> params,
                                     final String target,
                                     RequestContentType requestContentType,
-                                    final Func2<Object, APIRequestState, APIReturnResult> callback) {
+                                    final Func2<Object, APIRequestState, APIReturnResult> callback,
+                                    String userClass) {
         RetrofitParams retrofitParams = new RetrofitParams();
         TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
@@ -251,15 +254,16 @@ public class H5InteractionAPIUtils {
                 },
                 null,
                 "",
-                null);
+                null,
+                userClass);
     }
 
-    private static void getRequest(Context context,
-                                   String url,
+    private static void getRequest(String url,
                                    HashMap<String, String> headers,
                                    HashMap<String, Object> params,
                                    final String target,
-                                   final Func2<Object, APIRequestState, APIReturnResult> callback) {
+                                   final Func2<Object, APIRequestState, APIReturnResult> callback,
+                                   String userClass) {
         RetrofitParams retrofitParams = new RetrofitParams();
         TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
@@ -286,6 +290,10 @@ public class H5InteractionAPIUtils {
                             callback.call(APIRequestState.Complate, null);
                         }
                     }
-                }, null, "", null);
+                },
+                null,
+                "",
+                null,
+                userClass);
     }
 }

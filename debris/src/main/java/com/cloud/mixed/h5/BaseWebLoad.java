@@ -141,7 +141,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
                 this.webview = webview;
                 this.addView(webview, wvparam);
             }
-            RelativeLayout.LayoutParams vparam = new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, PixelUtils.dip2px(getContext(), 3));
+            RelativeLayout.LayoutParams vparam = new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, PixelUtils.dip2px(3));
             progressBar = new ProgressBar(getContext());
             progressBar.setMax(100);
             progressBar.setProgress(0);
@@ -222,6 +222,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
         mbox.setContentGravity(Gravity.LEFT);
         mbox.setContent(message);
         mbox.setShowTitle(false);
+        mbox.setShowClose(false);
         mbox.setTarget("ON_JS_CONFIRM_TARGET", result);
         mbox.show(getContext(), DialogButtonsEnum.ConfirmCancel);
         return true;
@@ -230,7 +231,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     private View createPromptEditView(Context context, String defaultText) {
         LinearLayout ll = new LinearLayout(context);
         LinearLayout.LayoutParams llparam = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                PixelUtils.dip2px(context, 32));
+                PixelUtils.dip2px(32));
         EditText editText = new EditText(context);
         editText.setLayoutParams(llparam);
         editText.setPadding(2, 1, 2, 1);
@@ -246,6 +247,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     public boolean onJsPrompt(Object view, String url, String message, String defaultValue, Object result) {
         mbox.setContentGravity(Gravity.LEFT);
         mbox.setShowTitle(true);
+        mbox.setShowClose(false);
         mbox.setTitle(message);
         mbox.setContentView(createPromptEditView(getContext(), defaultValue));
         Object[] extras = {result, defaultValue};
@@ -259,6 +261,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
         mbox.setContentGravity(Gravity.CENTER);
         mbox.setContent(message);
         mbox.setShowTitle(false);
+        mbox.setShowClose(false);
         mbox.setTarget("ON_JS_ALERT_TARGET", result);
         mbox.show(getContext(), DialogButtonsEnum.Confirm);
         return true;
@@ -771,7 +774,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
                             public void accept(Boolean success) {
                                 if (success) {
                                     //选择后图片最大压缩大小
-                                    imageSelectDialog.setMaxFileSize(98);
+                                    imageSelectDialog.setMaxFileSize(2048);
                                     imageSelectDialog.setMaxImageWidth(ObjectManager.getScreenWidth(activity));
                                     imageSelectDialog.setMaxImageHeight(ObjectManager.getScreenHeight(activity));
                                     //最多选择图片数量
