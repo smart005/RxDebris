@@ -103,7 +103,7 @@ public class NKitActivity extends BaseActivity {
     public class JSObject {
 
         @JavascriptInterface
-        @com.cloud.mixed.h5.JavascriptInterface
+        @com.cloud.mixed.annotations.JavascriptInterface
         public void getHtmlContent(String html) {
             //取出body中onload调用的函数
             String readyFun = "";

@@ -7,11 +7,16 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.cloud.mixed.abstracts.OnBridgeAbstract;
+import com.cloud.mixed.annotations.HybridLogicBridge;
+import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.mapper.UrlParamsEntry;
+import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
+import com.cloud.objects.utils.JsonUtils;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -22,12 +27,10 @@ import java.util.List;
  * @Modifier:
  * @ModifyContent:
  */
-public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
+public class H5WebView extends BaseH5WebView {
 
-    /**
-     * js接口对象(name-register javascript class)
-     */
-    public HashMap<String, Object> jsInterfaceObjects = null;
+    //是否已添加基础js bridge
+    private boolean isAddedBasisJsBridge;
 
     public H5WebView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -39,51 +42,70 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
     }
 
     /**
-     * 绑定(注册)接口
+     * 添加bridge对象
      *
-     * @param interfaceName 接口名
+     * @param bridgeKeys bridge name keys
      */
-    public void bindInterface(String interfaceName) {
-        if (TextUtils.isEmpty(interfaceName)) {
+    public void addBridges(String... bridgeKeys) {
+        if (!isAddedBasisJsBridge) {
+            this.addJavascriptInterface(javascriptMethods, "cl_cloud_group_jsm");
+            isAddedBasisJsBridge = true;
+        }
+        if (ObjectJudge.isNullOrEmpty(bridgeKeys)) {
             return;
         }
-        //cache interface name
-        this.setTag(405409710, interfaceName);
-        //init after register script object
-        final L webListener = getWebListener();
-        if (webListener != null) {
-            //回调native方法
-            this.addJavascriptInterface(new JavascriptMethods(webListener), "cl_cloud_group_jsm");
-            //注册子类时超类脚本不会被回调,通过JavascriptMethods回调
-            this.addJavascriptInterface(webListener, interfaceName);
+        List<String> keys = ConvertUtils.toList(bridgeKeys);
+        Context context = getContext();
+        Class<? extends Context> contextClass = context.getClass();
+        if (android.os.Build.VERSION.SDK_INT >= 24) {
+            HybridLogicBridge[] annotations = contextClass.getAnnotationsByType(HybridLogicBridge.class);
+            if (ObjectJudge.isNullOrEmpty(annotations)) {
+                return;
+            }
+            for (HybridLogicBridge annotation : annotations) {
+                addJavascriptObject(annotation, keys);
+            }
+        } else {
+            Annotation[] annotations = contextClass.getDeclaredAnnotations();
+            if (ObjectJudge.isNullOrEmpty(annotations)) {
+                return;
+            }
+            for (Annotation annotation : annotations) {
+                if (!(annotation instanceof HybridLogicBridge)) {
+                    continue;
+                }
+                addJavascriptObject((HybridLogicBridge) annotation, keys);
+            }
         }
     }
 
-    /**
-     * 获取js方法或接口名-注册脚本对象
-     *
-     * @return
-     */
-    public HashMap<String, Object> getJsInterfaceObjects() {
-        return jsInterfaceObjects == null ? jsInterfaceObjects = new HashMap<String, Object>() : jsInterfaceObjects;
+    private void addJavascriptObject(HybridLogicBridge bridge, List<String> keys) {
+        if (!keys.contains(bridge.key())) {
+            return;
+        }
+        Object bridgeObject = JsonUtils.newNull(bridge.bridgeClass());
+        if (bridgeObject == null) {
+            return;
+        }
+        this.addJavascriptInterface(bridgeObject, bridge.bridgeName());
     }
 
     private boolean interceptEffectiveScheme(String url) {
         if (TextUtils.equals(url, "about:blank")) {
             return true;
         }
-        L listener = getWebListener();
-        if (listener == null) {
+        OnBridgeAbstract bridgeAbstract = getOnBridgeAbstract();
+        if (bridgeAbstract == null) {
             return false;
         }
         UrlParamsEntry urlParamsEntry = new UrlParamsEntry();
         urlParamsEntry.mapper(url);
         String scheme = urlParamsEntry.getParams("scheme");
         if (!TextUtils.isEmpty(scheme)) {
-            listener.nativeSchemeCall(scheme);
+            bridgeAbstract.nativeSchemeCall(scheme);
             return true;
         } else {
-            return listener.onUrlListener(url);
+            return bridgeAbstract.onUrlListener(this, url);
         }
     }
 
@@ -95,9 +117,12 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
         String suffixName = GlobalUtils.getSuffixName(path);
         List<String> suffixs = Arrays.asList("apk", "rar");
         if (!TextUtils.isEmpty(suffixName) && suffixs.contains(suffixName)) {
-            L listener = getWebListener();
-            if (listener != null) {
-                listener.download(url, "");
+            OnBridgeAbstract bridgeAbstract = getOnBridgeAbstract();
+            if (bridgeAbstract != null) {
+                String segment = uri.getLastPathSegment();
+                int index = segment.lastIndexOf(".");
+                String name = segment.substring(0, index);
+                bridgeAbstract.download(url, name);
             }
             return true;
         }
@@ -105,10 +130,10 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
     }
 
     private boolean callTel(String url) {
-        if (url.contains("tel:")) {
-            L listener = getWebListener();
-            if (listener != null) {
-                listener.onCallTel(url);
+        if (url.startsWith("tel:")) {
+            OnBridgeAbstract bridgeAbstract = getOnBridgeAbstract();
+            if (bridgeAbstract != null) {
+                bridgeAbstract.onCallTel(url);
             }
             return true;
         }
@@ -116,10 +141,10 @@ public class H5WebView<L extends OnH5WebViewListener> extends BaseH5WebView {
     }
 
     private boolean callSms(String url) {
-        if (url.contains("sms:") || url.contains("smsto:")) {
-            L listener = getWebListener();
-            if (listener != null) {
-                listener.onCallSms(url);
+        if (url.startsWith("sms:") || url.startsWith("smsto:")) {
+            OnBridgeAbstract bridgeAbstract = getOnBridgeAbstract();
+            if (bridgeAbstract != null) {
+                bridgeAbstract.onCallSms(url);
             }
             return true;
         }

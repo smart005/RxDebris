@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.cloud.debris.event.OnActivityCycleStatusCall;
 import com.cloud.debris.event.OnApplicationLifecycle;
@@ -243,23 +244,30 @@ public abstract class BaseApplication extends Application implements OnApplicati
      * @return true在后台运行, false在前台
      */
     public boolean isAppOnBackground() {
+        if (!isAppOnBackground) {
+            if (countActivity <= 0) {
+                isAppOnBackground = true;
+            }
+        }
         return isAppOnBackground;
     }
 
     /**
      * 判断应用是否已启动
      *
-     * @return
+     * @param componentInfo 组件信息
+     * @return true-启动;false-未启动;
      */
-    public boolean isAppStarted() {
-        ActivityManager activityManager = (ActivityManager) this
-                .getSystemService(Context.ACTIVITY_SERVICE);
+    public boolean isAppStarted(String componentInfo) {
+        if (TextUtils.isEmpty(componentInfo)) {
+            return false;
+        }
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> activitys = activityManager.getRunningTasks(Integer.MAX_VALUE);
         for (int i = 0; i < activitys.size(); i++) {
             String baseAcivityName = activitys.get(i).baseActivity.toString();
             // private String accessToken;
-            String COMPONENT_INFO = "ComponentInfo{com.changshuo.ui/com.changshuo.ui.activity";
-            if (baseAcivityName.startsWith(COMPONENT_INFO)) {
+            if (baseAcivityName.startsWith(componentInfo)) {
                 return true;
             }
         }

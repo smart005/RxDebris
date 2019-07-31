@@ -7,6 +7,8 @@ import android.os.Build;
 import android.view.View;
 
 import com.cloud.mixed.RxMixed;
+import com.cloud.mixed.abstracts.OnBridgeAbstract;
+import com.cloud.mixed.h5.events.OnWebActivityListener;
 import com.cloud.mixed.h5.events.OnWebViewListener;
 import com.cloud.mixed.h5.events.OnWebViewPartCycle;
 import com.cloud.objects.ObjectJudge;
@@ -41,13 +43,15 @@ import static android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW;
  */
 class X5Webview extends WebView implements OnWebViewPartCycle {
 
-    private OnH5WebViewListener onH5WebViewListener;
+    private OnBridgeAbstract onBridgeAbstract;
+    private OnWebActivityListener onWebActivityListener;
     //web view call
     private OnWebViewListener onWebViewListener;
 
-    public X5Webview(Context context, OnH5WebViewListener onH5WebViewListener, OnWebViewListener onWebViewListener) {
+    public X5Webview(Context context, OnBridgeAbstract bridgeAbstract, OnWebActivityListener webActivityListener, OnWebViewListener onWebViewListener) {
         super(context);
-        this.onH5WebViewListener = onH5WebViewListener;
+        this.onBridgeAbstract = bridgeAbstract;
+        this.onWebActivityListener = webActivityListener;
         this.onWebViewListener = onWebViewListener;
         initSetting();
         //设置当前webview和父容器的layerType解决页面加载空白
@@ -97,16 +101,18 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
                 settings.setLoadsImagesAutomatically(true);
                 settings.setSavePassword(true);
                 //add new user agent
-                if (onH5WebViewListener != null) {
+                if (onBridgeAbstract != null) {
                     List<String> userAgents = new ArrayList<String>();
-                    onH5WebViewListener.addUserAgent(userAgents);
+                    onBridgeAbstract.addUserAgent(userAgents);
                     //重新设置user agent
                     if (!ObjectJudge.isNullOrEmpty(userAgents)) {
                         String join = ConvertUtils.toJoin(userAgents, ";");
                         String agentString = settings.getUserAgentString();
                         settings.setUserAgent(String.format("%s;%s", join, agentString));
                     }
-                    onH5WebViewListener.onSettingModified(settings, true);
+                }
+                if (onWebActivityListener != null) {
+                    onWebActivityListener.onSettingModified(settings);
                 }
                 //http和https混合使用
                 //MIXED_CONTENT_NEVER_ALLOW：Webview不允许一个安全的站点（https）去加载非安全的站点内容（http）,比如，https网页内容的图片是http链接。强烈建议App使用这种模式，因为这样更安全。

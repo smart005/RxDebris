@@ -6,9 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import com.cloud.cache.MemoryCache;
-import com.cloud.mixed.h5.events.OnH5ImageSelectedListener;
-import com.cloud.mixed.h5.OnH5WebViewListener;
 import com.cloud.objects.events.OnRecyclingListener;
 import com.tencent.smtt.export.external.TbsCoreSettings;
 import com.tencent.smtt.sdk.QbSdk;
@@ -28,8 +25,6 @@ public class RxMixed implements OnRecyclingListener {
     private static RxMixed rxMixed = null;
     //x5 view是否初始化完成
     private boolean isInitedX5 = false;
-    //webview图片选择回调
-    private OnH5ImageSelectedListener onH5ImageSelectedListener;
 
     @Override
     public void recycling() {
@@ -42,31 +37,6 @@ public class RxMixed implements OnRecyclingListener {
 
     public static RxMixed getInstance() {
         return rxMixed == null ? rxMixed = new RxMixed() : rxMixed;
-    }
-
-    /**
-     * 注册h5监听(原控件渲染过程需在application.onCreate或Activity.onCreate setContextView之前注册)
-     *
-     * @param listener
-     * @param <L>
-     */
-    public <L extends OnH5WebViewListener> RxMixed registerH5Listener(L listener) {
-        MemoryCache.getInstance().setSoftCache("H5WebViewListener", listener);
-        return this;
-    }
-
-    /**
-     * 获取h5脚本回调监听
-     *
-     * @param <L> OnH5WebViewListener子类型
-     * @return
-     */
-    public <L extends OnH5WebViewListener> L getH5Listener() {
-        Object listener = MemoryCache.getInstance().getSoftCache("H5WebViewListener");
-        if (listener instanceof OnH5WebViewListener) {
-            return (L) listener;
-        }
-        return null;
     }
 
     /**
@@ -107,31 +77,4 @@ public class RxMixed implements OnRecyclingListener {
 
         }
     };
-
-    /**
-     * 获取h5选择native图片监听
-     *
-     * @return OnH5ImageSelectedListener
-     */
-    public OnH5ImageSelectedListener getOnH5ImageSelectedListener() {
-        if (onH5ImageSelectedListener == null) {
-            Object selectedListener = MemoryCache.getInstance().getSoftCache("$_H5ImageSelectedListener");
-            if (selectedListener instanceof OnH5ImageSelectedListener) {
-                onH5ImageSelectedListener = (OnH5ImageSelectedListener) selectedListener;
-            }
-        }
-        return onH5ImageSelectedListener;
-    }
-
-    /**
-     * 设置h5选择native图片监听
-     *
-     * @param listener 图片选择监听
-     * @return RxMixed
-     */
-    public RxMixed setOnH5ImageSelectedListener(OnH5ImageSelectedListener listener) {
-        this.onH5ImageSelectedListener = listener;
-        MemoryCache.getInstance().setSoftCache("$_H5ImageSelectedListener", listener);
-        return this;
-    }
 }

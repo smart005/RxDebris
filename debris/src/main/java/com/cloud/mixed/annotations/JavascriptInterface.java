@@ -1,4 +1,4 @@
-package com.cloud.mixed.h5;
+package com.cloud.mixed.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

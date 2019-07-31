@@ -33,9 +33,11 @@ import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.ebus.EBus;
 import com.cloud.images.beans.SelectImageProperties;
 import com.cloud.images.figureset.ImageSelectDialog;
-import com.cloud.mixed.RxMixed;
+import com.cloud.mixed.abstracts.OnBridgeAbstract;
+import com.cloud.mixed.annotations.HybridBasisBridgeCall;
 import com.cloud.mixed.h5.events.OnFinishOrGoBackListener;
 import com.cloud.mixed.h5.events.OnH5ImageSelectedListener;
+import com.cloud.mixed.h5.events.OnWebActivityListener;
 import com.cloud.mixed.h5.events.OnWebViewListener;
 import com.cloud.mixed.h5.events.OnWebViewPartCycle;
 import com.cloud.objects.ObjectJudge;
@@ -45,6 +47,7 @@ import com.cloud.objects.handler.HandlerManager;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.manager.ObjectManager;
 import com.cloud.objects.utils.ConvertUtils;
+import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.PixelUtils;
 import com.cloud.objects.utils.ValidUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -52,6 +55,7 @@ import com.tencent.smtt.export.external.interfaces.JsPromptResult;
 import com.tencent.smtt.export.external.interfaces.JsResult;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -84,26 +88,60 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     private OnWebViewPartCycle onWebViewPartCycle;
     private X5Webview x5Webview;
     private WKWebview webview;
+    private OnH5ImageSelectedListener onH5ImageSelectedListener;
+    private OnBridgeAbstract onBridgeAbstract;
+    private OnWebActivityListener onWebActivityListener;
 
     public BaseWebLoad(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.H5WebView);
         isX5 = a.getBoolean(R.styleable.H5WebView_wv_isX5, true);
         a.recycle();
-        onPreCreated(context);
+        initBasisBridgeEvents(context);
+        initActivityListener(context);
         init();
         EBus.getInstance().registered(this);
     }
 
-    /**
-     * 获取监听对象
-     *
-     * @param <L>
-     * @return
-     */
-    protected <L extends OnH5WebViewListener> L getWebListener() {
-        L listener = (L) RxMixed.getInstance().getH5Listener();
-        return listener;
+    private void initActivityListener(Context context) {
+        if (!(context instanceof OnWebActivityListener)) {
+            return;
+        }
+        onWebActivityListener = (OnWebActivityListener) context;
+    }
+
+    protected OnBridgeAbstract getOnBridgeAbstract() {
+        return this.onBridgeAbstract;
+    }
+
+    protected OnWebActivityListener getOnWebActivityListener() {
+        return this.onWebActivityListener;
+    }
+
+    private void initBasisBridgeEvents(Context context) {
+        Class<? extends Context> contextClass = context.getClass();
+        HybridBasisBridgeCall bridgeCall;
+        if (android.os.Build.VERSION.SDK_INT >= 24) {
+            bridgeCall = contextClass.getDeclaredAnnotation(HybridBasisBridgeCall.class);
+        } else {
+            Annotation[] annotations = contextClass.getDeclaredAnnotations();
+            if (ObjectJudge.isNullOrEmpty(annotations)) {
+                return;
+            }
+            Annotation annotation = annotations[0];
+            if (!(annotation instanceof HybridBasisBridgeCall)) {
+                return;
+            }
+            bridgeCall = (HybridBasisBridgeCall) annotation;
+        }
+        if (bridgeCall == null) {
+            return;
+        }
+        Object callObject = JsonUtils.newNull(bridgeCall.bridgeClass());
+        if (!(callObject instanceof OnBridgeAbstract)) {
+            return;
+        }
+        onBridgeAbstract = (OnBridgeAbstract) callObject;
     }
 
     /**
@@ -127,16 +165,15 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
 
     private void init() {
         try {
-            OnH5WebViewListener webListener = getWebListener();
             RelativeLayout.LayoutParams wvparam = new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
             //添加webview
             if (isX5) {
-                X5Webview webview = new X5Webview(getContext(), webListener, this);
+                X5Webview webview = new X5Webview(getContext(), onBridgeAbstract, onWebActivityListener, this);
                 this.onWebViewPartCycle = webview;
                 this.x5Webview = webview;
                 this.addView(webview, wvparam);
             } else {
-                WKWebview webview = new WKWebview(getContext(), webListener, this);
+                WKWebview webview = new WKWebview(getContext(), onBridgeAbstract, onWebActivityListener, this);
                 this.onWebViewPartCycle = webview;
                 this.webview = webview;
                 this.addView(webview, wvparam);
@@ -199,6 +236,15 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     @Override
     public void onPageStarted(Object view, String url, Bitmap favicon) {
         progressBar.setVisibility(VISIBLE);
+    }
+
+    /**
+     * 设置图片选择监听
+     *
+     * @param listener OnH5ImageSelectedListener
+     */
+    public void setOnH5ImageSelectedListener(OnH5ImageSelectedListener listener) {
+        this.onH5ImageSelectedListener = listener;
     }
 
     @Override
@@ -284,12 +330,11 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             finishFileUpload();
         }
         BaseWebLoad.this.uploadMsg = uploadMsg;
-        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-        if (selectedListener == null) {
+        if (onH5ImageSelectedListener == null) {
             finishFileUpload();
             return;
         }
-        selectedListener.openFileChooserImpl(uploadMsg, null);
+        onH5ImageSelectedListener.openFileChooserImpl(uploadMsg, null);
     }
 
     @Override
@@ -298,12 +343,11 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             finishFileUpload();
         }
         BaseWebLoad.this.uploadMsg = uploadMsg;
-        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-        if (selectedListener == null) {
+        if (onH5ImageSelectedListener == null) {
             finishFileUpload();
             return;
         }
-        selectedListener.openFileChooserImpl(uploadMsg, null);
+        onH5ImageSelectedListener.openFileChooserImpl(uploadMsg, null);
     }
 
     @Override
@@ -312,13 +356,12 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             finishFileUpload();
         }
         BaseWebLoad.this.uploadMsg = valueCallback;
-        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-        if (selectedListener == null) {
+        if (onH5ImageSelectedListener == null) {
             //监听null时结束上传
             finishFileUpload();
             return;
         }
-        selectedListener.openFileChooserImpl(valueCallback, null);
+        onH5ImageSelectedListener.openFileChooserImpl(valueCallback, null);
     }
 
     @Override
@@ -327,9 +370,8 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             finishFileUpload();
         }
         BaseWebLoad.this.sdk5UploadMsg = uploadMsg;
-        OnH5ImageSelectedListener selectedListener = RxMixed.getInstance().getOnH5ImageSelectedListener();
-        if (selectedListener != null) {
-            selectedListener.openFileChooserImpl(null, uploadMsg);
+        if (onH5ImageSelectedListener != null) {
+            onH5ImageSelectedListener.openFileChooserImpl(null, uploadMsg);
         }
         return true;
     }
@@ -438,15 +480,6 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             onWebViewPartCycle.onDestory();
         }
         EBus.getInstance().unregister(this);
-    }
-
-    /**
-     * 在webview初始化前回调
-     *
-     * @param context 当前上下文
-     */
-    protected void onPreCreated(Context context) {
-
     }
 
     /**
