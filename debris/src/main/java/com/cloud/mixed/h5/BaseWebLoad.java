@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import com.cloud.coms.dialogs.BaseMessageBox;
 import com.cloud.coms.dialogs.enums.DialogButtonsEnum;
 import com.cloud.coms.dialogs.enums.MsgBoxClickButtonEnum;
+import com.cloud.dataprocessor.events.OnScriptRegisterBox;
 import com.cloud.debris.R;
 import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.ebus.EBus;
@@ -91,6 +92,8 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     private OnH5ImageSelectedListener onH5ImageSelectedListener;
     private OnBridgeAbstract onBridgeAbstract;
     private OnWebActivityListener onWebActivityListener;
+    //bridgeNames
+    protected HashMap<String, OnScriptRegisterBox> bridgeRegisterMap = new HashMap<>();
 
     public BaseWebLoad(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -472,14 +475,26 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     };
 
     /**
-     * 销毁webviewz
+     * 销毁webview
      */
-    public void onDestroy() {
+    public void destroy() {
         mbox.dismiss();
         if (onWebViewPartCycle != null) {
             onWebViewPartCycle.onDestory();
         }
         EBus.getInstance().unregister(this);
+        for (Map.Entry<String, OnScriptRegisterBox> entry : bridgeRegisterMap.entrySet()) {
+            try {
+                if (isX5) {
+                    x5Webview.removeJavascriptInterface(entry.getKey());
+                } else {
+                    webview.removeJavascriptInterface(entry.getKey());
+                }
+            } catch (Exception e) {
+                Logger.warn(e.getMessage());
+            }
+        }
+        bridgeRegisterMap.clear();
     }
 
     /**

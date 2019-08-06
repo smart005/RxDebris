@@ -6,7 +6,7 @@ import android.os.Bundle;
 import com.cloud.debris.BaseH5Activity;
 import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.H5ViewBinding;
-import com.cloud.mixed.annotations.HybridBasisBridgeCall;
+import com.cloud.mixed.annotations.HybridBridges;
 import com.cloud.mixed.annotations.HybridLogicBridge;
 
 /**
@@ -17,8 +17,10 @@ import com.cloud.mixed.annotations.HybridLogicBridge;
  * Modifier:
  * ModifyContent:
  */
-@HybridBasisBridgeCall(bridgeClass = BasisBridgeInteraction.class)
-@HybridLogicBridge(bridgeClass = GoodShopBridge.class, key = LogicBridgeKeys.goodShop, bridgeName = "mibao")
+@HybridBridges(values = {
+        @HybridLogicBridge(bridgeClass = BasisBridgeInteraction.class, isBasisBridge = true),
+        @HybridLogicBridge(bridgeClass = GoodShopBridge.class, key = LogicBridgeKeys.goodShop)
+})
 public class H5Test extends BaseH5Activity {
 
     private H5ViewBinding binding;
@@ -32,5 +34,10 @@ public class H5Test extends BaseH5Activity {
         //绑定业务交互bridge可以在这里添加
         bindH5View(binding.h5Test, LogicBridgeKeys.goodShop);
         binding.h5Test.load("http://192.168.31.52:8020/interaction/index.html");
+    }
+
+    @Override
+    public void onTitle(String title) {
+
     }
 }

@@ -13,13 +13,7 @@ import java.util.List;
  * Modifier:
  * ModifyContent:
  */
-public abstract class OnBridgeAbstract implements OnHybridListener {
-
-    private H5WebView webView;
-
-    public void setH5WebView(H5WebView view) {
-        this.webView = view;
-    }
+public abstract class OnBridgeAbstract extends OnRegisterBridgeAbstract implements OnHybridListener {
 
     @Override
     public boolean onUrlListener(H5WebView webView, String url) {

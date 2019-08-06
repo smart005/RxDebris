@@ -28,12 +28,12 @@ public @interface HybridLogicBridge {
      *
      * @return key
      */
-    String key();
+    String key() default "";
 
     /**
-     * bridge name
+     * 是否基础bridge
      *
-     * @return bridge name
+     * @return true-公用js bridge,反之false;
      */
-    String bridgeName();
+    boolean isBasisBridge() default false;
 }

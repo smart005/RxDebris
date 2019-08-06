@@ -1,13 +1,15 @@
 package com.cloud.mixed;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 
+import com.cloud.ebus.EBus;
+import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.events.OnRecyclingListener;
+import com.cloud.objects.events.RunnableParamsN;
+import com.cloud.objects.handler.HandlerManager;
+import com.cloud.objects.logs.Logger;
 import com.tencent.smtt.export.external.TbsCoreSettings;
+import com.tencent.smtt.sdk.CookieSyncManager;
 import com.tencent.smtt.sdk.QbSdk;
 
 import java.util.HashMap;
@@ -56,25 +58,60 @@ public class RxMixed implements OnRecyclingListener {
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put(TbsCoreSettings.TBS_SETTINGS_USE_SPEEDY_CLASSLOADER, true);
         QbSdk.initTbsSettings(map);
-        //启动x5预加载服务
-        Intent intent = new Intent(applicationContext, PreLoadX5Service.class);
-        applicationContext.startService(intent);
-        applicationContext.bindService(intent, x5Connection, Context.BIND_AUTO_CREATE);
+
+        PreLoadCall preLoadCall = new PreLoadCall(applicationContext);
+        QbSdk.initX5Environment(applicationContext, preLoadCall);
+        if (!QbSdk.isTbsCoreInited()) {
+            QbSdk.preInit(applicationContext, preLoadCall);
+        }
     }
 
-    private ServiceConnection x5Connection = new ServiceConnection() {
+    private class PreLoadCall implements QbSdk.PreInitCallback {
+
+        private Context context;
+
+        public PreLoadCall(Context context) {
+            this.context = context;
+        }
+
         @Override
-        public void onServiceConnected(ComponentName name, IBinder binder) {
-            if (binder instanceof PreLoadX5Service.PreLoadX5Binder) {
-                PreLoadX5Service.PreLoadX5Binder x5Binder = (PreLoadX5Service.PreLoadX5Binder) binder;
-                final PreLoadX5Service service = x5Binder.getService();
-                isInitedX5 = service.isInitedX5();
+        public void onViewInitFinished(boolean success) {
+            //x5內核初始化完成的回调，为true表示x5内核加载成功，否则表示x5内核加载失败，会自动切换到系统内核。
+            isInitedX5 = success;
+            try {
+                if (ObjectJudge.isMainThread()) {
+                    if (success) {
+                        CookieSyncManager.createInstance(context);
+                        CookieSyncManager.getInstance().sync();
+                    } else {
+                        android.webkit.CookieSyncManager.createInstance(context);
+                        android.webkit.CookieSyncManager.getInstance().sync();
+                    }
+                } else {
+                    HandlerManager.getInstance().post(new RunnableParamsN<Object>() {
+                        @Override
+                        public void run(Object... objects) {
+                            if (isInitedX5) {
+                                CookieSyncManager.createInstance(context);
+                                CookieSyncManager.getInstance().sync();
+                            } else {
+                                android.webkit.CookieSyncManager.createInstance(context);
+                                android.webkit.CookieSyncManager.getInstance().sync();
+                            }
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                //chrome error
+                Logger.error(e);
             }
+            //通知x5初始化结束
+            EBus.getInstance().post("X5_INIT_FINISHED", success);
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public void onCoreInitFinished() {
 
         }
-    };
+    }
 }

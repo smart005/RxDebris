@@ -8,25 +8,18 @@ import java.lang.annotation.Target;
 /**
  * Author lijinghuan
  * Email:ljh0576123@163.com
- * CreateTime:2019-07-30
- * Description:hybrid基础交互回调
+ * CreateTime:2019-08-05
+ * Description:
  * Modifier:
  * ModifyContent:
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface HybridBasisBridgeCall {
+public @interface HybridBridges {
     /**
-     * 基础bridge
+     * bridge对象
      *
-     * @return bridge class
+     * @return bridges
      */
-    Class bridgeClass();
-
-//    /**
-//     * web call class
-//     *
-//     * @return activity call class
-//     */
-//    Class webCallClass();
+    HybridLogicBridge[] values();
 }

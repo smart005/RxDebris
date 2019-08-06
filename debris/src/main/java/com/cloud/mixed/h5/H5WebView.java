@@ -7,9 +7,12 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.cloud.dataprocessor.events.OnScriptRegisterBox;
 import com.cloud.mixed.abstracts.OnBridgeAbstract;
+import com.cloud.mixed.abstracts.OnRegisterBridgeAbstract;
 import com.cloud.mixed.annotations.HybridLogicBridge;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.events.Action2;
 import com.cloud.objects.mapper.UrlParamsEntry;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
@@ -42,11 +45,11 @@ public class H5WebView extends BaseH5WebView {
     }
 
     /**
-     * 添加bridge对象
+     * 调用bridge对象
      *
      * @param bridgeKeys bridge name keys
      */
-    public void addBridges(String... bridgeKeys) {
+    public void startBridges(String... bridgeKeys) {
         if (!isAddedBasisJsBridge) {
             this.addJavascriptInterface(javascriptMethods, "cl_cloud_group_jsm");
             isAddedBasisJsBridge = true;
@@ -57,37 +60,72 @@ public class H5WebView extends BaseH5WebView {
         List<String> keys = ConvertUtils.toList(bridgeKeys);
         Context context = getContext();
         Class<? extends Context> contextClass = context.getClass();
+        //添加basis bridge
+
+        //添加logic bridge
+        addLogicBridge(contextClass, keys);
+    }
+
+    private void addLogicBridge(Class<? extends Context> contextClass, List<String> keys) {
+        Action2<Annotation[], List<String>> action1 = new Action2<Annotation[], List<String>>() {
+            @Override
+            public void call(Annotation[] annotations, List<String> keys) {
+                if (ObjectJudge.isNullOrEmpty(annotations)) {
+                    return;
+                }
+                for (Annotation annotation : annotations) {
+                    if (!(annotation instanceof HybridLogicBridge)) {
+                        continue;
+                    }
+                    HybridLogicBridge logicBridge = (HybridLogicBridge) annotation;
+                    if (!keys.contains(logicBridge.key())) {
+                        continue;
+                    }
+                    Object obj = JsonUtils.newNull(logicBridge.bridgeClass());
+                    if (!(obj instanceof OnRegisterBridgeAbstract)) {
+                        continue;
+                    }
+                    OnRegisterBridgeAbstract bridgeAbstract = (OnRegisterBridgeAbstract) obj;
+                    bridgeAbstract.registerBridges(H5WebView.this);
+                }
+            }
+        };
         if (android.os.Build.VERSION.SDK_INT >= 24) {
             HybridLogicBridge[] annotations = contextClass.getAnnotationsByType(HybridLogicBridge.class);
-            if (ObjectJudge.isNullOrEmpty(annotations)) {
-                return;
-            }
-            for (HybridLogicBridge annotation : annotations) {
-                addJavascriptObject(annotation, keys);
-            }
+            action1.call(annotations, keys);
         } else {
             Annotation[] annotations = contextClass.getDeclaredAnnotations();
-            if (ObjectJudge.isNullOrEmpty(annotations)) {
-                return;
-            }
-            for (Annotation annotation : annotations) {
-                if (!(annotation instanceof HybridLogicBridge)) {
-                    continue;
-                }
-                addJavascriptObject((HybridLogicBridge) annotation, keys);
-            }
+            action1.call(annotations, keys);
         }
     }
 
-    private void addJavascriptObject(HybridLogicBridge bridge, List<String> keys) {
-        if (!keys.contains(bridge.key())) {
+    /**
+     * 注册对象
+     *
+     * @param registerBox 实现OnScriptRegisterBox
+     */
+    public void registerBox(OnScriptRegisterBox registerBox) {
+        if (registerBox == null || registerBox.getRegisterObject() == null || TextUtils.isEmpty(registerBox.getBridgeName())) {
             return;
         }
-        Object bridgeObject = JsonUtils.newNull(bridge.bridgeClass());
-        if (bridgeObject == null) {
+        if (bridgeRegisterMap.containsKey(registerBox.getBridgeName())) {
             return;
         }
-        this.addJavascriptInterface(bridgeObject, bridge.bridgeName());
+        this.addJavascriptInterface(registerBox.getRegisterObject(), registerBox.getBridgeName());
+        this.bridgeRegisterMap.put(registerBox.getBridgeName(), registerBox);
+    }
+
+    /**
+     * 获取注册对象
+     *
+     * @param bridgeName bridgeName
+     * @return OnScriptRegisterBox
+     */
+    public OnScriptRegisterBox getRegisterBox(String bridgeName) {
+        if (TextUtils.isEmpty(bridgeName) || !bridgeRegisterMap.containsKey(bridgeName)) {
+            return null;
+        }
+        return bridgeRegisterMap.get(bridgeName);
     }
 
     private boolean interceptEffectiveScheme(String url) {
@@ -171,4 +209,5 @@ public class H5WebView extends BaseH5WebView {
         //拦截有效schemeUrl
         return interceptEffectiveScheme(url);
     }
+
 }
