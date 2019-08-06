@@ -35,7 +35,7 @@ public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivit
         this.webView = h5WebView;
         h5WebView.setOnH5ImageSelectedListener(imageSelectedListener);
         if (!TextUtils.isEmpty(bridgeKey)) {
-            h5WebView.addBridges(bridgeKey);
+            h5WebView.startBridges(bridgeKey);
         }
     }
 

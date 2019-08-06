@@ -18,7 +18,6 @@ import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.GlobalUtils;
 import com.cloud.objects.utils.JsonUtils;
 
-import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,31 +53,24 @@ public class H5WebView extends BaseH5WebView {
             this.addJavascriptInterface(javascriptMethods, "cl_cloud_group_jsm");
             isAddedBasisJsBridge = true;
         }
-        if (ObjectJudge.isNullOrEmpty(bridgeKeys)) {
+        if (ObjectJudge.isNullOrEmpty(bridgeKeys) || declaredAnnotation == null) {
             return;
         }
         List<String> keys = ConvertUtils.toList(bridgeKeys);
-        Context context = getContext();
-        Class<? extends Context> contextClass = context.getClass();
-        //添加basis bridge
-
         //添加logic bridge
-        addLogicBridge(contextClass, keys);
+        addLogicBridge(keys);
     }
 
-    private void addLogicBridge(Class<? extends Context> contextClass, List<String> keys) {
-        Action2<Annotation[], List<String>> action1 = new Action2<Annotation[], List<String>>() {
+    private void addLogicBridge(List<String> keys) {
+        HybridLogicBridge[] values = declaredAnnotation.values();
+        if (ObjectJudge.isNullOrEmpty(values)) {
+            return;
+        }
+        Action2<HybridLogicBridge[], List<String>> action1 = new Action2<HybridLogicBridge[], List<String>>() {
             @Override
-            public void call(Annotation[] annotations, List<String> keys) {
-                if (ObjectJudge.isNullOrEmpty(annotations)) {
-                    return;
-                }
-                for (Annotation annotation : annotations) {
-                    if (!(annotation instanceof HybridLogicBridge)) {
-                        continue;
-                    }
-                    HybridLogicBridge logicBridge = (HybridLogicBridge) annotation;
-                    if (!keys.contains(logicBridge.key())) {
+            public void call(HybridLogicBridge[] annotations, List<String> keys) {
+                for (HybridLogicBridge logicBridge : annotations) {
+                    if (!keys.contains(logicBridge.key()) || logicBridge.isBasisBridge()) {
                         continue;
                     }
                     Object obj = JsonUtils.newNull(logicBridge.bridgeClass());
@@ -90,13 +82,7 @@ public class H5WebView extends BaseH5WebView {
                 }
             }
         };
-        if (android.os.Build.VERSION.SDK_INT >= 24) {
-            HybridLogicBridge[] annotations = contextClass.getAnnotationsByType(HybridLogicBridge.class);
-            action1.call(annotations, keys);
-        } else {
-            Annotation[] annotations = contextClass.getDeclaredAnnotations();
-            action1.call(annotations, keys);
-        }
+        action1.call(values, keys);
     }
 
     /**

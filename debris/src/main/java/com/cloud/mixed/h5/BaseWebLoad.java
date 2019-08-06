@@ -35,7 +35,8 @@ import com.cloud.ebus.EBus;
 import com.cloud.images.beans.SelectImageProperties;
 import com.cloud.images.figureset.ImageSelectDialog;
 import com.cloud.mixed.abstracts.OnBridgeAbstract;
-import com.cloud.mixed.annotations.HybridBasisBridgeCall;
+import com.cloud.mixed.annotations.HybridBridges;
+import com.cloud.mixed.annotations.HybridLogicBridge;
 import com.cloud.mixed.h5.events.OnFinishOrGoBackListener;
 import com.cloud.mixed.h5.events.OnH5ImageSelectedListener;
 import com.cloud.mixed.h5.events.OnWebActivityListener;
@@ -94,13 +95,16 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     private OnWebActivityListener onWebActivityListener;
     //bridgeNames
     protected HashMap<String, OnScriptRegisterBox> bridgeRegisterMap = new HashMap<>();
+    //bridge objects
+    protected HybridBridges declaredAnnotation;
 
     public BaseWebLoad(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.H5WebView);
         isX5 = a.getBoolean(R.styleable.H5WebView_wv_isX5, true);
         a.recycle();
-        initBasisBridgeEvents(context);
+        bindBridgeAnnotation(context);
+        initBridgeEvents(context);
         initActivityListener(context);
         init();
         EBus.getInstance().registered(this);
@@ -121,30 +125,41 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
         return this.onWebActivityListener;
     }
 
-    private void initBasisBridgeEvents(Context context) {
+    private void bindBridgeAnnotation(Context context) {
+        if (declaredAnnotation != null) {
+            return;
+        }
         Class<? extends Context> contextClass = context.getClass();
-        HybridBasisBridgeCall bridgeCall;
         if (android.os.Build.VERSION.SDK_INT >= 24) {
-            bridgeCall = contextClass.getDeclaredAnnotation(HybridBasisBridgeCall.class);
+            declaredAnnotation = contextClass.getDeclaredAnnotation(HybridBridges.class);
         } else {
-            Annotation[] annotations = contextClass.getDeclaredAnnotations();
-            if (ObjectJudge.isNullOrEmpty(annotations)) {
+            Annotation[] declaredAnnotations = contextClass.getDeclaredAnnotations();
+            for (Annotation annotation : declaredAnnotations) {
+                if (annotation instanceof HybridBridges) {
+                    declaredAnnotation = (HybridBridges) annotation;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void initBridgeEvents(Context context) {
+        if (onBridgeAbstract == null) {
+            if (declaredAnnotation == null) {
                 return;
             }
-            Annotation annotation = annotations[0];
-            if (!(annotation instanceof HybridBasisBridgeCall)) {
-                return;
+            HybridLogicBridge[] values = declaredAnnotation.values();
+            for (HybridLogicBridge logicBridge : values) {
+                if (logicBridge.isBasisBridge()) {
+                    Object callObject = JsonUtils.newNull(logicBridge.bridgeClass());
+                    if (!(callObject instanceof OnBridgeAbstract)) {
+                        return;
+                    }
+                    onBridgeAbstract = (OnBridgeAbstract) callObject;
+                    break;
+                }
             }
-            bridgeCall = (HybridBasisBridgeCall) annotation;
         }
-        if (bridgeCall == null) {
-            return;
-        }
-        Object callObject = JsonUtils.newNull(bridgeCall.bridgeClass());
-        if (!(callObject instanceof OnBridgeAbstract)) {
-            return;
-        }
-        onBridgeAbstract = (OnBridgeAbstract) callObject;
     }
 
     /**

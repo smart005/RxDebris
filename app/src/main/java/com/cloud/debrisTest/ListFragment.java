@@ -1,6 +1,5 @@
 package com.cloud.debrisTest;
 
-import android.arch.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.view.View;
 
@@ -18,6 +17,5 @@ public class ListFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        new ViewModelProvider(this,)
     }
 }
