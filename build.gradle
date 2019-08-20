@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/' }
+        maven { url 'http://www.geease.com:81/content/groups/cloud-group/' }
         maven { url 'http://192.168.200.156:8081/repository/group-android/' }
         google()
     }
@@ -11,7 +11,7 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'http://mv.slcore.com:81/content/groups/cloud-group/' }
+        maven { url 'http://www.geease.com:81/content/groups/cloud-group/' }
         maven { url 'http://192.168.200.156:8081/repository/group-android/' }
     }
 }

@@ -62,6 +62,10 @@ public class BaseFragment extends Fragment implements OnSupperProperties {
         EBus.getInstance().unregister(this, $_page_code);
     }
 
+    public BundleData getBundleData() {
+        return bundleData;
+    }
+
     @Override
     public Bundle getBundle() {
         return bundleData.getBundle();

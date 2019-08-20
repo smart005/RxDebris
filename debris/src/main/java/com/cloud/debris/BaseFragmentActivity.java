@@ -39,6 +39,10 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
         EBus.getInstance().registered(this, $_page_code);
     }
 
+    public BundleData getBundleData() {
+        return bundleData;
+    }
+
     @Override
     protected void onResume() {
         try {
@@ -185,7 +189,7 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
     }
 
     @Override
-    public  Parcelable[] getParcelableArrayBundle(String key) {
+    public Parcelable[] getParcelableArrayBundle(String key) {
         return bundleData.getParcelableArrayBundle(key);
     }
 

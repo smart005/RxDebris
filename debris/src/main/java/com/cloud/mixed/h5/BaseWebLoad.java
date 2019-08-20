@@ -40,14 +40,15 @@ import com.cloud.mixed.annotations.HybridLogicBridge;
 import com.cloud.mixed.h5.events.OnFinishOrGoBackListener;
 import com.cloud.mixed.h5.events.OnH5ImageSelectedListener;
 import com.cloud.mixed.h5.events.OnWebActivityListener;
+import com.cloud.mixed.h5.events.OnWebCookieListener;
 import com.cloud.mixed.h5.events.OnWebViewListener;
 import com.cloud.mixed.h5.events.OnWebViewPartCycle;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RuleParams;
 import com.cloud.objects.events.RunnableParamsN;
 import com.cloud.objects.handler.HandlerManager;
+import com.cloud.objects.logs.CrashUtils;
 import com.cloud.objects.logs.Logger;
-import com.cloud.objects.manager.ObjectManager;
 import com.cloud.objects.utils.ConvertUtils;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.PixelUtils;
@@ -55,6 +56,8 @@ import com.cloud.objects.utils.ValidUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tencent.smtt.export.external.interfaces.JsPromptResult;
 import com.tencent.smtt.export.external.interfaces.JsResult;
+import com.tencent.smtt.sdk.CookieManager;
+import com.tencent.smtt.sdk.CookieSyncManager;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -97,6 +100,10 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     protected HashMap<String, OnScriptRegisterBox> bridgeRegisterMap = new HashMap<>();
     //bridge objects
     protected HybridBridges declaredAnnotation;
+    /**
+     * 是否选择原图(默认true)
+     */
+    private boolean isOriginalImage = true;
 
     public BaseWebLoad(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -117,7 +124,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
         onWebActivityListener = (OnWebActivityListener) context;
     }
 
-    protected OnBridgeAbstract getOnBridgeAbstract() {
+    public OnBridgeAbstract getOnBridgeAbstract() {
         return this.onBridgeAbstract;
     }
 
@@ -207,8 +214,79 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             Drawable mdrawable = progressBar.getResources().getDrawable(R.drawable.cl_progressbar_style);
             progressBar.setProgressDrawable(mdrawable);
             this.addView(progressBar);
-            //设置当前容器硬件加速
-            this.setLayerType(LAYER_TYPE_HARDWARE, null);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+    }
+
+    /**
+     * 设置启动硬件加速
+     * (默认5.0以上6.0以下禁用，6.0以上启用)
+     * if (Build.VERSION.SDK_INT >= 19 && Build.VERSION.SDK_INT < 23) {
+     * super.setEnableHardwareAcceleration(false);
+     * } else if (Build.VERSION.SDK_INT >= 23) {
+     * super.setEnableHardwareAcceleration(true);
+     * }
+     *
+     * @param enable true-启用硬件加速,false-禁用硬件加速;
+     */
+    public void setEnableHardwareAcceleration(boolean enable) {
+        try {
+            if (enable) {
+                if (isX5) {
+                    if (x5Webview != null) {
+                        x5Webview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                    }
+                } else {
+                    if (webview != null) {
+                        webview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                    }
+                }
+            } else {
+                if (isX5) {
+                    if (x5Webview != null) {
+                        x5Webview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+                    }
+                } else {
+                    if (webview != null) {
+                        webview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Logger.warn("rxlog", CrashUtils.getCrashInfo(e));
+        }
+    }
+
+    /**
+     * 绑定cookies
+     *
+     * @param listener cookie相关属性构建监听
+     */
+    public void bindCookies(OnWebCookieListener listener) {
+        if (listener == null) {
+            return;
+        }
+        try {
+            HashMap<String, String> cookies = listener.onWebCookies();
+            if (ObjectJudge.isNullOrEmpty(cookies)) {
+                return;
+            }
+            if (isX5) {
+                CookieSyncManager.createInstance(getContext());
+                CookieManager cookieManager = CookieManager.getInstance();
+                for (Map.Entry<String, String> entry : cookies.entrySet()) {
+                    cookieManager.setCookie(entry.getKey(), entry.getValue());
+                }
+                CookieSyncManager.getInstance().sync();
+            } else {
+                android.webkit.CookieSyncManager.createInstance(getContext());
+                android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
+                for (Map.Entry<String, String> entry : cookies.entrySet()) {
+                    cookieManager.setCookie(entry.getKey(), entry.getValue());
+                }
+                android.webkit.CookieSyncManager.getInstance().sync();
+            }
         } catch (Exception e) {
             Logger.error(e);
         }
@@ -820,6 +898,15 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
     };
 
     /**
+     * 设置是否选择原图
+     *
+     * @param originalImage true-原图,反之false;
+     */
+    public void setOriginalImage(boolean originalImage) {
+        isOriginalImage = originalImage;
+    }
+
+    /**
      * 选择本地图片
      *
      * @param activity FragmentActivity
@@ -836,10 +923,14 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
                             @Override
                             public void accept(Boolean success) {
                                 if (success) {
-                                    //选择后图片最大压缩大小
-                                    imageSelectDialog.setMaxFileSize(2048);
-                                    imageSelectDialog.setMaxImageWidth(ObjectManager.getScreenWidth(activity));
-                                    imageSelectDialog.setMaxImageHeight(ObjectManager.getScreenHeight(activity));
+                                    imageSelectDialog.setOriginalImage(isOriginalImage);
+                                    if (!isOriginalImage) {
+                                        //选择后图片最大压缩大小
+                                        imageSelectDialog.setMaxFileSize(2048);
+                                        //图片尺寸不做限制
+                                        imageSelectDialog.setMaxImageWidth(1000000);
+                                        imageSelectDialog.setMaxImageHeight(1000000);
+                                    }
                                     //最多选择图片数量
                                     imageSelectDialog.setMaxSelectNumber(1);
                                     //是否显示拍照选项

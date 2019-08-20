@@ -1,6 +1,8 @@
 package com.cloud.mixed.abstracts;
 
 import com.cloud.mixed.h5.H5WebView;
+import com.cloud.mixed.h5.events.OnWebInitListener;
+import com.cloud.objects.bases.BundleData;
 
 /**
  * Author lijinghuan
@@ -10,7 +12,12 @@ import com.cloud.mixed.h5.H5WebView;
  * Modifier:
  * ModifyContent:
  */
-public abstract class OnRegisterBridgeAbstract {
+public abstract class OnRegisterBridgeAbstract implements OnWebInitListener {
+
+    @Override
+    public void onWebInit(H5WebView h5WebView, BundleData bundleData) {
+        //页面初始化时回调
+    }
 
     /**
      * 注册脚本对象

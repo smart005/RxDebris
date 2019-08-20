@@ -2,13 +2,19 @@ package com.cloud.debris;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.text.TextUtils;
+import android.os.Bundle;
 import android.webkit.ValueCallback;
 
+import com.cloud.cache.DerivedCache;
+import com.cloud.mixed.abstracts.OnBridgeAbstract;
 import com.cloud.mixed.h5.H5WebView;
 import com.cloud.mixed.h5.events.OnH5ImageSelectedListener;
 import com.cloud.mixed.h5.events.OnWebActivityListener;
+import com.cloud.mixed.h5.events.OnWebCookieListener;
+import com.cloud.objects.bases.BundleData;
 import com.tencent.smtt.sdk.WebSettings;
+
+import java.util.HashMap;
 
 /**
  * Author lijinghuan
@@ -18,9 +24,27 @@ import com.tencent.smtt.sdk.WebSettings;
  * Modifier:
  * ModifyContent:
  */
-public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivityListener {
+public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivityListener, OnWebCookieListener {
 
     private H5WebView webView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Intent intent = getIntent();
+        if (intent != null) {
+            //是否播放视频状态
+            boolean isAutoPlayAudioVideo = intent.getBooleanExtra("isAutoPlayAudioVideo", false);
+            String name = this.getClass().getName();
+            String apvkey = String.format("%s_isAutoPlayAudioVideo", name);
+            DerivedCache.getInstance().put(apvkey, isAutoPlayAudioVideo);
+            //标签id或className集合(用于隐藏或显示)
+            String tagsArray = intent.getStringExtra("tagsIdsOrClassNames");
+            DerivedCache.getInstance().put("$_tagsIdsOrClassNames", tagsArray);
+            //是否请求html code
+            DerivedCache.getInstance().put("$_isRequestHtml", intent.getBooleanExtra("isRequestHtml", false));
+        }
+        super.onCreate(savedInstanceState);
+    }
 
     /**
      * bind web view
@@ -33,9 +57,18 @@ public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivit
             return;
         }
         this.webView = h5WebView;
+        BundleData bundleData = getBundleData();
+        h5WebView.setBundleData(bundleData);
+        //初始回调
+        OnBridgeAbstract onBridgeAbstract = h5WebView.getOnBridgeAbstract();
+        if (onBridgeAbstract != null) {
+            onBridgeAbstract.onWebInit(h5WebView, bundleData);
+        }
         h5WebView.setOnH5ImageSelectedListener(imageSelectedListener);
-        if (!TextUtils.isEmpty(bridgeKey)) {
-            h5WebView.startBridges(bridgeKey);
+        h5WebView.startBridges(bridgeKey);
+        if (!getBooleanBundle("hasVideo")) {
+            //是否启用硬件加速
+            h5WebView.setEnableHardwareAcceleration(getBooleanBundle("enableHardwareAcceleration", true));
         }
     }
 
@@ -70,5 +103,18 @@ public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivit
     @Override
     public void onSettingModified(android.webkit.WebSettings settings) {
         //android WebSettings
+    }
+
+    @Override
+    public HashMap<String, String> onWebCookies() {
+        return null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        String name = this.getClass().getName();
+        String apvkey = String.format("%s_isAutoPlayAudioVideo", name);
+        DerivedCache.getInstance().remove(apvkey);
     }
 }

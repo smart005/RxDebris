@@ -64,4 +64,9 @@ public abstract class OnBridgeAbstract extends OnRegisterBridgeAbstract implemen
     public void onCallSms(String sms) {
         //拨打电话功能需要在头部加上<meta name="format-detection" content="telephone=yes"/>
     }
+
+    @Override
+    public void onWebContent(String html) {
+        //只有参数isRequestHtml=true此方法才回调
+    }
 }

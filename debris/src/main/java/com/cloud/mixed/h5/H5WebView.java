@@ -2,7 +2,6 @@ package com.cloud.mixed.h5;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -12,6 +11,7 @@ import com.cloud.mixed.abstracts.OnBridgeAbstract;
 import com.cloud.mixed.abstracts.OnRegisterBridgeAbstract;
 import com.cloud.mixed.annotations.HybridLogicBridge;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.bases.BundleData;
 import com.cloud.objects.events.Action2;
 import com.cloud.objects.mapper.UrlParamsEntry;
 import com.cloud.objects.utils.ConvertUtils;
@@ -33,14 +33,16 @@ public class H5WebView extends BaseH5WebView {
 
     //是否已添加基础js bridge
     private boolean isAddedBasisJsBridge;
+    //bundle
+    private BundleData bundleData;
 
     public H5WebView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        //解决5.0以上启动硬件加速导致的异常
-        if (Build.VERSION.SDK_INT >= 19) {
-            this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
         this.setDrawingCacheEnabled(true);
+    }
+
+    public void setBundleData(BundleData bundleData) {
+        this.bundleData = bundleData;
     }
 
     /**
@@ -78,6 +80,7 @@ public class H5WebView extends BaseH5WebView {
                         continue;
                     }
                     OnRegisterBridgeAbstract bridgeAbstract = (OnRegisterBridgeAbstract) obj;
+                    bridgeAbstract.onWebInit(H5WebView.this, bundleData);
                     bridgeAbstract.registerBridges(H5WebView.this);
                 }
             }
@@ -139,7 +142,7 @@ public class H5WebView extends BaseH5WebView {
         Uri uri = Uri.parse(url);
         String path = uri.getPath();
         String suffixName = GlobalUtils.getSuffixName(path);
-        List<String> suffixs = Arrays.asList("apk", "rar");
+        List<String> suffixs = Arrays.asList("apk", "rar", "zip");
         if (!TextUtils.isEmpty(suffixName) && suffixs.contains(suffixName)) {
             OnBridgeAbstract bridgeAbstract = getOnBridgeAbstract();
             if (bridgeAbstract != null) {
@@ -195,5 +198,4 @@ public class H5WebView extends BaseH5WebView {
         //拦截有效schemeUrl
         return interceptEffectiveScheme(url);
     }
-
 }

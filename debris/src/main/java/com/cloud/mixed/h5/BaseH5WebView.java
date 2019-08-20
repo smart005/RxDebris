@@ -4,11 +4,13 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
+import com.cloud.cache.DerivedCache;
 import com.cloud.ebus.EBus;
 import com.cloud.ebus.SubscribeEBus;
 import com.cloud.mixed.abstracts.OnBridgeAbstract;
 import com.cloud.mixed.annotations.JavascriptInterface;
 import com.cloud.mixed.h5.events.OnWebActivityListener;
+import com.cloud.objects.ObjectJudge;
 
 /**
  * @Author lijinghuan
@@ -23,6 +25,10 @@ class BaseH5WebView extends BaseWebLoad {
     //js检测失败重试次数
     private int checkJsRetryCount = 0;
     protected JavascriptMethods javascriptMethods = new JavascriptMethods();
+    //标签id或className集合(用于隐藏或显示)
+    private String tagsIdsOrClassNames;
+    //是否请求html内容
+    private boolean isRequestHtml;
 
     public BaseH5WebView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -45,7 +51,63 @@ class BaseH5WebView extends BaseWebLoad {
                 TextUtils.equals(url, "about:blank")) {
             return;
         }
+        requestHtmlCode();
         bridgeAbstract.onLoaded(success, errorCode, description, url);
+        visibilityTags();
+    }
+
+    /**
+     * 设置标签id或className集合(用于隐藏或显示)
+     *
+     * @param tagsIdsOrClassNames ['id1','id2','className1',...]
+     */
+    public void setTagsIdsOrClassNames(String tagsIdsOrClassNames) {
+        this.tagsIdsOrClassNames = tagsIdsOrClassNames;
+    }
+
+    /**
+     * 是否请求html code
+     *
+     * @param isRequestHtml true-回调OnBridgeAbstract.onWebContent(html).
+     */
+    public void setRequestHtml(boolean isRequestHtml) {
+        this.isRequestHtml = isRequestHtml;
+    }
+
+    //请求html code
+    private void requestHtmlCode() {
+        boolean isRequestHtml = DerivedCache.getInstance().getBoolean("$_isRequestHtml");
+        if (!isRequestHtml) {
+            isRequestHtml = this.isRequestHtml;
+        }
+        if (!isRequestHtml) {
+            return;
+        }
+        this.load("javascript:cl_cloud_group_jsm.onHtmlCall(document.getElementsByTagName('html')[0].innerHTML);");
+    }
+
+    //隐藏显示标签
+    private void visibilityTags() {
+        //$_tagsIdsOrClassNames参数优先级高于tagsIdsOrClassNames
+        String idsOrClassNames = DerivedCache.getInstance().getString("$_tagsIdsOrClassNames");
+        if (!ObjectJudge.isJsonArray(idsOrClassNames)) {
+            if (!ObjectJudge.isJsonArray(tagsIdsOrClassNames)) {
+                return;
+            }
+            idsOrClassNames = tagsIdsOrClassNames;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("javascript: setTimeout(function() {try {");
+        builder.append("var tags = ").append(idsOrClassNames).append(";");
+        builder.append("for(var k = 0; k < tags.length; k++) {");
+        builder.append("var cele = tags[k].split('|');");
+        builder.append("var element = document.getElementById(cele[0]);");
+        builder.append("if(element) {element.style.display = cele[1];} else {");
+        builder.append("var elelst = document.getElementsByClassName(cele[0]);");
+        builder.append("for(var i = 0; i < elelst.length; i++) {");
+        builder.append("if(elelst[i]) {elelst[i].style.display = cele[1];}}}}");
+        builder.append("} catch(e) {}}, 0);");
+        load(builder.toString());
     }
 
     /**
@@ -179,6 +241,16 @@ class BaseH5WebView extends BaseWebLoad {
                     bridgeAbstract.onCheckJsFunctionCall(funName, false);
                 }
             }
+        }
+
+        @android.webkit.JavascriptInterface
+        @JavascriptInterface
+        public void onHtmlCall(String html) {
+            OnBridgeAbstract bridgeAbstract = getOnBridgeAbstract();
+            if (bridgeAbstract == null) {
+                return;
+            }
+            bridgeAbstract.onWebContent(html);
         }
     }
 }

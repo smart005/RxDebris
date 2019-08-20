@@ -39,6 +39,10 @@ public class BaseCompatActivity extends AppCompatActivity implements OnSupperPro
         EBus.getInstance().registered(this, $_page_code);
     }
 
+    public BundleData getBundleData() {
+        return bundleData;
+    }
+
     @Override
     protected void onResume() {
         try {

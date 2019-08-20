@@ -5,12 +5,17 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
+import com.cloud.objects.logs.Logger;
+import com.cloud.objects.storage.UriFileUtils;
 import com.cloud.toasty.ToastUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+
+import java.io.File;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -125,15 +130,38 @@ public class RedirectUtils extends BaseRedirectUtils {
      * @param className   要判断activity的类名(全路径)
      * @return true:存在;false:不存在;
      */
-    public boolean isActivityExist(Context context,
-                                   String packageName,
-                                   String className) {
+    public static boolean isActivityExist(Context context,
+                                          String packageName,
+                                          String className) {
         Intent intent = new Intent();
         intent.setClassName(packageName, className);
         if (context.getPackageManager().resolveActivity(intent, 0) == null) {
             return false;
         } else {
             return true;
+        }
+    }
+
+    /**
+     * 安装apk
+     *
+     * @param context context
+     * @param apkFile apk文件
+     */
+    public static void installApk(Context context, File apkFile) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Uri uri = UriFileUtils.getInstance().getUri(context, apkFile);
+            intent.setDataAndType(uri, "application/vnd.android.package-archive");
+            // android4.0以前可以出现安装成功界面,
+            // 但在4.0或以后版本不加FLAG_ACTIVITY_NEW_TASK则不会出现安装完成界面;
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (Build.VERSION.SDK_INT >= 24) {
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Logger.error(e);
         }
     }
 }

@@ -75,4 +75,11 @@ public interface OnHybridListener {
      * @param sms web format (sms:xxxxxxxx)
      */
     public void onCallSms(String sms);
+
+    /**
+     * request's web page html
+     *
+     * @param html html
+     */
+    public void onWebContent(String html);
 }

@@ -14,6 +14,7 @@ import com.cloud.debrisTest.web.NKitActivity;
 import com.cloud.ebus.EBus;
 import com.cloud.ebus.SubscribeEBus;
 import com.cloud.objects.ObjectJudge;
+import com.cloud.objects.beans.MapEntryItem;
 import com.cloud.objects.events.OnChainInputRunnable;
 import com.cloud.objects.events.OnChainRunnable;
 import com.cloud.objects.events.RunnableParamsN;
@@ -167,7 +168,8 @@ public class MainActivity extends BaseActivity {
     }
 
     public void OnH5Click(View view) {
-        RedirectUtils.startActivity(this, H5Test.class);
+        RedirectUtils.startActivity(this, H5Test.class,
+                new MapEntryItem<>("isAutoPlayAudioVideo", true));
     }
 
     public void OnAndroidWebkitClick(View view) {

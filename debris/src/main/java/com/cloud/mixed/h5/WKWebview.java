@@ -18,6 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.cloud.cache.DerivedCache;
 import com.cloud.mixed.abstracts.OnBridgeAbstract;
 import com.cloud.mixed.h5.events.OnWebActivityListener;
 import com.cloud.mixed.h5.events.OnWebViewListener;
@@ -45,15 +46,17 @@ class WKWebview extends WebView implements OnWebViewPartCycle {
     private OnWebActivityListener onWebActivityListener;
     //web view call
     private OnWebViewListener onWebViewListener;
+    private boolean isAutoPlayAudioVideo;
 
     public WKWebview(Context context, OnBridgeAbstract bridgeAbstract, OnWebActivityListener webActivityListener, OnWebViewListener onWebViewListener) {
         super(context);
         this.onBridgeAbstract = bridgeAbstract;
         this.onWebActivityListener = webActivityListener;
         this.onWebViewListener = onWebViewListener;
+        String clsName = context.getClass().getName();
+        String apvkey = String.format("%s_isAutoPlayAudioVideo", clsName);
+        isAutoPlayAudioVideo = DerivedCache.getInstance().getBoolean(apvkey);
         initSetting();
-        //设置当前webview和父容器的layerType解决页面加载空白
-        this.setLayerType(LAYER_TYPE_SOFTWARE, null);
         initListener();
     }
 
@@ -109,6 +112,9 @@ class WKWebview extends WebView implements OnWebViewPartCycle {
                         settings.setUserAgentString(String.format("%s;%s", join, agentString));
                     }
                 }
+                if (isAutoPlayAudioVideo && Build.VERSION.SDK_INT >= 17) {
+                    settings.setMediaPlaybackRequiresUserGesture(false);
+                }
                 if (onWebActivityListener != null) {
                     onWebActivityListener.onSettingModified(settings);
                 }
@@ -123,6 +129,7 @@ class WKWebview extends WebView implements OnWebViewPartCycle {
                 }
             }
             android.webkit.CookieSyncManager.createInstance(getContext());
+
             android.webkit.CookieSyncManager.getInstance().sync();
             this.setClickable(true);
         } catch (Exception e) {
@@ -159,6 +166,9 @@ class WKWebview extends WebView implements OnWebViewPartCycle {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                if (isAutoPlayAudioVideo) {
+                    view.loadUrl("javascript:document.querySelector('video').play();");
+                }
                 onWebViewListener.onPageFinished(view, url);
             }
         });

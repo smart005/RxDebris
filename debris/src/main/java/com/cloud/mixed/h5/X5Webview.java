@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 
-import com.cloud.mixed.RxMixed;
+import com.cloud.cache.DerivedCache;
 import com.cloud.mixed.abstracts.OnBridgeAbstract;
 import com.cloud.mixed.h5.events.OnWebActivityListener;
 import com.cloud.mixed.h5.events.OnWebViewListener;
@@ -20,7 +20,6 @@ import com.tencent.smtt.export.external.interfaces.JsResult;
 import com.tencent.smtt.export.external.interfaces.SslError;
 import com.tencent.smtt.export.external.interfaces.SslErrorHandler;
 import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
-import com.tencent.smtt.sdk.CookieSyncManager;
 import com.tencent.smtt.sdk.DownloadListener;
 import com.tencent.smtt.sdk.ValueCallback;
 import com.tencent.smtt.sdk.WebChromeClient;
@@ -47,15 +46,17 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
     private OnWebActivityListener onWebActivityListener;
     //web view call
     private OnWebViewListener onWebViewListener;
+    private boolean isAutoPlayAudioVideo;
 
     public X5Webview(Context context, OnBridgeAbstract bridgeAbstract, OnWebActivityListener webActivityListener, OnWebViewListener onWebViewListener) {
         super(context);
         this.onBridgeAbstract = bridgeAbstract;
         this.onWebActivityListener = webActivityListener;
         this.onWebViewListener = onWebViewListener;
+        String clsName = context.getClass().getName();
+        String apvkey = String.format("%s_isAutoPlayAudioVideo", clsName);
+        isAutoPlayAudioVideo = DerivedCache.getInstance().getBoolean(apvkey);
         initSetting();
-        //设置当前webview和父容器的layerType解决页面加载空白
-        this.setLayerType(LAYER_TYPE_SOFTWARE, null);
         initListener();
     }
 
@@ -111,6 +112,9 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
                         settings.setUserAgent(String.format("%s;%s", join, agentString));
                     }
                 }
+                if (isAutoPlayAudioVideo) {
+                    settings.setMediaPlaybackRequiresUserGesture(false);
+                }
                 if (onWebActivityListener != null) {
                     onWebActivityListener.onSettingModified(settings);
                 }
@@ -123,13 +127,6 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
                 if (Build.VERSION.SDK_INT >= 21) {
                     settings.setMixedContentMode(MIXED_CONTENT_ALWAYS_ALLOW);
                 }
-            }
-            if (RxMixed.getInstance().isInitedX5()) {
-                CookieSyncManager.createInstance(getContext());
-                CookieSyncManager.getInstance().sync();
-            } else {
-                android.webkit.CookieSyncManager.createInstance(getContext());
-                android.webkit.CookieSyncManager.getInstance().sync();
             }
             this.setClickable(true);
         } catch (Exception e) {
@@ -166,6 +163,9 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                if (isAutoPlayAudioVideo) {
+                    view.loadUrl("javascript:document.querySelector('video').play();");
+                }
                 onWebViewListener.onPageFinished(view, url);
             }
         });
