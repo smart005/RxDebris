@@ -2,6 +2,7 @@ package com.cloud.debris;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.text.TextUtils;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -195,26 +196,24 @@ public class WindowLifeCycleManager {
     /**
      * 屏蔽相应事件操作(包括固件)
      *
-     * @param activity activity
+     * @param blockClassName blockClassName
      */
-    public void blockingEvents(Activity activity) {
-        if (activity == null) {
+    public void blockingEvents(String blockClassName) {
+        if (TextUtils.isEmpty(blockClassName)) {
             return;
         }
-        String name = activity.getClass().getName();
-        DerivedCache.getInstance().put(name, true);
+        DerivedCache.getInstance().put(blockClassName, true);
     }
 
     /**
      * 恢复相应事件操作(包括固件)
      *
-     * @param activity activity
+     * @param blockClassName blockClassName
      */
-    public void restoreEvents(Activity activity) {
-        if (activity == null) {
+    public void restoreEvents(String blockClassName) {
+        if (TextUtils.isEmpty(blockClassName)) {
             return;
         }
-        String name = activity.getClass().getName();
-        DerivedCache.getInstance().remove(name);
+        DerivedCache.getInstance().remove(blockClassName);
     }
 }

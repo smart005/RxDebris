@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.cloud.cache.RxCache;
 import com.cloud.debris.BaseActivity;
+import com.cloud.debris.annotations.ActivityTagParams;
 import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.debrisTest.databinding.MainViewBinding;
 import com.cloud.debrisTest.web.H5Test;
@@ -38,6 +39,7 @@ import java.io.File;
  * Modifier:
  * ModifyContent:
  */
+@ActivityTagParams
 public class MainActivity extends BaseActivity {
 
     private MainViewBinding binding;
@@ -153,6 +155,8 @@ public class MainActivity extends BaseActivity {
                 "  }\n" +
                 "}";
         boolean check = ObjectJudge.isJson(jsoncheck);
+
+        String name1 = PreviewImageActivity.class.getName();
     }
 
     private ObservableComponent component = new ObservableComponent() {
@@ -186,5 +190,10 @@ public class MainActivity extends BaseActivity {
 
     public void OnPreviewImageClick(View view) {
         RedirectUtils.startActivity(this, PreviewImageActivity.class);
+    }
+
+    public void OnParamPassClick(View view) {
+        RedirectUtils.startActivity(this, PreviewImageActivity.class,
+                new MapEntryItem<>("",""));
     }
 }

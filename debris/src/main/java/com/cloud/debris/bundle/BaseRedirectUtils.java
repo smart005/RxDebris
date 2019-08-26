@@ -96,7 +96,7 @@ class BaseRedirectUtils {
      * @param cls     要启动类对象
      * @param params  传入的bundle数据参数
      */
-    public static void startActivity(Context context, Class<?> cls, MapEntryItem... params) {
+    public static void startActivity(Context context, Class<?> cls, MapEntryItem<?>... params) {
         Intent _intent = new Intent();
         _intent.setClass(context, cls);
         if (!ObjectJudge.isNullOrEmpty(params)) {

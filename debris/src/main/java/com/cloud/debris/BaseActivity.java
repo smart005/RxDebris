@@ -3,14 +3,19 @@ package com.cloud.debris;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
+import com.cloud.debris.annotations.ActivityTagParams;
+import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.debris.enums.StatisticalTypes;
 import com.cloud.debris.event.OnActivityStatesLisstener;
 import com.cloud.debris.event.OnLifeCycleStatistical;
 import com.cloud.ebus.EBus;
+import com.cloud.ebus.SubscribeEBus;
 import com.cloud.launchs.utils.ActivityUtils;
 import com.cloud.objects.bases.BundleData;
 import com.cloud.objects.events.OnSupperProperties;
+import com.cloud.objects.utils.ActiveParamsUtils;
 import com.cloud.objects.utils.GlobalUtils;
 
 import java.util.ArrayList;
@@ -36,6 +41,12 @@ public class BaseActivity extends Activity implements OnSupperProperties,
         super.onCreate(savedInstanceState);
         $_page_code = GlobalUtils.getNewGuid();
         EBus.getInstance().registered(this, $_page_code);
+        //记录当前参数
+        Class<? extends BaseActivity> aClass = getClass();
+        if (aClass.isAnnotationPresent(ActivityTagParams.class)) {
+            String classPath = aClass.getName();
+            ActiveParamsUtils.getInstance().putParams(classPath, bundleData.getBundle());
+        }
     }
 
     public BundleData getBundleData() {
@@ -55,6 +66,24 @@ public class BaseActivity extends Activity implements OnSupperProperties,
     protected void onDestroy() {
         super.onDestroy();
         EBus.getInstance().unregister(this, $_page_code);
+        ActiveParamsUtils.getInstance().activeDestory();
+    }
+
+    /**
+     * 销毁活动
+     *
+     * @param classes 要销毁的活动
+     */
+    public void destoryActives(Class<?>... classes) {
+        ActiveParamsUtils.getInstance().destorys(classes);
+    }
+
+    @SubscribeEBus(receiveKey = "$_42e9aa025d5f49e6abbe7d150498e93e")
+    public void onEventDestoryActive(String className) {
+        String name = getClass().getName();
+        if (TextUtils.equals(className, name)) {
+            RedirectUtils.finishActivity(this);
+        }
     }
 
     @Override

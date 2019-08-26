@@ -588,6 +588,11 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             }
         }
         bridgeRegisterMap.clear();
+        if (isX5) {
+            x5Webview.onDestory();
+        } else {
+            webview.onDestory();
+        }
     }
 
     /**

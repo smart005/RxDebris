@@ -47,5 +47,12 @@
             android:layout_marginTop="@dimen/spacing_8"
             android:onClick="@{(view)->handler.OnPreviewImageClick(view)}"
             android:text="预览图片" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnParamPassClick(view)}"
+            android:text="参数传递" />
     </LinearLayout>
 </layout>

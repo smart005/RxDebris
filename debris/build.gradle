@@ -51,9 +51,9 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     api 'com.cloud:tbs:4.3.0'
-    api 'com.cloud:libsdk:1.1.18'
-    api 'com.cloud:coms:1.0.114'
-    api 'com.cloud:images:1.0.31'
+    api 'com.cloud:libsdk:1.1.23'
+    api 'com.cloud:coms:1.0.140'
+    api 'com.cloud:images:1.0.34'
     api 'com.cloud:nets:1.0.20'
     api 'com.cloud:dataprocessor:1.0.48'
 }
