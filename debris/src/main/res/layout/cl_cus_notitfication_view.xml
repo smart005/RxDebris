@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/notice_root_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_200"
+        android:paddingLeft="14dp"
+        android:paddingTop="6dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="6dp">
+
+        <ImageView
+            android:id="@+id/m_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            tools:background="#f4f4f4" />
+
+        <TextView
+            android:id="@+id/m_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="4dp"
+            android:textColor="#898989"
+            android:textSize="12sp"
+            android:visibility="gone"
+            tools:text="time" />
+
+        <TextView
+            android:id="@+id/m_app_name_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/m_time"
+            android:layout_toRightOf="@id/m_icon"
+            android:singleLine="true"
+            android:textColor="#2B2A2C"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="108社区" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/m_app_name_tv"
+            android:layout_alignLeft="@id/m_app_name_tv"
+            android:layout_marginTop="2dp"
+            android:paddingRight="4dp">
+
+            <ImageView
+                android:id="@+id/m_img_iv"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="2dp"
+                android:background="@color/transparent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                tools:background="@color/color_f4f4f4"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/m_img_iv"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/m_title_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="4dp"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:textColor="#1A181A"
+                    android:textSize="16sp"
+                    tools:text="习近平为什么屡屡对领导干部讲这两个典故" />
+
+                <TextView
+                    android:id="@+id/m_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginRight="4dp"
+                    android:textColor="#817F81"
+                    android:textSize="14sp"
+                    tools:text="学习进行时】“只有不忘初心、牢记使命、永远奋斗，才能让中国共产党永远年轻。”当前，“不忘初心、牢记使命”主题教育正在全党展开。新华社《学习进行时》原创品牌栏目“讲习所”围绕习近平总书记提到的有关“不忘初心”的故事推出系列解读，今天推出《习近平为什么屡屡对领导干部讲这两个典故" />
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+</RelativeLayout>

@@ -47,12 +47,14 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
     //web view call
     private OnWebViewListener onWebViewListener;
     private boolean isAutoPlayAudioVideo;
+    private boolean isLoadFinish;
 
     public X5Webview(Context context, OnBridgeAbstract bridgeAbstract, OnWebActivityListener webActivityListener, OnWebViewListener onWebViewListener) {
         super(context);
         this.onBridgeAbstract = bridgeAbstract;
         this.onWebActivityListener = webActivityListener;
         this.onWebViewListener = onWebViewListener;
+        this.isLoadFinish = false;
         String clsName = context.getClass().getName();
         String apvkey = String.format("%s_isAutoPlayAudioVideo", clsName);
         isAutoPlayAudioVideo = DerivedCache.getInstance().getBoolean(apvkey);
@@ -78,8 +80,8 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
                 settings.setAllowFileAccess(true);
                 //NARROW_COLUMNS
                 settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-                settings.setSupportZoom(true);
-                settings.setBuiltInZoomControls(true);
+                settings.setSupportZoom(false);
+                settings.setBuiltInZoomControls(false);
                 settings.setUseWideViewPort(true);
                 settings.setSupportMultipleWindows(true);
                 settings.setLoadWithOverviewMode(true);
@@ -101,6 +103,7 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
                 settings.setBlockNetworkImage(false);
                 settings.setLoadsImagesAutomatically(true);
                 settings.setSavePassword(true);
+                settings.setTextZoom(100);
                 //add new user agent
                 if (onBridgeAbstract != null) {
                     List<String> userAgents = new ArrayList<String>();
@@ -163,6 +166,7 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                isLoadFinish = true;
                 if (isAutoPlayAudioVideo) {
                     view.loadUrl("javascript:document.querySelector('video').play();");
                 }
@@ -231,5 +235,16 @@ class X5Webview extends WebView implements OnWebViewPartCycle {
     @Override
     public void onDestory() {
         this.destroy();
+    }
+
+    public void setAutoPlayAudioVideo(boolean isAutoPlayAudioVideo) {
+        this.isAutoPlayAudioVideo = isAutoPlayAudioVideo;
+        if (this.isLoadFinish) {
+            if (isAutoPlayAudioVideo && Build.VERSION.SDK_INT >= 17) {
+                WebSettings settings = getSettings();
+                settings.setMediaPlaybackRequiresUserGesture(false);
+            }
+            this.loadUrl("javascript:document.querySelector('video').play();");
+        }
     }
 }

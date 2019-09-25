@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="96dp"
+    android:layout_height="96dp"
+    android:layout_centerInParent="true"
+    android:layout_marginTop="@dimen/spacing_15">
+
+    <com.cloud.coms.icons.IconView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textColor="#E2E5E9"
+        android:textSize="@dimen/font_size_20"
+        app:itv_fontStyle="custom01"
+        app:itv_ucode="&#xe617;" />
+
+    <com.cloud.coms.dialogs.progress.CircleProgress
+        android:id="@+id/loading_dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:donut_circle_starting_degree="270"
+        app:donut_finished_color="#B5BDC8"
+        app:donut_finished_stroke_width="12dp"
+        app:donut_show_text="false"
+        app:donut_unfinished_color="#E2E5E9"
+        app:donut_unfinished_stroke_width="12dp" />
+
+</RelativeLayout>

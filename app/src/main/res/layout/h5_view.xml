@@ -2,10 +2,9 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <com.cloud.mixed.h5.H5WebView
             android:id="@+id/h5_test"
@@ -13,9 +12,7 @@
             android:layout_height="match_parent"
             android:scrollbars="none"
             app:wv_isX5="false" />
-        <!--<WebView-->
-            <!--android:id="@+id/h5_test"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"/>-->
-    </LinearLayout>
+
+        <include layout="@layout/cl_web_loading_view" />
+    </RelativeLayout>
 </layout>

@@ -1,5 +1,7 @@
 package com.cloud.debrisTest;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.View;
@@ -8,6 +10,7 @@ import com.cloud.cache.RxCache;
 import com.cloud.debris.BaseActivity;
 import com.cloud.debris.annotations.ActivityTagParams;
 import com.cloud.debris.bundle.RedirectUtils;
+import com.cloud.debris.notify.NotifyManager;
 import com.cloud.debrisTest.databinding.MainViewBinding;
 import com.cloud.debrisTest.web.H5Test;
 import com.cloud.debrisTest.web.LayoutAdapterActivity;
@@ -27,7 +30,6 @@ import com.cloud.objects.observable.ObservableComponent;
 import com.cloud.objects.storage.DirectoryUtils;
 import com.cloud.objects.tasks.SyncChainTasks;
 import com.cloud.objects.utils.JsonUtils;
-import com.cloud.toasty.ToastUtils;
 
 import java.io.File;
 
@@ -184,8 +186,22 @@ public class MainActivity extends BaseActivity {
         RedirectUtils.startActivity(this, LayoutAdapterActivity.class);
     }
 
+    @SuppressLint("WrongConstant")
     public void OnToastClick(View view) {
-        ToastUtils.show("默认消息");
+        if (!ObjectJudge.isNotificationEnabled(this)) {
+            RedirectUtils.startAppNotication(this);
+            return;
+        }
+
+        NotifyManager.NotifyBuilder builder = NotifyManager.getInstance().builder(getApplicationContext())
+                .setIcon(R.mipmap.ic_launcher)
+                .setTitle("习近平为什么屡屡对领导干部讲这两个典故")
+                .setText("【学习进行时】“只有不忘初心、牢记使命、永远奋斗，才能让中国共产党永远年轻。”当前，“不忘初心、牢记使命”主题教育正在全党展开。新华社《学习进行时》原创品牌栏目“讲习所”围绕习近平总书记提到的有关“不忘初心”的故事推出系列解读，今天推出《习近平为什么屡屡对领导干部讲这两个典故")
+                .setBroadCast(true);
+        Intent intent = new Intent();
+        intent.setClass(MainActivity.this, PreviewImageActivity.class);
+        builder.setIntent(intent);
+        builder.show();
     }
 
     public void OnPreviewImageClick(View view) {
@@ -194,6 +210,6 @@ public class MainActivity extends BaseActivity {
 
     public void OnParamPassClick(View view) {
         RedirectUtils.startActivity(this, PreviewImageActivity.class,
-                new MapEntryItem<>("",""));
+                new MapEntryItem<>("", ""));
     }
 }

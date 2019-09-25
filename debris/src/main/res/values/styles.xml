@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="cl_notify_theme" parent="android:Theme.Light">
+        <item name="android:background">@color/color_ffffff</item>
+    </style>
+</resources>

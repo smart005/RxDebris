@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -163,5 +164,38 @@ public class RedirectUtils extends BaseRedirectUtils {
         } catch (Exception e) {
             Logger.error(e);
         }
+    }
+
+    /**
+     * 启动应用通知界面
+     *
+     * @param context context
+     */
+    public static void startAppNotication(Context context) {
+        if (context == null) {
+            return;
+        }
+        Context applicationContext = context.getApplicationContext();
+        String packageName = applicationContext.getPackageName();
+        Intent notificationIntent = new Intent();
+        //android 8.0引导
+        if (Build.VERSION.SDK_INT >= 26) {
+            notificationIntent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            notificationIntent.putExtra("android.provider.extra.APP_PACKAGE", packageName);
+        }
+        //android 5.0-7.0
+        if (Build.VERSION.SDK_INT >= 21 && Build.VERSION.SDK_INT < 26) {
+            ApplicationInfo applicationInfo = applicationContext.getApplicationInfo();
+            notificationIntent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            notificationIntent.putExtra("app_package", packageName);
+            notificationIntent.putExtra("app_uid", applicationInfo.uid);
+        }
+        //其他
+        if (Build.VERSION.SDK_INT < 21) {
+            notificationIntent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+            notificationIntent.setData(Uri.fromParts("package", packageName, null));
+        }
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        applicationContext.startActivity(notificationIntent);
     }
 }

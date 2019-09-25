@@ -10,5 +10,5 @@ package com.cloud.mixed.h5.events;
  */
 
 public interface OnFinishOrGoBackListener {
-    public void onFinishOrGoBack(boolean isH5GoBack);
+    public void onFinishOrGoBack(boolean isH5GoBack, String url);
 }

@@ -7,17 +7,16 @@ import com.cloud.mixed.h5.beans.ArgFieldItem;
 import com.cloud.mixed.h5.beans.H5GetAPIMethodArgsBean;
 import com.cloud.mixed.h5.enums.APIRequestState;
 import com.cloud.nets.OkRxManager;
+import com.cloud.nets.beans.CompleteResponse;
 import com.cloud.nets.beans.ResponseData;
 import com.cloud.nets.beans.RetrofitParams;
+import com.cloud.nets.beans.SuccessResponse;
 import com.cloud.nets.enums.CallStatus;
-import com.cloud.nets.enums.DataType;
-import com.cloud.nets.enums.ErrorType;
-import com.cloud.nets.properties.ReqQueueItem;
 import com.cloud.objects.ObjectJudge;
 import com.cloud.objects.enums.RequestContentType;
 import com.cloud.objects.enums.RequestState;
-import com.cloud.objects.events.Action2;
-import com.cloud.objects.events.Action4;
+import com.cloud.objects.enums.RequestType;
+import com.cloud.objects.events.Action1;
 import com.cloud.objects.events.Func2;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.utils.JsonUtils;
@@ -72,48 +71,52 @@ public class H5InteractionAPIUtils {
                 return;
             }
             String target = h5GetAPIMethodArgsBean.getTarget();
-            switch (h5GetAPIMethodArgsBean.getReqType().trim().toLowerCase()) {
-                case "get":
-                    getRequest(url, headers, params, target, callback, userClass);
-                    break;
-                case "post":
-                    postRequest(url, headers, params, target, requestContentType, callback, userClass);
-                    break;
-                case "put":
-                    putRequest(url, headers, params, target, requestContentType, callback, userClass);
-                    break;
-                case "patch":
-                    patchRequest(url, headers, params, target, requestContentType, callback, userClass);
-                    break;
-                case "delete":
-                    deleteRequest(url, headers, params, target, requestContentType, callback, userClass);
-                    break;
-            }
+//            switch (h5GetAPIMethodArgsBean.getReqType().trim().toLowerCase()) {
+//                case "get":
+//                    request(url, headers, params, target, callback, userClass,RequestType.GET);
+//                    break;
+//                case "post":
+//                    request(url, headers, params, target, requestContentType, callback, userClass);
+//                    break;
+//                case "put":
+//                    request(url, headers, params, target, requestContentType, callback, userClass);
+//                    break;
+//                case "patch":
+//                    request(url, headers, params, target, requestContentType, callback, userClass);
+//                    break;
+//                case "delete":
+//                    request(url, headers, params, target, requestContentType, callback, userClass);
+//                    break;
+//            }
         } catch (Exception e) {
             Logger.error(e);
         }
     }
 
-    private static void deleteRequest(String url,
-                                      HashMap<String, String> headers,
-                                      HashMap<String, Object> params,
-                                      final String target,
-                                      RequestContentType requestContentType,
-                                      final Func2<Object, APIRequestState, APIReturnResult> callback,
-                                      String userClass) {
+    private static void request(String url,
+                                HashMap<String, String> headers,
+                                HashMap<String, Object> params,
+                                final String target,
+                                RequestContentType requestContentType,
+                                final Func2<Object, APIRequestState, APIReturnResult> callback,
+                                String userClass,
+                                RequestType requestType) {
         RetrofitParams retrofitParams = new RetrofitParams();
         TreeMap<String, Object> requestParams = retrofitParams.getParams();
         requestParams.putAll(params);
         retrofitParams.setCallStatus(CallStatus.OnlyNet);
         retrofitParams.setRequestContentType(requestContentType);
-        OkRxManager.getInstance().delete(url,
+        retrofitParams.setRequestType(requestType);
+        OkRxManager.getInstance().request(url,
                 headers,
                 retrofitParams,
                 requestContentType,
-                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
+                userClass,
+                new Action1<SuccessResponse>() {
                     @Override
-                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
+                    public void call(SuccessResponse response) {
                         if (callback != null) {
+                            ResponseData responseData = response.getResponseData();
                             APIReturnResult apiReturnResult = new APIReturnResult();
                             apiReturnResult.setResponse(responseData.getResponse());
                             apiReturnResult.setTarget(target);
@@ -121,179 +124,13 @@ public class H5InteractionAPIUtils {
                         }
                     }
                 },
-                "",
-                new Action2<RequestState, ErrorType>() {
+                new Action1<CompleteResponse>() {
                     @Override
-                    public void call(RequestState requestState, ErrorType errorType) {
-                        if (callback != null && requestState == RequestState.Completed) {
+                    public void call(CompleteResponse response) {
+                        if (callback != null && response.getRequestState() == RequestState.Completed) {
                             callback.call(APIRequestState.Complate, null);
                         }
                     }
-                },
-                null,
-                "",
-                null,
-                userClass);
-    }
-
-    private static void patchRequest(String url,
-                                     HashMap<String, String> headers,
-                                     HashMap<String, Object> params,
-                                     final String target,
-                                     RequestContentType requestContentType,
-                                     final Func2<Object, APIRequestState, APIReturnResult> callback,
-                                     String userClass) {
-        RetrofitParams retrofitParams = new RetrofitParams();
-        TreeMap<String, Object> requestParams = retrofitParams.getParams();
-        requestParams.putAll(params);
-        retrofitParams.setCallStatus(CallStatus.OnlyNet);
-        OkRxManager.getInstance().patch(url,
-                headers,
-                retrofitParams,
-                requestContentType,
-                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
-                    @Override
-                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        if (callback != null) {
-                            APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(responseData.getResponse());
-                            apiReturnResult.setTarget(target);
-                            callback.call(APIRequestState.Success, apiReturnResult);
-                        }
-                    }
-                }, "",
-                new Action2<RequestState, ErrorType>() {
-                    @Override
-                    public void call(RequestState requestState, ErrorType errorType) {
-                        if (callback != null && requestState == RequestState.Completed) {
-                            callback.call(APIRequestState.Complate, null);
-                        }
-                    }
-                },
-                null,
-                "",
-                null,
-                userClass);
-    }
-
-    private static void putRequest(String url,
-                                   HashMap<String, String> headers,
-                                   HashMap<String, Object> params,
-                                   final String target,
-                                   RequestContentType requestContentType,
-                                   final Func2<Object, APIRequestState, APIReturnResult> callback,
-                                   String userClass) {
-        RetrofitParams retrofitParams = new RetrofitParams();
-        TreeMap<String, Object> requestParams = retrofitParams.getParams();
-        requestParams.putAll(params);
-        retrofitParams.setCallStatus(CallStatus.OnlyNet);
-        OkRxManager.getInstance().put(url,
-                headers,
-                retrofitParams,
-                requestContentType,
-                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
-                    @Override
-                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        if (callback != null) {
-                            APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(responseData.getResponse());
-                            apiReturnResult.setTarget(target);
-                            callback.call(APIRequestState.Success, apiReturnResult);
-                        }
-                    }
-                },
-                "",
-                new Action2<RequestState, ErrorType>() {
-                    @Override
-                    public void call(RequestState requestState, ErrorType errorType) {
-                        if (callback != null && requestState == RequestState.Completed) {
-                            callback.call(APIRequestState.Complate, null);
-                        }
-                    }
-                },
-                null,
-                "",
-                null,
-                userClass);
-    }
-
-    private static void postRequest(String url,
-                                    HashMap<String, String> headers,
-                                    HashMap<String, Object> params,
-                                    final String target,
-                                    RequestContentType requestContentType,
-                                    final Func2<Object, APIRequestState, APIReturnResult> callback,
-                                    String userClass) {
-        RetrofitParams retrofitParams = new RetrofitParams();
-        TreeMap<String, Object> requestParams = retrofitParams.getParams();
-        requestParams.putAll(params);
-        retrofitParams.setCallStatus(CallStatus.OnlyNet);
-        OkRxManager.getInstance().post(url,
-                headers,
-                retrofitParams,
-                requestContentType,
-                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
-                    @Override
-                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        if (callback != null) {
-                            APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(responseData.getResponse());
-                            apiReturnResult.setTarget(target);
-                            callback.call(APIRequestState.Success, apiReturnResult);
-                        }
-                    }
-                },
-                "",
-                new Action2<RequestState, ErrorType>() {
-                    @Override
-                    public void call(RequestState requestState, ErrorType errorType) {
-                        if (callback != null && requestState == RequestState.Completed) {
-                            callback.call(APIRequestState.Complate, null);
-                        }
-                    }
-                },
-                null,
-                "",
-                null,
-                userClass);
-    }
-
-    private static void getRequest(String url,
-                                   HashMap<String, String> headers,
-                                   HashMap<String, Object> params,
-                                   final String target,
-                                   final Func2<Object, APIRequestState, APIReturnResult> callback,
-                                   String userClass) {
-        RetrofitParams retrofitParams = new RetrofitParams();
-        TreeMap<String, Object> requestParams = retrofitParams.getParams();
-        requestParams.putAll(params);
-        retrofitParams.setCallStatus(CallStatus.OnlyNet);
-        OkRxManager.getInstance().get(url,
-                headers,
-                retrofitParams,
-                new Action4<ResponseData, String, HashMap<String, ReqQueueItem>, DataType>() {
-                    @Override
-                    public void call(ResponseData responseData, String apiRequestKey, HashMap<String, ReqQueueItem> reqQueueItemHashMap, DataType dataType) {
-                        if (callback != null) {
-                            APIReturnResult apiReturnResult = new APIReturnResult();
-                            apiReturnResult.setResponse(responseData.getResponse());
-                            apiReturnResult.setTarget(target);
-                            callback.call(APIRequestState.Success, apiReturnResult);
-                        }
-                    }
-                },
-                "",
-                new Action2<RequestState, ErrorType>() {
-                    @Override
-                    public void call(RequestState requestState, ErrorType errorType) {
-                        if (callback != null && requestState == RequestState.Completed) {
-                            callback.call(APIRequestState.Complate, null);
-                        }
-                    }
-                },
-                null,
-                "",
-                null,
-                userClass);
+                });
     }
 }

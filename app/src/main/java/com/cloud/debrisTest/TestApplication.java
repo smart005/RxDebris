@@ -1,9 +1,5 @@
 package com.cloud.debrisTest;
 
-import com.cloud.cache.daos.CacheDataItemDao;
-import com.cloud.cache.daos.StackInfoItemDao;
-import com.cloud.cache.greens.DBManager;
-import com.cloud.cache.greens.OnDatabasePathListener;
 import com.cloud.debris.BaseApplication;
 import com.cloud.mixed.RxMixed;
 import com.cloud.nets.OkRx;
@@ -20,11 +16,9 @@ import com.cloud.objects.events.OnDirectoryBuildListener;
 import com.cloud.objects.events.OnNetworkConnectListener;
 import com.cloud.objects.logs.Logger;
 import com.cloud.objects.storage.DirectoryUtils;
-import com.cloud.objects.storage.StorageUtils;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.NetworkUtils;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,15 +73,15 @@ public class TestApplication extends BaseApplication {
                 .setDatabaseName("gscloud")
                 .build();
         //数据库初始化
-        DBManager.getInstance().initialize(getApplicationContext(),
-                new OnDatabasePathListener() {
-                    @Override
-                    public File onDatabaseRootPath() {
-                        return StorageUtils.getDir("data");
-                    }
-                },
-                CacheDataItemDao.class,
-                StackInfoItemDao.class);
+//        DBManager.getInstance().initialize(getApplicationContext(),
+//                new OnDatabasePathListener() {
+//                    @Override
+//                    public File onDatabaseRootPath() {
+//                        return StorageUtils.getDir("data");
+//                    }
+//                },
+//                CacheDataItemDao.class,
+//                StackInfoItemDao.class);
         //dao对象也可以通过以下方式绑定
         //.bindDaos();
         //网络框架初始化
@@ -97,8 +91,6 @@ public class TestApplication extends BaseApplication {
                 .setOnConfigParamsListener(new OnConfigParamsListener() {
                     @Override
                     public OkRxConfigParams onConfigParamsCall(OkRxConfigParams configParams) {
-                        //true-网络请求成功后内部处理相关状态;false-网络请求success后直接返回;
-                        configParams.setProcessNetResults(false);
                         //是否进行网络状态码拦截(默认为false)
                         configParams.setNetStatusCodeIntercept(false);
                         return configParams;

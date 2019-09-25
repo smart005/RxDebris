@@ -68,7 +68,7 @@ public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivit
         h5WebView.startBridges(bridgeKey);
         if (!getBooleanBundle("hasVideo")) {
             //是否启用硬件加速
-            h5WebView.setEnableHardwareAcceleration(getBooleanBundle("enableHardwareAcceleration", true));
+            h5WebView.setEnableHardwareAcceleration(getBooleanBundle("enableHardwareAcceleration"));
         }
     }
 
@@ -113,6 +113,10 @@ public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivit
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //销毁webview
+        if (webView != null) {
+            webView.destroy();
+        }
         String name = this.getClass().getName();
         String apvkey = String.format("%s_isAutoPlayAudioVideo", name);
         DerivedCache.getInstance().remove(apvkey);

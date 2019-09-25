@@ -38,7 +38,7 @@ public class BaseCompatActivity extends AppCompatActivity implements OnSupperPro
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        bundleData = new BundleData(getIntent());
+        bundleData = getBundleData();
         super.onCreate(savedInstanceState);
         $_page_code = GlobalUtils.getNewGuid();
         EBus.getInstance().registered(this, $_page_code);
@@ -51,6 +51,9 @@ public class BaseCompatActivity extends AppCompatActivity implements OnSupperPro
     }
 
     public BundleData getBundleData() {
+        if (bundleData == null) {
+            bundleData = new BundleData(getIntent());
+        }
         return bundleData;
     }
 
@@ -89,141 +92,169 @@ public class BaseCompatActivity extends AppCompatActivity implements OnSupperPro
 
     @Override
     public Bundle getBundle() {
+        bundleData = getBundleData();
         return bundleData.getBundle();
     }
 
     @Override
     public String getStringBundle(Bundle bundle, String key, String defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getStringBundle(bundle, key, defaultValue);
     }
 
     @Override
     public String getStringBundle(String key, String defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getStringBundle(key, defaultValue);
     }
 
     @Override
     public String getStringBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getStringBundle(key);
     }
 
     @Override
     public int getIntBundle(Bundle bundle, String key, int defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getIntBundle(bundle, key, defaultValue);
     }
 
     @Override
     public int getIntBundle(String key, int defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getIntBundle(key, defaultValue);
     }
 
     @Override
     public int getIntBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getIntBundle(key);
     }
 
     @Override
     public boolean getBooleanBundle(Bundle bundle, String key, boolean defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getBooleanBundle(bundle, key, defaultValue);
     }
 
     @Override
     public boolean getBooleanBundle(String key, boolean defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getBooleanBundle(key, defaultValue);
     }
 
     @Override
     public boolean getBooleanBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getBooleanBundle(key);
     }
 
     @Override
     public Object getObjectBundle(Bundle bundle, String key, Object defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getObjectBundle(bundle, key, defaultValue);
     }
 
     @Override
     public Object getObjectBundle(String key, Object defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getObjectBundle(key, defaultValue);
     }
 
     @Override
     public Object getObjectBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getObjectBundle(key);
     }
 
     @Override
     public float getFloatBundle(Bundle bundle, String key, float defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getFloatBundle(bundle, key, defaultValue);
     }
 
     @Override
     public float getFloatBundle(String key, float defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getFloatBundle(key, defaultValue);
     }
 
     @Override
     public float getFloatBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getFloatBundle(key);
     }
 
     @Override
     public double getDoubleBundle(Bundle bundle, String key, double defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getDoubleBundle(bundle, key, defaultValue);
     }
 
     @Override
     public double getDoubleBundle(String key, double defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getDoubleBundle(key, defaultValue);
     }
 
     @Override
     public double getDoubleBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getDoubleBundle(key);
     }
 
     @Override
     public long getLongBundle(Bundle bundle, String key, long defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getLongBundle(bundle, key, defaultValue);
     }
 
     @Override
     public long getLongBundle(String key, long defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getLongBundle(key, defaultValue);
     }
 
     @Override
     public long getLongBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getLongBundle(key);
     }
 
     @Override
     public <T> T getSerializableBundle(String key, T defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getSerializableBundle(key, defaultValue);
     }
 
     @Override
     public <T> T getSerializableBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getSerializableBundle(key);
     }
 
     @Override
     public <T> T getParcelableBundle(String key, T defaultValue) {
+        bundleData = getBundleData();
         return bundleData.getParcelableBundle(key, defaultValue);
     }
 
     @Override
     public Parcelable[] getParcelableArrayBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getParcelableArrayBundle(key);
     }
 
     @Override
     public <T extends Parcelable> ArrayList<T> getParcelableArrayListBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getParcelableArrayListBundle(key);
     }
 
     @Override
     public <T> T getParcelableBundle(String key) {
+        bundleData = getBundleData();
         return bundleData.getParcelableBundle(key);
     }
 
@@ -243,6 +274,7 @@ public class BaseCompatActivity extends AppCompatActivity implements OnSupperPro
 
     @Override
     public String getClassAction() {
+        bundleData = getBundleData();
         return bundleData.getClassAction(this.getClass());
     }
 

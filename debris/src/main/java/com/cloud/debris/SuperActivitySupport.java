@@ -32,9 +32,9 @@ class SuperActivitySupport {
             callField.setAccessible(true);
             callField.setBoolean(activity, true);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -54,12 +54,24 @@ class SuperActivitySupport {
         }
     }
 
+    public static boolean isProjectActivitys(Activity activity) {
+        if (activity instanceof BaseActivity ||
+                activity instanceof BaseCompatActivity ||
+                activity instanceof BaseFragmentActivity) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 启动时移除全局浮动视图
      *
      * @param activity activity
      */
     public static void removeGlobalFloatViews(Activity activity) {
+        if (!isProjectActivitys(activity)) {
+            return;
+        }
         boolean state = SharedPrefUtils.getPrefBoolean(activity, "$_global_float_dialog_destoryed");
         if (state) {
             BaseFloatViewDialog.removeFloatViewForActivity(activity, R.id.cl_tip_view_rl);

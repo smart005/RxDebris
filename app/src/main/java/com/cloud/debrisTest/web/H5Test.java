@@ -3,6 +3,7 @@ package com.cloud.debrisTest.web;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 
+import com.cloud.coms.dialogs.progress.DonutProgress;
 import com.cloud.debris.BaseH5Activity;
 import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.H5ViewBinding;
@@ -24,6 +25,7 @@ import com.cloud.mixed.annotations.HybridLogicBridge;
 public class H5Test extends BaseH5Activity {
 
     private H5ViewBinding binding;
+    private DonutProgress progress;
 
     //此类请不要写业务代码
     @Override
@@ -67,6 +69,8 @@ public class H5Test extends BaseH5Activity {
 //        binding.h5Test.setWebChromeClient(new WebChromeClient() {
 //
 //        });
+
+        progress=(DonutProgress)findViewById(R.id.loading_dp);
     }
 
 //    @Override

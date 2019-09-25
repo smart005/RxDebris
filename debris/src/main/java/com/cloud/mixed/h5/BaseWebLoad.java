@@ -571,27 +571,50 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
      * 销毁webview
      */
     public void destroy() {
-        mbox.dismiss();
-        if (onWebViewPartCycle != null) {
-            onWebViewPartCycle.onDestory();
-        }
-        EBus.getInstance().unregister(this);
-        for (Map.Entry<String, OnScriptRegisterBox> entry : bridgeRegisterMap.entrySet()) {
-            try {
-                if (isX5) {
-                    x5Webview.removeJavascriptInterface(entry.getKey());
-                } else {
-                    webview.removeJavascriptInterface(entry.getKey());
-                }
-            } catch (Exception e) {
-                Logger.warn(e.getMessage());
+        try {
+            mbox.dismiss();
+            if (onWebViewPartCycle != null) {
+                onWebViewPartCycle.onDestory();
             }
-        }
-        bridgeRegisterMap.clear();
-        if (isX5) {
-            x5Webview.onDestory();
-        } else {
-            webview.onDestory();
+            EBus.getInstance().unregister(this);
+            for (Map.Entry<String, OnScriptRegisterBox> entry : bridgeRegisterMap.entrySet()) {
+                try {
+                    if (isX5) {
+                        x5Webview.removeJavascriptInterface(entry.getKey());
+                    } else {
+                        webview.removeJavascriptInterface(entry.getKey());
+                    }
+                } catch (Exception e) {
+                    Logger.warn(e.getMessage());
+                }
+            }
+            bridgeRegisterMap.clear();
+            if (isX5) {
+                if (x5Webview != null) {
+                    x5Webview.setVisibility(View.GONE);
+                }
+            } else {
+                if (webview != null) {
+                    webview.setVisibility(View.GONE);
+                }
+            }
+            //webview延迟1秒销毁,解决Receiver not registered: android.widget.ZoomButtonsController bug
+            HandlerManager.getInstance().postDelayed(new RunnableParamsN<Object>() {
+                @Override
+                public void run(Object... objects) {
+                    if (isX5) {
+                        if (x5Webview != null) {
+                            x5Webview.onDestory();
+                        }
+                    } else {
+                        if (webview != null) {
+                            webview.onDestory();
+                        }
+                    }
+                }
+            }, 500);
+        } catch (Exception e) {
+            Logger.error(e);
         }
     }
 
@@ -791,6 +814,7 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
                 activity.finish();
             } else {
                 boolean canGoBack = isX5 ? x5Webview.canGoBack() : webview.canGoBack();
+                String url = (isX5 ? x5Webview.getUrl() : webview.getUrl());
                 if (canGoBack) {
                     if (isX5) {
                         x5Webview.goBack();
@@ -798,11 +822,11 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
                         webview.goBack();
                     }
                     if (finishOrGoBackListener != null) {
-                        finishOrGoBackListener.onFinishOrGoBack(canGoBack);
+                        finishOrGoBackListener.onFinishOrGoBack(canGoBack, url);
                     }
                 } else {
                     if (finishOrGoBackListener != null) {
-                        finishOrGoBackListener.onFinishOrGoBack(false);
+                        finishOrGoBackListener.onFinishOrGoBack(false, url);
                     } else {
                         activity.finish();
                     }
@@ -972,6 +996,19 @@ public abstract class BaseWebLoad extends RelativeLayout implements OnWebViewLis
             x5Webview.addJavascriptInterface(javascriptObject, javascriptInterfaceName);
         } else {
             webview.addJavascriptInterface(javascriptObject, javascriptInterfaceName);
+        }
+    }
+
+    /**
+     * 设置自动播放视频
+     *
+     * @param isAutoPlayAudioVideo true-自动播放;false-默认不播放;
+     */
+    public void setAutoPlayAudioVideo(boolean isAutoPlayAudioVideo) {
+        if (isX5) {
+            x5Webview.setAutoPlayAudioVideo(isAutoPlayAudioVideo);
+        } else {
+            webview.setAutoPlayAudioVideo(isAutoPlayAudioVideo);
         }
     }
 }

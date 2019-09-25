@@ -3,10 +3,10 @@ package com.cloud.debris.presets;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.cloud.coms.refresh.bases.BaseRecyclerViewAdapter;
 import com.cloud.objects.ObjectJudge;
 
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
  * Modifier:
  * ModifyContent:
  */
-public class BaseRecycleAdapter<T, BT extends ViewDataBinding> extends RecyclerView.Adapter<BindingViewHolder<BT>> {
+public class BaseRecycleAdapter<T, BT extends ViewDataBinding> extends BaseRecyclerViewAdapter<BindingViewHolder<BT>> {
 
     private Context context;
     private List<T> datalist;

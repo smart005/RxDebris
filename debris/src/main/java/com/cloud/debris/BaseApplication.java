@@ -148,7 +148,9 @@ public abstract class BaseApplication extends Application implements OnApplicati
                 //记录活动名称
                 ActivityUtils.getInstance().put(activity.getClass().getName());
                 //维护activity队列
-                LauncherState.getInstance().onActivityCreated(activity, savedInstanceState);
+                if (SuperActivitySupport.isProjectActivitys(activity)) {
+                    LauncherState.getInstance().onActivityCreated(activity, savedInstanceState);
+                }
                 SuperActivitySupport.removeGlobalFloatViews(activity);
             }
 
@@ -235,7 +237,9 @@ public abstract class BaseApplication extends Application implements OnApplicati
                 //移除活动名称
                 ActivityUtils.getInstance().remove(activity.getClass().getName());
                 //移出activity队列
-                LauncherState.getInstance().onActivityDestroyed(activity);
+                if (SuperActivitySupport.isProjectActivitys(activity)) {
+                    LauncherState.getInstance().onActivityDestroyed(activity);
+                }
             }
         });
     }
