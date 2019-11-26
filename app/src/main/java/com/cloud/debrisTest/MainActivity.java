@@ -1,13 +1,20 @@
 package com.cloud.debrisTest;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
 
 import com.cloud.cache.RxCache;
-import com.cloud.debris.BaseActivity;
+import com.cloud.debris.BasicActivity;
 import com.cloud.debris.annotations.ActivityTagParams;
 import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.debris.notify.NotifyManager;
@@ -42,7 +49,7 @@ import java.io.File;
  * ModifyContent:
  */
 @ActivityTagParams
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BasicActivity {
 
     private MainViewBinding binding;
 
@@ -188,8 +195,12 @@ public class MainActivity extends BaseActivity {
 
     @SuppressLint("WrongConstant")
     public void OnToastClick(View view) {
+//        Intent intent_p = new Intent(Settings.ACTION_APPLICATION_SETTINGS);
+//        startActivity(intent_p);
         if (!ObjectJudge.isNotificationEnabled(this)) {
             RedirectUtils.startAppNotication(this);
+            Intent intent_s = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+            startActivity(intent_s);
             return;
         }
 
@@ -211,5 +222,75 @@ public class MainActivity extends BaseActivity {
     public void OnParamPassClick(View view) {
         RedirectUtils.startActivity(this, PreviewImageActivity.class,
                 new MapEntryItem<>("", ""));
+    }
+
+    public void OnStartNoticeServiceClick(View view) {
+        Intent intent = new Intent(this, NoticeReceiveService.class);
+        startService(intent);
+    }
+
+    public void OnStopNoticeServiceClick(View view) {
+        Intent intent = new Intent(this, NoticeReceiveService.class);
+        stopService(intent);
+    }
+
+    public boolean isNotificationListenersEnabled() {
+        String pkgName = getPackageName();
+        final String flat = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
+        if (!TextUtils.isEmpty(flat)) {
+            final String[] names = flat.split(":");
+            for (int i = 0; i < names.length; i++) {
+                final ComponentName cn = ComponentName.unflattenFromString(names[i]);
+                if (cn != null) {
+                    if (TextUtils.equals(pkgName, cn.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    protected boolean gotoNotificationAccessSetting() {
+        try {
+            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return true;
+
+        } catch (ActivityNotFoundException e) {//普通情况下找不到的时候需要再特殊处理找一次
+            try {
+                Intent intent = new Intent();
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.Settings$NotificationAccessSettingsActivity");
+                intent.setComponent(cn);
+                intent.putExtra(":settings:show_fragment", "NotificationAccessSettings");
+                startActivity(intent);
+                return true;
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+            Toast.makeText(this, "对不起，您的手机暂不支持", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void OnNoticePermissionCheckClick(View view) {
+        if (!isNotificationListenersEnabled()) {
+            gotoNotificationAccessSetting();
+        }
+    }
+
+    private void toggleNotificationListenerService(Context context) {
+        PackageManager pm = context.getPackageManager();
+        pm.setComponentEnabledSetting(new ComponentName(context, NoticeReceiveService.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        pm.setComponentEnabledSetting(new ComponentName(context, NoticeReceiveService.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+    }
+
+    public void OnEnableNoticeListenerServiceClick(View view) {
+        toggleNotificationListenerService(this);
     }
 }

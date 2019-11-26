@@ -10,7 +10,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.cloud.debris.BaseActivity;
+import com.cloud.debris.BasicActivity;
 import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.LayoutAdapterViewBinding;
 import com.cloud.objects.logs.Logger;
@@ -23,7 +23,7 @@ import com.cloud.objects.logs.Logger;
  * Modifier:
  * ModifyContent:
  */
-public class LayoutAdapterActivity extends BaseActivity {
+public class LayoutAdapterActivity extends BasicActivity {
 
     private LayoutAdapterViewBinding binding;
 

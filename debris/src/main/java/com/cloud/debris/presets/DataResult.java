@@ -33,6 +33,26 @@ public class DataResult<T> {
      * 请求状态
      */
     private RequestState requestState;
+    /**
+     * 消息
+     */
+    private String message;
+    /**
+     * 当前索引
+     */
+    private int position;
+    /**
+     * 开始索引
+     */
+    private int startPosition;
+    /**
+     * 结束索引
+     */
+    private int endPosition;
+    /**
+     * 返回码
+     */
+    private int code;
 
     public T getPreset() {
         return preset;
@@ -62,7 +82,7 @@ public class DataResult<T> {
         return extras;
     }
 
-    public void setExtras(Object[] extras) {
+    public void setExtras(Object... extras) {
         this.extras = extras;
     }
 
@@ -72,5 +92,45 @@ public class DataResult<T> {
 
     public void setRequestState(RequestState requestState) {
         this.requestState = requestState;
+    }
+
+    public String getMessage() {
+        return message == null ? "" : message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public int getStartPosition() {
+        return startPosition;
+    }
+
+    public void setStartPosition(int startPosition) {
+        this.startPosition = startPosition;
+    }
+
+    public int getEndPosition() {
+        return endPosition;
+    }
+
+    public void setEndPosition(int endPosition) {
+        this.endPosition = endPosition;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 }

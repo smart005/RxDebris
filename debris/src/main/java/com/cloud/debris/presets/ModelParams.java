@@ -13,6 +13,10 @@ public class ModelParams<T> {
     private Object extras;
 
     private T value;
+    /**
+     * true-成功逻辑;false-失败逻辑;
+     */
+    private boolean success;
 
     public Object getExtras() {
         return extras;
@@ -28,5 +32,13 @@ public class ModelParams<T> {
 
     public void setValue(T value) {
         this.value = value;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }

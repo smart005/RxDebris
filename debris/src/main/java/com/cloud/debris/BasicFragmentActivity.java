@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * Modifier:
  * ModifyContent:
  */
-public class BaseFragmentActivity extends FragmentActivity implements OnSupperProperties,
+public class BasicFragmentActivity extends FragmentActivity implements OnSupperProperties,
         OnActivityStatesLisstener, OnLifeCycleStatistical {
 
     private BundleData bundleData = null;
@@ -43,7 +43,7 @@ public class BaseFragmentActivity extends FragmentActivity implements OnSupperPr
         $_page_code = GlobalUtils.getNewGuid();
         EBus.getInstance().registered(this, $_page_code);
         //记录当前参数
-        Class<? extends BaseFragmentActivity> aClass = getClass();
+        Class<? extends BasicFragmentActivity> aClass = getClass();
         if (aClass.isAnnotationPresent(ActivityTagParams.class)) {
             String classPath = aClass.getName();
             ActiveParamsUtils.getInstance().putParams(classPath, bundleData.getBundle());

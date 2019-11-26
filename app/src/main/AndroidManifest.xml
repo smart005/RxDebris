@@ -43,6 +43,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
     <application
         android:name=".TestApplication"
         android:allowBackup="true"
@@ -76,8 +77,18 @@
         <activity
             android:name=".PreviewImageActivity"
             android:screenOrientation="portrait" />
-        <receiver android:name=".NotifyBroadCast">
-        </receiver>
+
+        <receiver android:name=".NotifyBroadCast" />
+        <service
+            android:name=".NoticeReceiveService"
+            android:label="通知监控"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:priority="1000"
+            android:process=":notice">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

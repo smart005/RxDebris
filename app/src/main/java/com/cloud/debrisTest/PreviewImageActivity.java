@@ -3,7 +3,7 @@ package com.cloud.debrisTest;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 
-import com.cloud.debris.BaseFragmentActivity;
+import com.cloud.debris.BasicFragmentActivity;
 import com.cloud.debris.utils.BaseCommonUtils;
 import com.cloud.objects.utils.JsonUtils;
 import com.cloud.objects.utils.ResUtils;
@@ -16,7 +16,7 @@ import com.cloud.objects.utils.ResUtils;
  * Modifier:
  * ModifyContent:
  */
-public class PreviewImageActivity extends BaseFragmentActivity {
+public class PreviewImageActivity extends BasicFragmentActivity {
 
     private FrameLayout imageFragmentFl;
 

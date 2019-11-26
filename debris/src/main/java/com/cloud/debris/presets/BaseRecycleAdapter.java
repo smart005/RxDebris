@@ -43,12 +43,12 @@ public class BaseRecycleAdapter<T, BT extends ViewDataBinding> extends BaseRecyc
         this(context, datalist, 0, 0);
     }
 
-    protected <BindingT extends ViewDataBinding> BindingViewHolder<BindingT> buildViewHolder(ViewGroup parent, int viewType, int layoutItemId, int variableId) {
+    protected BindingViewHolder<BT> buildViewHolder(ViewGroup parent, int viewType, int layoutItemId, int variableId) {
         this.layoutItemId = layoutItemId;
         this.variableId = variableId;
         LayoutInflater inflater = LayoutInflater.from(context);
-        BindingT binding = DataBindingUtil.inflate(inflater, layoutItemId, parent, false);
-        BindingViewHolder<BindingT> viewHolder = new BindingViewHolder<BindingT>(binding);
+        BT binding = DataBindingUtil.inflate(inflater, layoutItemId, parent, false);
+        BindingViewHolder<BT> viewHolder = new BindingViewHolder<BT>(binding);
         viewHolder.setViewType(viewType);
         return viewHolder;
     }

@@ -24,7 +24,7 @@ import java.util.HashMap;
  * Modifier:
  * ModifyContent:
  */
-public class BaseH5Activity extends BaseFragmentActivity implements OnWebActivityListener, OnWebCookieListener {
+public class BaseH5Activity extends BasicFragmentActivity implements OnWebActivityListener, OnWebCookieListener {
 
     private H5WebView webView;
 

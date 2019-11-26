@@ -45,7 +45,7 @@ public class TestApplication extends BaseApplication {
                 .setOnNetworkConnectListener(new OnNetworkConnectListener() {
                     @Override
                     public boolean isConnected() {
-                        return NetworkUtils.isConnected(getApplicationContext());
+                        return NetworkUtils.isConnected();
                     }
                 })
                 //设置的目录;sdcard不存在取RxAndroid.setInternalCacheRootDir()设置的目录)

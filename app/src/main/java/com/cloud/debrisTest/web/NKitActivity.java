@@ -13,7 +13,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.cloud.debris.BaseActivity;
+import com.cloud.debris.BasicActivity;
 import com.cloud.debrisTest.R;
 import com.cloud.debrisTest.databinding.NkitViewBinding;
 import com.cloud.objects.ObjectJudge;
@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * Modifier:
  * ModifyContent:
  */
-public class NKitActivity extends BaseActivity {
+public class NKitActivity extends BasicActivity {
 
     private NkitViewBinding binding;
     private boolean isReloadHtml = false;

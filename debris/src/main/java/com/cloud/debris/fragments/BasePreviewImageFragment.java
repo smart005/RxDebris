@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.request.transition.Transition;
-import com.cloud.debris.BaseFragment;
+import com.cloud.debris.BasicFragment;
 import com.cloud.debris.R;
 import com.cloud.debris.bundle.RedirectUtils;
 import com.cloud.images.glide.GFileCallback;
@@ -36,7 +36,7 @@ import java.util.List;
  * @Modifier:
  * @ModifyContent:
  */
-public abstract class BasePreviewImageFragment extends BaseFragment {
+public abstract class BasePreviewImageFragment extends BasicFragment {
 
     private ViewPager imgViewerVp;
     private TextView imageCountTv;

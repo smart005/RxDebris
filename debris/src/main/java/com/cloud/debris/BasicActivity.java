@@ -1,16 +1,21 @@
 package com.cloud.debris;
 
 import android.app.Activity;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.Fragment;
-import android.view.View;
+import android.text.TextUtils;
 
+import com.cloud.debris.annotations.ActivityTagParams;
+import com.cloud.debris.bundle.RedirectUtils;
+import com.cloud.debris.enums.StatisticalTypes;
+import com.cloud.debris.event.OnActivityStatesLisstener;
+import com.cloud.debris.event.OnLifeCycleStatistical;
 import com.cloud.ebus.EBus;
+import com.cloud.ebus.SubscribeEBus;
+import com.cloud.launchs.utils.ActivityUtils;
 import com.cloud.objects.bases.BundleData;
 import com.cloud.objects.events.OnSupperProperties;
+import com.cloud.objects.utils.ActiveParamsUtils;
 import com.cloud.objects.utils.GlobalUtils;
 
 import java.util.ArrayList;
@@ -23,50 +28,65 @@ import java.util.ArrayList;
  * Modifier:
  * ModifyContent:
  */
-public class BaseFragment extends Fragment implements OnSupperProperties {
+public class BasicActivity extends Activity implements OnSupperProperties,
+        OnActivityStatesLisstener, OnLifeCycleStatistical {
 
     private BundleData bundleData = null;
     //页面标识
     private String $_page_code;
 
-    protected void onAttached(Context context) {
-        //fragment第一个生命周期
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         bundleData = getBundleData();
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        onAttached(context);
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        //sdk < 23时回调此方法(除v4下)
-        //目前此方法可忽略
-        if (Build.VERSION.SDK_INT < 23) {
-            onAttached(activity);
-        }
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         $_page_code = GlobalUtils.getNewGuid();
         EBus.getInstance().registered(this, $_page_code);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        EBus.getInstance().unregister(this, $_page_code);
+        //记录当前参数
+        Class<? extends BasicActivity> aClass = getClass();
+        if (aClass.isAnnotationPresent(ActivityTagParams.class)) {
+            String classPath = aClass.getName();
+            ActiveParamsUtils.getInstance().putParams(classPath, bundleData.getBundle());
+        }
     }
 
     public BundleData getBundleData() {
         if (bundleData == null) {
-            bundleData = new BundleData(getArguments());
+            bundleData = new BundleData(getIntent());
         }
         return bundleData;
+    }
+
+    @Override
+    protected void onResume() {
+        try {
+            super.onResume();
+        } catch (Exception e) {
+            SuperActivitySupport.callUpActivity(this);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EBus.getInstance().unregister(this, $_page_code);
+        ActiveParamsUtils.getInstance().activeDestory();
+    }
+
+    /**
+     * 销毁活动
+     *
+     * @param classes 要销毁的活动
+     */
+    public void destoryActives(Class<?>... classes) {
+        ActiveParamsUtils.getInstance().destorys(classes);
+    }
+
+    @SubscribeEBus(receiveKey = "$_42e9aa025d5f49e6abbe7d150498e93e")
+    public void onEventDestoryActive(String className) {
+        String name = getClass().getName();
+        if (TextUtils.equals(className, name)) {
+            RedirectUtils.finishActivity(this);
+        }
     }
 
     @Override
@@ -238,8 +258,32 @@ public class BaseFragment extends Fragment implements OnSupperProperties {
     }
 
     @Override
+    public <T> T onStatisticalClassObject(StatisticalTypes statisticalTypes) {
+        return null;
+    }
+
+    @Override
+    public void setStatisticalClassObject(StatisticalTypes statisticalTypes, Object statisticalClassObject) {
+
+    }
+
+    protected Activity getActivity() {
+        return this;
+    }
+
+    @Override
     public String getClassAction() {
         bundleData = getBundleData();
         return bundleData.getClassAction(this.getClass());
+    }
+
+    @Override
+    public void setMainActivity(boolean isMainActivity) {
+        SuperActivitySupport.setMainActivity(this.getClass(), isMainActivity);
+    }
+
+    @Override
+    public boolean isDestroyed(Activity activity) {
+        return ActivityUtils.isDestroyed(activity);
     }
 }

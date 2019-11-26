@@ -54,5 +54,33 @@
             android:layout_marginTop="@dimen/spacing_8"
             android:onClick="@{(view)->handler.OnParamPassClick(view)}"
             android:text="参数传递" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnStartNoticeServiceClick(view)}"
+            android:text="启动通知服务" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnStopNoticeServiceClick(view)}"
+            android:text="停止通知服务" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnNoticePermissionCheckClick(view)}"
+            android:text="通知权限检测" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_8"
+            android:onClick="@{(view)->handler.OnEnableNoticeListenerServiceClick(view)}"
+            android:text="通知监听服务重新生效" />
     </LinearLayout>
 </layout>

@@ -3,7 +3,7 @@ package com.cloud.debrisTest;
 import android.os.Bundle;
 import android.view.View;
 
-import com.cloud.debris.BaseFragment;
+import com.cloud.debris.BasicFragment;
 
 /**
  * Author lijinghuan
@@ -13,7 +13,7 @@ import com.cloud.debris.BaseFragment;
  * Modifier:
  * ModifyContent:
  */
-public class ListFragment extends BaseFragment {
+public class ListFragment extends BasicFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

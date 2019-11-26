@@ -8,7 +8,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -107,7 +106,7 @@ public class NotifyManager {
         private Bitmap bitmap;
         private String image;
         private int imageRes;
-        private CharSequence title;
+        private String title;
         private String text;
         private int requestCode;
         private int notificationId;
@@ -169,7 +168,7 @@ public class NotifyManager {
          * @param title title
          * @return NotifyBuilder
          */
-        public NotifyBuilder setTitle(CharSequence title) {
+        public NotifyBuilder setTitle(String title) {
             this.title = title;
             return this;
         }
@@ -242,10 +241,11 @@ public class NotifyManager {
             return this;
         }
 
-        private RemoteViews buildRemoteViews(String text) {
+        private RemoteViews buildRemoteViews(String title, String text) {
             RemoteViews remoteViews = new RemoteViews(packageName, R.layout.cl_cus_notitfication_view);
             //通知显示时间
             if (TextUtils.isEmpty(notifyTime)) {
+
                 remoteViews.setViewVisibility(R.id.m_time, View.GONE);
             } else {
                 remoteViews.setViewVisibility(R.id.m_time, View.VISIBLE);
@@ -272,8 +272,6 @@ public class NotifyManager {
             }
             //content
             remoteViews.setTextViewText(R.id.m_text, text);
-            //背景颜色
-            remoteViews.setInt(R.id.notice_root_view, "setBackgroundColor", Color.WHITE);
             return remoteViews;
         }
 
@@ -289,21 +287,20 @@ public class NotifyManager {
                 startIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             String textLimit = textLimit(text);
-            RemoteViews remoteViews = buildRemoteViews(textLimit);
+            String mtitle = (TextUtils.isEmpty(this.title) ? textLimit : this.title);
+            RemoteViews remoteViews = buildRemoteViews(mtitle, textLimit);
             //定义按钮点击后的动作(设置后auto cancel失效)
             //remoteViews.setOnClickPendingIntent(R.id.notice_root_view, startIntent);
             NotificationManager manager = getNotificationManager(context);
             NotificationCompat.Builder notification = new NotificationCompat.Builder(context, packageName);
             if (Build.VERSION.SDK_INT >= 26) {
-                notification.setChannelId(packageName);
-                NotificationChannel channel = new NotificationChannel(packageName, "畅说通知", NotificationManager.IMPORTANCE_DEFAULT);
+                NotificationChannel channel = new NotificationChannel(
+                        String.format("%s.channel", packageName),
+                        "畅说108通知", NotificationManager.IMPORTANCE_DEFAULT);
                 channel.enableVibration(true);
                 manager.createNotificationChannel(channel);
+                notification.setChannelId(String.format("%s.channel", packageName));
             }
-//            if (Build.VERSION.SDK_INT >= 24) {
-//            } else {
-//                notification.setContent(remoteViews);
-//            }
             notification.setCustomContentView(remoteViews);
             //该通知要启动的activity
             notification.setContentIntent(startIntent);
@@ -313,13 +310,9 @@ public class NotifyManager {
             notification.setSmallIcon(icon);
             //在顶部状态栏中的提示信息
             //title->text
-            if (TextUtils.isEmpty(title)) {
-                notification.setTicker(textLimit);
-            } else {
-                notification.setTicker(title);
-            }
+            notification.setTicker(mtitle);
             notification.setContentTitle(title);
-            notification.setContentText(textLimit);
+            notification.setContentText(text);
             // 将Ongoing设为true 那么notification将不能滑动删除
             notification.setOngoing(false);
             /*
@@ -342,7 +335,7 @@ public class NotifyManager {
             notification.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
             Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             notification.setSound(sound);
-            NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle(notification).bigText(textLimit);
+            NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle(notification).bigText(text);
             bigTextStyle.setBigContentTitle(title);
             bigTextStyle.setSummaryText(textLimit);
             Notification build = bigTextStyle.build();
@@ -409,9 +402,9 @@ public class NotifyManager {
             int textSize = PixelUtils.sp2px(14);
             int preNumber = width / textSize;
             int count = text.length();
-            int total = 3 * preNumber;
+            int total = preNumber;
             if (count > total) {
-                String stext = text.substring(0, total - 10);
+                String stext = text.substring(0, total - 4);
                 StringBuilder builder = new StringBuilder(stext);
                 builder.append(">>>");
                 return builder.toString();

@@ -55,9 +55,9 @@ class SuperActivitySupport {
     }
 
     public static boolean isProjectActivitys(Activity activity) {
-        if (activity instanceof BaseActivity ||
-                activity instanceof BaseCompatActivity ||
-                activity instanceof BaseFragmentActivity) {
+        if (activity instanceof BasicActivity ||
+                activity instanceof BasicCompatActivity ||
+                activity instanceof BasicFragmentActivity) {
             return true;
         }
         return false;

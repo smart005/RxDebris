@@ -7,7 +7,8 @@
     <RelativeLayout
         android:id="@+id/notice_root_view"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/spacing_200"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
         android:paddingLeft="14dp"
         android:paddingTop="6dp"
         android:paddingRight="10dp"
@@ -59,7 +60,6 @@
                 android:layout_height="48dp"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="2dp"
-                android:background="@color/transparent"
                 android:scaleType="centerCrop"
                 android:visibility="gone"
                 tools:background="@color/color_f4f4f4"

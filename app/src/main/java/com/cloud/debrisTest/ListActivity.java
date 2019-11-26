@@ -2,7 +2,7 @@ package com.cloud.debrisTest;
 
 import android.os.Bundle;
 
-import com.cloud.debris.BaseFragmentActivity;
+import com.cloud.debris.BasicFragmentActivity;
 
 /**
  * Author lijinghuan
@@ -12,7 +12,7 @@ import com.cloud.debris.BaseFragmentActivity;
  * Modifier:
  * ModifyContent:
  */
-public class ListActivity extends BaseFragmentActivity {
+public class ListActivity extends BasicFragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
